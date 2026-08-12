@@ -15,6 +15,7 @@ export interface LibreOfficeStatus {
 
 export interface ConversionOptions {
   sheetMode?: 'single' | 'multiple';
+  allowClientFallback?: boolean;
 }
 
 export interface ConversionResult {
@@ -28,9 +29,14 @@ export interface ConversionResult {
 
 const customBridgeUrl = import.meta.env.VITE_BRIDGE_URL;
 const BASE_URLS = [
-  ...(customBridgeUrl ? [customBridgeUrl.endsWith('/api/libreoffice') ? customBridgeUrl : `${customBridgeUrl.replace(/\/$/, '')}/api/libreoffice`] : []),
+  ...(customBridgeUrl
+    ? [customBridgeUrl.endsWith('/api/libreoffice') ? customBridgeUrl : customBridgeUrl.replace(/\/$/, '')]
+    : []),
   '/api/libreoffice',
-  'http://127.0.0.1:3001/api/libreoffice'
+  '/api',
+  'http://127.0.0.1:3001/api/libreoffice',
+  'http://127.0.0.1:3001/api',
+  'http://127.0.0.1:3001'
 ];
 
 export class LibreOfficeEngine {
@@ -46,15 +52,17 @@ export class LibreOfficeEngine {
   public async getStatus(): Promise<LibreOfficeStatus> {
     for (const baseUrl of BASE_URLS) {
       try {
-        const res = await fetch(`${baseUrl}/status`, { signal: AbortSignal.timeout(3000) });
+        const targetUrl = baseUrl.endsWith('/status') ? baseUrl : `${baseUrl.replace(/\/$/, '')}/status`;
+        const res = await fetch(targetUrl, { signal: AbortSignal.timeout(3000) });
         if (res.ok) {
           const data = await res.json();
-          if (data && typeof data.installed === 'boolean') {
+          if (data && (typeof data.installed === 'boolean' || typeof data.libreoffice === 'boolean')) {
+            const installed = Boolean(data.installed ?? data.libreoffice);
             return {
-              installed: data.installed,
+              installed,
               version: data.version || 'Installed',
-              path: data.path || null,
-              status: data.installed ? 'connected' : 'not_installed'
+              path: data.path || 'Server Container',
+              status: installed ? 'connected' : 'not_installed'
             };
           }
         }
@@ -72,16 +80,17 @@ export class LibreOfficeEngine {
   public async testEngine(): Promise<{ success: boolean; message: string }> {
     for (const baseUrl of BASE_URLS) {
       try {
-        const res = await fetch(`${baseUrl}/test`, {
+        const targetUrl = baseUrl.endsWith('/test') ? baseUrl : `${baseUrl.replace(/\/$/, '')}/test`;
+        const res = await fetch(targetUrl, {
           method: 'POST',
-          signal: AbortSignal.timeout(10000)
+          signal: AbortSignal.timeout(12000)
         });
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
             return {
               success: true,
-              message: `Engine test passed! soffice.exe executed successfully in ${data.durationMs}ms.`
+              message: `Engine test passed! LibreOffice executed successfully in ${data.durationMs}ms.`
             };
           }
           return { success: false, message: data.error || 'Engine execution failed.' };
@@ -91,7 +100,7 @@ export class LibreOfficeEngine {
       }
     }
 
-    return { success: false, message: 'Could not connect to engine bridge server.' };
+    return { success: false, message: 'Could not connect to conversion backend server.' };
   }
 
   public async convertDocument(
@@ -101,65 +110,30 @@ export class LibreOfficeEngine {
   ): Promise<ConversionResult> {
     const startTime = Date.now();
     const cleanTargetFormat = targetFormat.toLowerCase().replace('.', '');
-
     const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
     const outputFilename = `${baseName}.${cleanTargetFormat}`;
-
     const arrayBuffer = await file.arrayBuffer();
 
-    const inputExt = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
-    const isPdfInput = inputExt === 'pdf' || file.type === 'application/pdf';
-
-    // For PDF to PPTX/PPT, use high-fidelity Client-Side Layout Extraction Engine (pptxgenjs)
-    if (isPdfInput && (cleanTargetFormat === 'pptx' || cleanTargetFormat === 'ppt')) {
-      console.log('[ConvertingHub Engine] Executing High-Fidelity PDF Layout Extraction Engine (PPTX)...');
-      const pptxBlob = await this.extractPdfToPptx(arrayBuffer);
-      const durationMs = Date.now() - startTime;
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('toolUsageCompleted'));
-      }
-      return {
-        blob: pptxBlob,
-        engineUsed: 'PDF Layout Extraction Engine',
-        filename: outputFilename,
-        success: true,
-        durationMs
-      };
-    }
-
-    // For PDF to DOCX/DOC, use high-fidelity Client-Side Document Extraction Engine (docx.js)
-    // to guarantee 100% clean OpenXML document files without MS Word unreadable content warnings.
-    if (isPdfInput && (cleanTargetFormat === 'docx' || cleanTargetFormat === 'doc')) {
-      console.log('[ConvertingHub Engine] Executing High-Fidelity PDF Layout Extraction Engine (DOCX)...');
-      const docxBlob = await this.extractPdfToDocx(arrayBuffer);
-      const durationMs = Date.now() - startTime;
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('toolUsageCompleted'));
-      }
-      return {
-        blob: docxBlob,
-        engineUsed: 'PDF Layout Extraction Engine',
-        filename: outputFilename,
-        success: true,
-        durationMs
-      };
-    }
-
-    // 1. Try LibreOffice Headless via local bridge (90-second timeout for large 20-30 page PDFs)
+    // 1. Try LibreOffice Headless via Backend Service (Primary Engine)
     for (const baseUrl of BASE_URLS) {
       try {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('targetFormat', cleanTargetFormat);
-
         if (options?.sheetMode) {
           formData.append('sheetMode', options.sheetMode);
         }
 
-        const response = await fetch(`${baseUrl}/convert`, {
+        const convertUrl = baseUrl.endsWith('/convert') ? baseUrl : `${baseUrl.replace(/\/$/, '')}/convert`;
+
+        const response = await fetch(convertUrl, {
           method: 'POST',
           body: formData,
-          signal: AbortSignal.timeout(90000)
+          headers: {
+            'x-target-format': cleanTargetFormat,
+            'x-input-name': file.name
+          },
+          signal: AbortSignal.timeout(120000) // 120s timeout for large multi-page documents
         });
 
         if (response.ok) {
@@ -179,16 +153,29 @@ export class LibreOfficeEngine {
           }
         } else {
           const errData = await response.json().catch(() => ({}));
-          console.warn(`[ConvertingHub Engine] Bridge call to ${baseUrl} returned status ${response.status}:`, errData);
+          console.warn(`[ConvertingHub Engine] Backend call to ${convertUrl} returned status ${response.status}:`, errData);
         }
       } catch (e: any) {
-        console.warn(`[ConvertingHub Engine] Bridge call to ${baseUrl} failed: ${e.message}`);
+        console.warn(`[ConvertingHub Engine] Backend call to ${baseUrl} failed: ${e.message}`);
       }
     }
 
-    // 2. High-fidelity Client-Side Fallback Engine (No corrupt files or repair warnings!)
+    // 2. Client-Side Fallback behavior check
+    if (options?.sheetMode === undefined && !options?.allowClientFallback) {
+      const durationMs = Date.now() - startTime;
+      return {
+        blob: null,
+        engineUsed: 'LibreOffice Headless',
+        filename: outputFilename,
+        success: false,
+        error: 'Document conversion service is temporarily unavailable. Please try again.',
+        durationMs
+      };
+    }
+
+    console.warn('[ConvertingHub Engine] Backend unavailable. Falling back to client-side extraction engine.');
+
     if (cleanTargetFormat === 'docx') {
-      console.log('[ConvertingHub Engine] Executing PDF Layout Extraction Engine (DOCX)...');
       const docxBlob = await this.extractPdfToDocx(arrayBuffer);
       const durationMs = Date.now() - startTime;
       if (typeof window !== 'undefined') {
@@ -204,7 +191,6 @@ export class LibreOfficeEngine {
     }
 
     if (cleanTargetFormat === 'pptx') {
-      console.log('[ConvertingHub Engine] Executing PDF Layout Extraction Engine (PPTX)...');
       const pptxBlob = await this.extractPdfToPptx(arrayBuffer);
       const durationMs = Date.now() - startTime;
       if (typeof window !== 'undefined') {
@@ -220,7 +206,6 @@ export class LibreOfficeEngine {
     }
 
     if (cleanTargetFormat === 'xlsx') {
-      console.log('[ConvertingHub Engine] Executing PDF Table Extraction Engine (XLSX)...');
       const sheetMode = (options && options.sheetMode) || 'single';
       const xlsxBlob = await this.extractPdfToXlsx(arrayBuffer, sheetMode);
       const durationMs = Date.now() - startTime;
@@ -242,7 +227,7 @@ export class LibreOfficeEngine {
       engineUsed: 'LibreOffice Headless',
       filename: outputFilename,
       success: false,
-      error: 'Conversion pipeline failed to process target format.',
+      error: 'Document conversion service is temporarily unavailable. Please try again.',
       durationMs
     };
   }

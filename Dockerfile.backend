@@ -2,9 +2,21 @@ FROM node:20-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install LibreOffice and standard fonts for document conversion
+# Install LibreOffice, Linux font suites (including Noto Sans Arabic & Noto Naskh Arabic), and fontconfig
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends libreoffice fonts-dejavu-core && \
+    apt-get install -y --no-install-recommends \
+        libreoffice \
+        libreoffice-writer \
+        libreoffice-calc \
+        libreoffice-impress \
+        fonts-dejavu-core \
+        fonts-liberation \
+        fonts-noto-core \
+        fonts-noto-extra \
+        fonts-noto-ui-core \
+        fontconfig \
+        procps && \
+    fc-cache -f -v && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -16,8 +28,11 @@ COPY scripts ./scripts
 
 ENV PORT=3001
 ENV HOST=0.0.0.0
+ENV NODE_ENV=production
 
 EXPOSE 3001
 
-CMD ["node", "scripts/bridge.mjs"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
+CMD ["node", "scripts/bridge.mjs"]

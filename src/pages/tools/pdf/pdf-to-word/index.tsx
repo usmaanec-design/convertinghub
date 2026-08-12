@@ -37,9 +37,15 @@ export default function PdfToWord() {
       setIsProcessing(true);
       setError(null);
       const res = await convertPdfToWord(file);
-      setResult(res);
+      if (!res.success || !res.blob) {
+        setError(res.error || 'Document conversion service is temporarily unavailable. Please try again.');
+        setResult(null);
+      } else {
+        setResult(res);
+      }
     } catch (err: any) {
       setError(`Failed to convert PDF to Word: ${err.message}`);
+      setResult(null);
     } finally {
       setIsProcessing(false);
     }

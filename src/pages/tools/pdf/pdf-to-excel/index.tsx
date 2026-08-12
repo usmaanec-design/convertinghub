@@ -47,9 +47,15 @@ export default function PdfToExcel() {
       setError(null);
       const options: PdfToExcelOptions = { layout, useOcr };
       const res = await convertPdfToExcel(file, options);
-      setResult(res);
+      if (!res.success || !res.blob) {
+        setError(res.error || 'Document conversion service is temporarily unavailable. Please try again.');
+        setResult(null);
+      } else {
+        setResult(res);
+      }
     } catch (err: any) {
       setError(`Failed to convert PDF to Excel: ${err.message}`);
+      setResult(null);
     } finally {
       setIsProcessing(false);
     }
