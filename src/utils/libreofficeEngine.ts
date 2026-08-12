@@ -107,6 +107,25 @@ export class LibreOfficeEngine {
 
     const arrayBuffer = await file.arrayBuffer();
 
+    const inputExt = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
+    // For PDF to PPTX/PPT, use high-fidelity Client-Side Layout Extraction Engine (pptxgenjs)
+    // to guarantee 100% clean OpenXML presentation files without MS PowerPoint repair warnings.
+    if ((inputExt === 'pdf' || file.type === 'application/pdf') && (cleanTargetFormat === 'pptx' || cleanTargetFormat === 'ppt')) {
+      console.log('[ConvertingHub Engine] Executing High-Fidelity PDF Layout Extraction Engine (PPTX)...');
+      const pptxBlob = await this.extractPdfToPptx(arrayBuffer);
+      const durationMs = Date.now() - startTime;
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('toolUsageCompleted'));
+      }
+      return {
+        blob: pptxBlob,
+        engineUsed: 'PDF Layout Extraction Engine',
+        filename: outputFilename,
+        success: true,
+        durationMs
+      };
+    }
+
     // 1. Try LibreOffice Headless via local bridge (90-second timeout for large 20-30 page PDFs)
     for (const baseUrl of BASE_URLS) {
       try {
