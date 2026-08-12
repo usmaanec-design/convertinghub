@@ -409,7 +409,46 @@ async function startBridgeServer() {
 
         sofficeArgs.push('--convert-to', targetFormat, '--outdir', tmpDir, inputFilePath);
 
-        const { stdout, stderr } = await runSofficeCommand(cachedInfo.path, sofficeArgs, CONVERSION_TIMEOUT_MS);
+        try {
+          await runSofficeCommand(cachedInfo.path, sofficeArgs, CONVERSION_TIMEOUT_MS);
+        } catch (execErr) {
+          // Fallback for PDF -> XLSX using 2-stage LibreOffice conversion (PDF -> HTML -> XLSX)
+          if (inputExt === 'pdf' && targetFormat === 'xlsx') {
+            console.log(`[ConvertingHub Backend] Direct PDF->XLSX attempt failed, executing LibreOffice 2-stage HTML bridge...`);
+            const htmlArgs = [
+              '--headless',
+              `-env:UserInstallation=file:///${userProfileDir}`,
+              '--infilter=writer_pdf_import',
+              '--convert-to', 'html',
+              '--outdir', tmpDir,
+              inputFilePath
+            ];
+            await runSofficeCommand(cachedInfo.path, htmlArgs, CONVERSION_TIMEOUT_MS);
+
+            let intermediateHtml = path.join(tmpDir, 'input.html');
+            if (!fs.existsSync(intermediateHtml)) {
+              const files = fs.readdirSync(tmpDir);
+              const hMatch = files.find(f => f.endsWith('.html'));
+              if (hMatch) intermediateHtml = path.join(tmpDir, hMatch);
+            }
+
+            if (fs.existsSync(intermediateHtml)) {
+              const xlsxArgs = [
+                '--headless',
+                `-env:UserInstallation=file:///${userProfileDir}`,
+                '--convert-to', 'xlsx',
+                '--outdir', tmpDir,
+                intermediateHtml
+              ];
+              await runSofficeCommand(cachedInfo.path, xlsxArgs, CONVERSION_TIMEOUT_MS);
+            } else {
+              throw execErr;
+            }
+          } else {
+            throw execErr;
+          }
+        }
+
         const durationMs = Date.now() - startTime;
 
         let outputFilePath = path.join(tmpDir, `input.${targetFormat}`);
@@ -463,12 +502,16 @@ Target: ${targetFormat || 'unknown'}
 Duration: ${durationMs} ms
 Error: ${err.message}`);
 
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          error: `Conversion failed: ${err.message}`,
-          jobId,
-          durationMs
-        }));
+        if (!res.headersSent) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            error: `Conversion failed: ${err.message}`,
+            jobId,
+            durationMs
+          }));
+        } else {
+          try { res.end(); } catch (e) {}
+        }
       } finally {
         activeConversions = Math.max(0, activeConversions - 1);
         try {
@@ -491,5 +534,13 @@ Error: ${err.message}`);
     }
   });
 }
+
+process.on('uncaughtException', (err) => {
+  console.error('[ConvertingHub Backend] Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[ConvertingHub Backend] Unhandled Rejection:', reason);
+});
 
 startBridgeServer().catch(console.error);
