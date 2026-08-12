@@ -1,0 +1,51 @@
+import { tool as stringSlugGenerator } from './slug-generator/meta';
+import { tool as stringHiddenCharacterDetector } from './hidden-character-detector/meta';
+import { tool as stringRemoveDuplicateLines } from './remove-duplicate-lines/meta';
+import { tool as stringRotate } from './rotate/meta';
+import { tool as stringQuote } from './quote/meta';
+import { tool as stringReverse } from './reverse/meta';
+import { tool as stringUppercase } from './uppercase/meta';
+import { tool as stringExtractSubstring } from './extract-substring/meta';
+import { tool as stringSplit } from './split/meta';
+import { tool as stringJoin } from './join/meta';
+import { tool as stringReplace } from './text-replacer/meta';
+import { tool as stringRepeat } from './repeat/meta';
+import { tool as stringTruncate } from './truncate/meta';
+import { tool as stringBase64 } from './base64/meta';
+import { tool as stringStatistic } from './statistic/meta';
+import { tool as stringCensor } from './censor/meta';
+import { tool as stringPasswordGenerator } from './password-generator/meta';
+import { tool as stringEncodeUrl } from './url-encode/meta';
+import { tool as stringDecodeUrl } from './url-decode/meta';
+import { tool as stringUrlEditor } from './url-editor/meta';
+import { tool as stringCompare } from './text-compare/meta';
+import { tool as stringUnicode } from './unicode/meta';
+import { tool as stringEmailExtractor } from './email-extractor/meta';
+import { tool as stringBcrypt } from './bcrypt/meta';
+
+export const stringTools = [
+  stringSplit,
+  stringJoin,
+  stringRemoveDuplicateLines,
+  stringReplace,
+  stringRepeat,
+  stringTruncate,
+  stringReverse,
+  stringUppercase,
+  stringExtractSubstring,
+  stringQuote,
+  stringRotate,
+  stringBase64,
+  stringStatistic,
+  stringCensor,
+  stringPasswordGenerator,
+  stringEncodeUrl,
+  stringDecodeUrl,
+  stringUrlEditor,
+  stringUnicode,
+  stringHiddenCharacterDetector,
+  stringEmailExtractor,
+  stringCompare,
+  stringSlugGenerator,
+  stringBcrypt
+];
