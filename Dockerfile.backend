@@ -1,5 +1,7 @@
 FROM node:20-slim
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install LibreOffice and standard fonts for document conversion
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libreoffice fonts-dejavu-core && \
@@ -8,7 +10,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --only=production || npm install --only=production
+RUN npm install --omit=dev
 
 COPY scripts ./scripts
 
@@ -18,3 +20,4 @@ ENV HOST=0.0.0.0
 EXPOSE 3001
 
 CMD ["node", "scripts/bridge.mjs"]
+
