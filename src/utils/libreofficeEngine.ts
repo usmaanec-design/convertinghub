@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { Document, Paragraph, TextRun, Packer } from 'docx';
+import { Document, Paragraph, TextRun, Packer, ImageRun } from 'docx';
 import pptxgen from 'pptxgenjs';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min?url';
@@ -108,9 +108,10 @@ export class LibreOfficeEngine {
     const arrayBuffer = await file.arrayBuffer();
 
     const inputExt = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
+    const isPdfInput = inputExt === 'pdf' || file.type === 'application/pdf';
+
     // For PDF to PPTX/PPT, use high-fidelity Client-Side Layout Extraction Engine (pptxgenjs)
-    // to guarantee 100% clean OpenXML presentation files without MS PowerPoint repair warnings.
-    if ((inputExt === 'pdf' || file.type === 'application/pdf') && (cleanTargetFormat === 'pptx' || cleanTargetFormat === 'ppt')) {
+    if (isPdfInput && (cleanTargetFormat === 'pptx' || cleanTargetFormat === 'ppt')) {
       console.log('[ConvertingHub Engine] Executing High-Fidelity PDF Layout Extraction Engine (PPTX)...');
       const pptxBlob = await this.extractPdfToPptx(arrayBuffer);
       const durationMs = Date.now() - startTime;
@@ -119,6 +120,24 @@ export class LibreOfficeEngine {
       }
       return {
         blob: pptxBlob,
+        engineUsed: 'PDF Layout Extraction Engine',
+        filename: outputFilename,
+        success: true,
+        durationMs
+      };
+    }
+
+    // For PDF to DOCX/DOC, use high-fidelity Client-Side Document Extraction Engine (docx.js)
+    // to guarantee 100% clean OpenXML document files without MS Word unreadable content warnings.
+    if (isPdfInput && (cleanTargetFormat === 'docx' || cleanTargetFormat === 'doc')) {
+      console.log('[ConvertingHub Engine] Executing High-Fidelity PDF Layout Extraction Engine (DOCX)...');
+      const docxBlob = await this.extractPdfToDocx(arrayBuffer);
+      const durationMs = Date.now() - startTime;
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('toolUsageCompleted'));
+      }
+      return {
+        blob: docxBlob,
         engineUsed: 'PDF Layout Extraction Engine',
         filename: outputFilename,
         success: true,
@@ -382,40 +401,83 @@ export class LibreOfficeEngine {
 
     for (let pageNum = 1; pageNum <= numPages; pageNum++) {
       const page = await pdfDoc.getPage(pageNum);
-      const textContent = await page.getTextContent();
-      const pageRows = this.parsePageTextToRows(textContent.items);
+      const viewport = page.getViewport({ scale: 2.0 });
 
-      paragraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `Page ${pageNum}`,
-              bold: true,
-              size: 24,
-              color: '2C3E50'
-            })
-          ],
-          spacing: { before: 200, after: 120 }
-        })
-      );
+      let renderedCanvas = false;
+      if (typeof document !== 'undefined') {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            const response = await fetch(dataUrl);
+            const imgBuffer = await response.arrayBuffer();
 
-      pageRows.forEach((rowValues) => {
-        const lineText = rowValues.join(' ');
-        if (lineText.trim()) {
-          paragraphs.push(
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: lineText,
-                  size: 22,
-                  font: 'Calibri'
-                })
-              ],
-              spacing: { after: 100 }
-            })
-          );
+            const aspectRatio = viewport.height / viewport.width;
+            const targetWidth = 595;
+            const targetHeight = Math.round(targetWidth * aspectRatio);
+
+            paragraphs.push(
+              new Paragraph({
+                children: [
+                  new ImageRun({
+                    data: new Uint8Array(imgBuffer),
+                    transformation: {
+                      width: targetWidth,
+                      height: targetHeight
+                    },
+                    type: 'jpg'
+                  })
+                ],
+                spacing: { after: 200 }
+              })
+            );
+            renderedCanvas = true;
+          }
+        } catch (e) {
+          console.warn(`[ConvertingHub Engine] Canvas page render failed for DOCX page ${pageNum}:`, e);
         }
-      });
+      }
+
+      if (!renderedCanvas) {
+        const textContent = await page.getTextContent();
+        const pageRows = this.parsePageTextToRows(textContent.items);
+
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Page ${pageNum}`,
+                bold: true,
+                size: 24,
+                color: '2C3E50'
+              })
+            ],
+            spacing: { before: 200, after: 120 }
+          })
+        );
+
+        pageRows.forEach((rowValues) => {
+          const lineText = rowValues.join(' ');
+          if (lineText.trim()) {
+            paragraphs.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: lineText,
+                    size: 22,
+                    font: 'Calibri'
+                  })
+                ],
+                spacing: { after: 100 }
+              })
+            );
+          }
+        });
+      }
 
       if (pageNum < numPages) {
         paragraphs.push(
