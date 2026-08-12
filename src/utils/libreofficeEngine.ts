@@ -230,7 +230,7 @@ export class LibreOfficeEngine {
           canvas.height = viewport.height;
           const ctx = canvas.getContext('2d');
           if (ctx) {
-            await page.render({ canvasContext: ctx, viewport }).promise;
+            await page.render({ canvasContext: ctx, viewport, canvas }).promise;
             const imgDataUrl = canvas.toDataURL('image/jpeg', 0.92);
             slide.addImage({ data: imgDataUrl, x: 0, y: 0, w: '100%', h: '100%' });
             renderedCanvas = true;
