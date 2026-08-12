@@ -208,10 +208,10 @@ async function startBridgeServer() {
       const inputName = req.headers['x-input-name'] || url.searchParams.get('inputName') || `document.pdf`;
       const ext = path.extname(inputName).replace('.', '').toLowerCase() || 'pdf';
 
-      if (ext === 'pdf' && (targetFormat === 'xlsx' || targetFormat === 'xls')) {
-        console.warn(`[OmniTools Bridge]\nInput: ${inputName}\nTarget: ${targetFormat}\nNote: LibreOffice has no native export filter for PDF to XLSX. Redirecting to PDF Table Extraction Engine.`);
+      if (ext === 'pdf' && (targetFormat === 'xlsx' || targetFormat === 'xls' || targetFormat === 'pptx' || targetFormat === 'ppt')) {
+        console.warn(`[OmniTools Bridge]\nInput: ${inputName}\nTarget: ${targetFormat}\nNote: Redirecting PDF to ${targetFormat.toUpperCase()} to PDF Layout Extraction Engine.`);
         res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'LibreOffice does not support direct PDF to XLSX export filter. Using PDF Table Extraction Engine.' }));
+        res.end(JSON.stringify({ error: `Redirecting PDF to ${targetFormat.toUpperCase()} to PDF Layout Extraction Engine.` }));
         return;
       }
 

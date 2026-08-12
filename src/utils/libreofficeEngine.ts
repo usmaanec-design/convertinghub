@@ -219,30 +219,51 @@ export class LibreOfficeEngine {
 
     for (let pageNum = 1; pageNum <= numPages; pageNum++) {
       const page = await pdfDoc.getPage(pageNum);
-      const textContent = await page.getTextContent();
+      const viewport = page.getViewport({ scale: 2.0 });
       const slide = pres.addSlide();
 
-      const pageRows = this.parsePageTextToRows(textContent.items);
-
-      let yPos = 0.6;
-      pageRows.forEach((row) => {
-        const lineText = row.join(' ');
-        if (lineText.trim() && yPos < 6.8) {
-          slide.addText(lineText, {
-            x: 0.6,
-            y: yPos,
-            w: 8.8,
-            h: 0.4,
-            fontSize: 13,
-            color: '2C3E50',
-            fontFace: 'Calibri'
-          });
-          yPos += 0.45;
+      let renderedCanvas = false;
+      if (typeof document !== 'undefined') {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            const imgDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            slide.addImage({ data: imgDataUrl, x: 0, y: 0, w: '100%', h: '100%' });
+            renderedCanvas = true;
+          }
+        } catch (e) {
+          console.warn(`[ConvertingHub Engine] Canvas page render failed for slide ${pageNum}:`, e);
         }
-      });
+      }
 
-      if (pageRows.length === 0) {
-        slide.addText(`Slide ${pageNum}`, { x: 1, y: 1, w: 6, h: 1, fontSize: 18, color: '7F8C8D' });
+      if (!renderedCanvas) {
+        const textContent = await page.getTextContent();
+        const pageRows = this.parsePageTextToRows(textContent.items);
+
+        let yPos = 0.6;
+        pageRows.forEach((row) => {
+          const lineText = row.join(' ');
+          if (lineText.trim() && yPos < 6.8) {
+            slide.addText(lineText, {
+              x: 0.6,
+              y: yPos,
+              w: 8.8,
+              h: 0.4,
+              fontSize: 13,
+              color: '2C3E50',
+              fontFace: 'Calibri'
+            });
+            yPos += 0.45;
+          }
+        });
+
+        if (pageRows.length === 0) {
+          slide.addText(`Slide ${pageNum}`, { x: 1, y: 1, w: 6, h: 1, fontSize: 18, color: '7F8C8D' });
+        }
       }
     }
 
