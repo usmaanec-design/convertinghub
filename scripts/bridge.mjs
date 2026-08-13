@@ -1157,6 +1157,7 @@ Output: ${outputFilename} (${convertedBuffer.length} bytes)`);
     console.log(`[ConvertingHub Backend] Server running on http://${HOST}:${PORT}`);
     console.log(`[ConvertingHub Backend] Adobe PDF Services Credentials: ${ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET ? 'CONFIGURED' : 'NOT SET'}${ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET ? ` (${ADOBE_CREDENTIAL_SOURCE})` : ''}`);
     console.log(`[ConvertingHub Backend] Adobe credential diagnostic: ${JSON.stringify(getAdobeCredentialDiagnostic())}`);
+    console.log('[ConvertingHub Backend] Adobe OAuth diagnostic version: c7d0dd1');
     void verifyAdobeOAuthCredentials();
     if (cachedInfo.installed) {
       console.log(`[ConvertingHub Backend] LibreOffice ${cachedInfo.version} ready at ${cachedInfo.path}`);
