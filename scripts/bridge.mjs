@@ -65,6 +65,42 @@ function getAdobeCredentialDiagnostic() {
   };
 }
 
+async function verifyAdobeOAuthCredentials() {
+  if (!ADOBE_CLIENT_ID || !ADOBE_CLIENT_SECRET) {
+    console.log('[ConvertingHub Backend] Adobe OAuth preflight: tokenObtained=false, status=not_configured');
+    return;
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ADOBE_TIMEOUT_MS);
+
+  try {
+    const response = await fetch('https://pdf-services.adobe.io/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: ADOBE_CLIENT_ID,
+        client_secret: ADOBE_CLIENT_SECRET
+      }),
+      signal: controller.signal
+    });
+    const payload = await response.json().catch(() => ({}));
+    const tokenObtained = response.ok && Boolean(payload.access_token);
+
+    console.log(`[ConvertingHub Backend] Adobe OAuth preflight: tokenObtained=${tokenObtained}, status=${response.status}`);
+    if (!tokenObtained) {
+      const errorCode = payload.error || payload.errorCode || 'unknown_error';
+      const errorMessage = payload.error_description || payload.errorMessage || payload.message || 'No Adobe error message returned.';
+      console.error(`[ConvertingHub Backend] Adobe OAuth preflight failed: code=${errorCode}, message=${errorMessage}`);
+    }
+  } catch (err) {
+    const errorMessage = err?.name === 'AbortError' ? 'OAuth request timed out.' : (err?.message || String(err));
+    console.error(`[ConvertingHub Backend] Adobe OAuth preflight: tokenObtained=false, status=network_error, message=${errorMessage}`);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 let activeConversions = 0;
 let largePdfConversions = 0;
 let adobeState = {
@@ -1090,6 +1126,7 @@ Output: ${outputFilename} (${convertedBuffer.length} bytes)`);
     console.log(`[ConvertingHub Backend] Server running on http://${HOST}:${PORT}`);
     console.log(`[ConvertingHub Backend] Adobe PDF Services Credentials: ${ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET ? 'CONFIGURED' : 'NOT SET'}${ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET ? ` (${ADOBE_CREDENTIAL_SOURCE})` : ''}`);
     console.log(`[ConvertingHub Backend] Adobe credential diagnostic: ${JSON.stringify(getAdobeCredentialDiagnostic())}`);
+    void verifyAdobeOAuthCredentials();
     if (cachedInfo.installed) {
       console.log(`[ConvertingHub Backend] LibreOffice ${cachedInfo.version} ready at ${cachedInfo.path}`);
     } else {
