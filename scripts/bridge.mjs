@@ -4,9 +4,20 @@ import path from 'path';
 import os from 'os';
 import { execFile, execSync } from 'child_process';
 import crypto from 'crypto';
+import { createReadStream } from 'fs';
 import JSZip from 'jszip';
 import { PDFDocument } from 'pdf-lib';
 import * as XLSX from 'xlsx';
+import { resolveAdobeCredentials } from './adobe-config.mjs';
+import {
+  PDFServices,
+  MimeType,
+  ServicePrincipalCredentials,
+  ExportPDFJob,
+  ExportPDFParams,
+  ExportPDFTargetFormat,
+  ExportPDFResult
+} from '@adobe/pdfservices-node-sdk';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -24,15 +35,29 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
     ];
 
 const MAX_CONCURRENT_CONVERSIONS = parseInt(process.env.MAX_CONCURRENT_CONVERSIONS || '5', 10);
+const MAX_LARGE_PDF_CONVERSIONS = parseInt(process.env.MAX_LARGE_PDF_CONVERSIONS || '1', 10);
 const BASE_CONVERSION_TIMEOUT_MS = parseInt(process.env.CONVERSION_TIMEOUT_MS || '90000', 10);
+const ADOBE_TIMEOUT_MS = parseInt(process.env.ADOBE_TIMEOUT_MS || '60000', 10);
+const ADOBE_RETRY_AFTER_MS = parseInt(process.env.ADOBE_RETRY_AFTER_MS || '300000', 10);
+const LIBREOFFICE_TIMEOUT_MS = parseInt(process.env.LIBREOFFICE_TIMEOUT_MS || '120000', 10);
+const LARGE_DOCUMENT_TIMEOUT_MS = parseInt(process.env.LARGE_DOCUMENT_TIMEOUT_MS || '300000', 10);
 const MAX_UPLOAD_SIZE = parseInt(process.env.MAX_UPLOAD_SIZE || '52428800', 10); // 50MB
 const TEMP_DIR = process.env.TEMP_DIR || os.tmpdir();
 
 // Adobe PDF Services Credentials (Server-Side ONLY - Never Exposed to Frontend)
-const ADOBE_CLIENT_ID = process.env.ADOBE_CLIENT_ID;
-const ADOBE_CLIENT_SECRET = process.env.ADOBE_CLIENT_SECRET;
+const adobeCredentialConfig = resolveAdobeCredentials(process.env);
+const ADOBE_CLIENT_ID = adobeCredentialConfig.clientId;
+const ADOBE_CLIENT_SECRET = adobeCredentialConfig.clientSecret;
+const ADOBE_CREDENTIAL_SOURCE = adobeCredentialConfig.source || 'environment';
 
 let activeConversions = 0;
+let largePdfConversions = 0;
+let adobeState = {
+  status: 'healthy',
+  cooldownUntil: 0,
+  lastFailureReason: null,
+  lastCheckedAt: 0
+};
 
 const ALLOWED_INPUT_EXTS = new Set([
   'pdf', 'docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt',
@@ -113,6 +138,100 @@ function sanitizeFilename(filename) {
   let safeName = path.basename(filename).replace(/[\x00-\x1F\x7F\\/]/g, '_');
   if (safeName.startsWith('.')) safeName = `document_${safeName}`;
   return safeName || 'document';
+}
+
+function shouldAttemptAdobe(targetFormat) {
+  if (!ADOBE_CLIENT_ID || !ADOBE_CLIENT_SECRET) return false;
+  if (adobeState.status !== 'quota_exhausted') return true;
+  return Date.now() >= adobeState.cooldownUntil;
+}
+
+function markAdobeFailure(reason) {
+  const normalized = String(reason || '').toLowerCase();
+  const quotaLike = normalized.includes('quota') || normalized.includes('429') || normalized.includes('usage limit') || normalized.includes('rate limit') || normalized.includes('monthly quota') || normalized.includes('too many requests');
+  const authLike = normalized.includes('auth') || normalized.includes('unauthorized') || normalized.includes('invalid credentials');
+
+  if (quotaLike) {
+    adobeState = {
+      status: 'quota_exhausted',
+      cooldownUntil: Date.now() + ADOBE_RETRY_AFTER_MS,
+      lastFailureReason: reason,
+      lastCheckedAt: Date.now()
+    };
+    return;
+  }
+
+  if (authLike) {
+    adobeState = {
+      status: 'authentication_failed',
+      cooldownUntil: Date.now() + Math.min(ADOBE_RETRY_AFTER_MS, 120000),
+      lastFailureReason: reason,
+      lastCheckedAt: Date.now()
+    };
+    return;
+  }
+
+  if (normalized.includes('timeout') || normalized.includes('timed out')) {
+    adobeState = {
+      status: 'timeout',
+      cooldownUntil: Date.now() + Math.min(ADOBE_RETRY_AFTER_MS, 60000),
+      lastFailureReason: reason,
+      lastCheckedAt: Date.now()
+    };
+    return;
+  }
+
+  if (normalized.includes('5xx') || normalized.includes('service unavailable') || normalized.includes('temporary')) {
+    adobeState = {
+      status: 'temporary_failure',
+      cooldownUntil: Date.now() + Math.min(ADOBE_RETRY_AFTER_MS, 120000),
+      lastFailureReason: reason,
+      lastCheckedAt: Date.now()
+    };
+    return;
+  }
+
+  adobeState = {
+    status: 'unhealthy',
+    cooldownUntil: Date.now() + Math.min(ADOBE_RETRY_AFTER_MS, 90000),
+    lastFailureReason: reason,
+    lastCheckedAt: Date.now()
+  };
+}
+
+function clearAdobeFailureState() {
+  adobeState = {
+    status: 'healthy',
+    cooldownUntil: 0,
+    lastFailureReason: null,
+    lastCheckedAt: Date.now()
+  };
+}
+
+function classifyAdobeFailure(reason) {
+  const normalized = String(reason || '').toLowerCase();
+  const authLike = normalized.includes('auth') || normalized.includes('unauthorized') || normalized.includes('invalid credentials') || normalized.includes('credential') || normalized.includes('client id') || normalized.includes('client secret') || normalized.includes('forbidden');
+  const quotaLike = normalized.includes('quota') || normalized.includes('429') || normalized.includes('usage limit') || normalized.includes('rate limit') || normalized.includes('monthly quota') || normalized.includes('too many requests');
+  const serviceLike = normalized.includes('service unavailable') || normalized.includes('temporary') || normalized.includes('5xx') || normalized.includes('503');
+  const timeoutLike = normalized.includes('timeout') || normalized.includes('timed out');
+
+  if (authLike) {
+    return { kind: 'authentication', shouldFallback: false, reasonLabel: 'authentication/configuration' };
+  }
+
+  if (quotaLike) {
+    return { kind: 'quota', shouldFallback: true, reasonLabel: 'quota/rate-limit' };
+  }
+
+  if (serviceLike) {
+    return { kind: 'service', shouldFallback: true, reasonLabel: 'service unavailable/temporary failure' };
+  }
+
+  if (timeoutLike) {
+    return { kind: 'timeout', shouldFallback: true, reasonLabel: 'timeout/temporary service issue' };
+  }
+
+  return { kind: 'unknown', shouldFallback: false, reasonLabel: 'unknown Adobe error' };
 }
 
 function setCorsHeaders(req, res) {
@@ -461,131 +580,85 @@ async function convertWithAdobePdfServices(fileBuffer, targetFormat, jobId) {
     throw new Error('Adobe PDF Services API credentials not configured on backend server.');
   }
 
-  console.log(`[Job: ${jobId}] [ADOBE] REQUEST_RECEIVED & UPLOAD_STARTED for targetFormat: ${targetFormat}`);
+  console.log(`[Conversion] [Job: ${jobId}] Requested conversion: PDF -> ${targetFormat.toUpperCase()}`);
+  console.log(`[Conversion] [Job: ${jobId}] Adobe configured: true`);
+  console.log(`[Conversion] [Job: ${jobId}] Primary: Adobe`);
+  console.log(`[Conversion] [Job: ${jobId}] Adobe initialization started`);
 
-  // 1. Get OAuth Access Token
-  const tokenRes = await fetch('https://pdf-services-ue1.adobe.io/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: ADOBE_CLIENT_ID,
-      client_secret: ADOBE_CLIENT_SECRET
-    })
-  });
+  try {
+    console.log(`[Conversion] [Job: ${jobId}] Adobe SDK credentials builder initialized`);
+    const credentials = new ServicePrincipalCredentials({
+      clientId: ADOBE_CLIENT_ID,
+      clientSecret: ADOBE_CLIENT_SECRET
+    });
+    console.log(`[Conversion] [Job: ${jobId}] Adobe PDFServices client initialized`);
 
-  if (!tokenRes.ok) {
-    const errText = await tokenRes.text();
-    throw new Error(`Adobe authentication failed (${tokenRes.status}): ${errText}`);
-  }
+    const pdfServices = new PDFServices({ credentials });
+    const inputTempPath = path.join(TEMP_DIR, `adobe_input_${jobId}.pdf`);
+    fs.writeFileSync(inputTempPath, fileBuffer);
+    console.log(`[Conversion] [Job: ${jobId}] Adobe upload started`);
 
-  const tokenData = await tokenRes.json();
-  const accessToken = tokenData.access_token;
-
-  // 2. Create Upload Asset
-  const assetRes = await fetch('https://pdf-services-ue1.adobe.io/assets', {
-    method: 'POST',
-    headers: {
-      'x-api-key': ADOBE_CLIENT_ID,
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ mediaType: 'application/pdf' })
-  });
-
-  if (!assetRes.ok) {
-    throw new Error(`Adobe asset creation failed (${assetRes.status}).`);
-  }
-
-  const assetData = await assetRes.json();
-  const { assetID, uploadUri } = assetData;
-
-  // 3. Upload PDF Binary
-  const uploadRes = await fetch(uploadUri, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/pdf' },
-    body: fileBuffer
-  });
-
-  if (!uploadRes.ok) {
-    throw new Error(`Adobe upload to asset URI failed (${uploadRes.status}).`);
-  }
-
-  console.log(`[Job: ${jobId}] [ADOBE] CONVERSION_STARTED`);
-
-  // 4. Submit Export PDF Job
-  const exportRes = await fetch('https://pdf-services-ue1.adobe.io/operation/exportpdf', {
-    method: 'POST',
-    headers: {
-      'x-api-key': ADOBE_CLIENT_ID,
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      assetID,
-      targetFormat
-    })
-  });
-
-  if (exportRes.status !== 202) {
-    const errText = await exportRes.text();
-    throw new Error(`Adobe export job submit failed (${exportRes.status}): ${errText}`);
-  }
-
-  const locationUrl = exportRes.headers.get('location');
-  if (!locationUrl) {
-    throw new Error('Adobe export job missing location header.');
-  }
-
-  // 5. Poll Job Status
-  let downloadUri = null;
-  const pollStart = Date.now();
-
-  while (Date.now() - pollStart < 120000) {
-    await new Promise(r => setTimeout(r, 1500));
-    const statusRes = await fetch(locationUrl, {
-      headers: {
-        'x-api-key': ADOBE_CLIENT_ID,
-        'Authorization': `Bearer ${accessToken}`
-      }
+    const inputAsset = await pdfServices.upload({
+      readStream: createReadStream(inputTempPath),
+      mimeType: MimeType.PDF
     });
 
-    if (statusRes.ok) {
-      const statusData = await statusRes.json();
-      if (statusData.status === 'done') {
-        downloadUri = statusData.asset.downloadUri;
-        break;
-      } else if (statusData.status === 'failed') {
-        throw new Error(`Adobe PDF Services export job failed: ${JSON.stringify(statusData.error || {})}`);
-      }
+    const params = new ExportPDFParams({
+      targetFormat: targetFormat === 'docx' ? ExportPDFTargetFormat.DOCX : ExportPDFTargetFormat.XLSX
+    });
+
+    const job = new ExportPDFJob({ inputAsset, params });
+    console.log(`[Conversion] [Job: ${jobId}] Adobe API request started`);
+    const pollingURL = await pdfServices.submit({ job });
+    console.log(`[Conversion] [Job: ${jobId}] Adobe job submitted; polling URL acquired`);
+
+    const response = await pdfServices.getJobResult({
+      pollingURL,
+      resultType: ExportPDFResult
+    });
+    console.log(`[Conversion] [Job: ${jobId}] Adobe API response received: status=${response?.status || 'unknown'}`);
+
+    const outputAsset = response.result.asset;
+    const streamAsset = await pdfServices.getContent({ asset: outputAsset });
+
+    const outputFilePath = path.join(TEMP_DIR, `adobe_output_${jobId}.${targetFormat}`);
+    await new Promise((resolve, reject) => {
+      const writeStream = fs.createWriteStream(outputFilePath);
+      streamAsset.stream.pipe(writeStream);
+      writeStream.on('finish', resolve);
+      writeStream.on('error', reject);
+    });
+
+    const convertedBuffer = fs.readFileSync(outputFilePath);
+    console.log(`[Conversion] [Job: ${jobId}] Adobe output file written: ${convertedBuffer.length} bytes`);
+
+    if (targetFormat === 'docx') {
+      const valid = await validateDocxStructure(convertedBuffer);
+      if (!valid) throw new Error('Adobe DOCX output failed structural OpenXML validation.');
+    } else if (targetFormat === 'xlsx') {
+      const valid = await validateXlsxStructure(convertedBuffer);
+      if (!valid) throw new Error('Adobe XLSX output failed structural OpenXML validation.');
     }
+
+    console.log(`[Conversion] [Job: ${jobId}] Adobe success`);
+    console.log(`[Conversion] [Job: ${jobId}] Final provider: Adobe`);
+    return convertedBuffer;
+  } catch (err) {
+    const message = err?.message || String(err);
+    const classification = classifyAdobeFailure(message);
+    console.error(`[Conversion] [Job: ${jobId}] Adobe failed: ${message}`);
+    console.error(`[Conversion] [Job: ${jobId}] Reason: ${classification.reasonLabel}`);
+
+    if (classification.kind === 'authentication') {
+      throw new Error(`Adobe authentication/configuration failed: ${message}`);
+    }
+
+    if (classification.shouldFallback) {
+      throw new Error(`Adobe fallback trigger: ${classification.reasonLabel}: ${message}`);
+    }
+
+    throw new Error(`Adobe conversion failed: ${message}`);
   }
-
-  if (!downloadUri) {
-    throw new Error('Adobe PDF Services job timed out waiting for completion.');
-  }
-
-  console.log(`[Job: ${jobId}] [ADOBE] CONVERSION_COMPLETED & VALIDATION_STARTED`);
-
-  // 6. Download Converted Output Binary
-  const fileRes = await fetch(downloadUri);
-  if (!fileRes.ok) {
-    throw new Error('Failed to download converted document asset from Adobe.');
-  }
-
-  const convertedBuffer = Buffer.from(await fileRes.arrayBuffer());
-
-  // 7. Validate Output Structure
-  if (targetFormat === 'docx') {
-    const valid = await validateDocxStructure(convertedBuffer);
-    if (!valid) throw new Error('Adobe DOCX output failed structural OpenXML validation.');
-  } else if (targetFormat === 'xlsx') {
-    const valid = await validateXlsxStructure(convertedBuffer);
-    if (!valid) throw new Error('Adobe XLSX output failed structural OpenXML validation.');
-  }
-
-  console.log(`[Job: ${jobId}] [ADOBE] VALIDATION_COMPLETED & RESPONSE_SENT`);
-  return convertedBuffer;
 }
 
 async function checkExistingBridge() {
@@ -639,6 +712,7 @@ async function startBridgeServer() {
         installed: cachedInfo.installed,
         libreoffice: cachedInfo.installed,
         adobeConfigured: !!(ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET),
+        adobeState,
         version: cachedInfo.version,
         path: cachedInfo.path,
         activeConversions,
@@ -770,23 +844,53 @@ async function startBridgeServer() {
         const outputFilename = `${baseOriginalName}.${targetFormat}`;
         let convertedBuffer = null;
         let engineUsedHeader = 'LibreOffice Headless';
+        let adobeFallbackReason = null;
+
+        console.log(`[Conversion] [Job: ${jobId}] Requested conversion: ${inputExt.toUpperCase()} -> ${targetFormat.toUpperCase()}`);
+        console.log(`[Conversion] [Job: ${jobId}] Adobe configured: ${Boolean(ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET)}`);
 
         // 1. HYBRID ROUTING MATRIX
-        if (inputExt === 'pdf' && (targetFormat === 'docx' || targetFormat === 'xlsx') && ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET) {
-          // PRIMARY for PDF -> DOCX & PDF -> XLSX: Adobe PDF Services API
-          engineUsedHeader = 'Adobe PDF Services';
-          console.log(`[Job: ${jobId}] Routing PDF -> ${targetFormat.toUpperCase()} to Adobe PDF Services API...`);
-          try {
-            convertedBuffer = await convertWithAdobePdfServices(fileBuffer, targetFormat, jobId);
-          } catch (adobeErr) {
-            console.error(`[Job: ${jobId}] Adobe PDF Services failed: ${adobeErr.message}`);
-            // Fallback to LibreOffice Headless if Adobe fails
-            if (cachedInfo.installed) {
-              console.log(`[Job: ${jobId}] Falling back to LibreOffice Headless for PDF -> ${targetFormat.toUpperCase()}...`);
-              engineUsedHeader = 'LibreOffice Headless';
-            } else {
-              throw adobeErr;
+        if (inputExt === 'pdf' && (targetFormat === 'docx' || targetFormat === 'xlsx')) {
+          const adobeConfigured = !!(ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET);
+          const canUseAdobe = adobeConfigured && shouldAttemptAdobe(targetFormat);
+          const primaryProvider = canUseAdobe ? 'Adobe' : 'LibreOffice';
+          console.log(`[Conversion] [Job: ${jobId}] Primary: ${primaryProvider}`);
+
+          if (canUseAdobe) {
+            engineUsedHeader = 'Adobe PDF Services';
+            console.log(`[Conversion] [Job: ${jobId}] Adobe request started`);
+            try {
+              convertedBuffer = await convertWithAdobePdfServices(fileBuffer, targetFormat, jobId);
+              clearAdobeFailureState();
+              console.log(`[Conversion] [Job: ${jobId}] Final provider: Adobe`);
+            } catch (adobeErr) {
+              const adobeErrorMessage = adobeErr?.message || String(adobeErr);
+              const classification = classifyAdobeFailure(adobeErrorMessage);
+              adobeFallbackReason = classification.reasonLabel;
+              markAdobeFailure(adobeErrorMessage);
+              console.error(`[Conversion] [Job: ${jobId}] Adobe failed: ${adobeErrorMessage}`);
+              console.error(`[Conversion] [Job: ${jobId}] Reason: ${classification.reasonLabel}`);
+
+              if (!classification.shouldFallback) {
+                const diagnostic = `Adobe authentication/configuration failed; backend config invalid. ${adobeErrorMessage}`;
+                console.error(`[Conversion] [Job: ${jobId}] Backend diagnostic: ${diagnostic}`);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Adobe PDF Services backend configuration is invalid.', diagnostic, jobId }));
+                return;
+              }
+
+              if (cachedInfo.installed) {
+                console.warn(`[Conversion] [Job: ${jobId}] Fallback: LibreOffice`);
+                console.warn(`[Conversion] [Job: ${jobId}] Fallback reason: ${classification.reasonLabel}`);
+                engineUsedHeader = 'LibreOffice Headless';
+              } else {
+                throw adobeErr;
+              }
             }
+          } else {
+            console.log(`[Conversion] [Job: ${jobId}] Adobe disabled or in quota retry window; route: LibreOffice`);
+            console.log(`[Conversion] [Job: ${jobId}] Fallback reason: ${adobeConfigured ? 'quota/rate-limit cooldown active' : 'Adobe not configured'}`);
+            engineUsedHeader = 'LibreOffice Headless';
           }
         }
 
@@ -969,7 +1073,7 @@ Output: ${outputFilename} (${convertedBuffer.length} bytes)`);
 
   server.listen(PORT, HOST, () => {
     console.log(`[ConvertingHub Backend] Server running on http://${HOST}:${PORT}`);
-    console.log(`[ConvertingHub Backend] Adobe PDF Services Credentials: ${ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET ? 'CONFIGURED' : 'NOT SET'}`);
+    console.log(`[ConvertingHub Backend] Adobe PDF Services Credentials: ${ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET ? 'CONFIGURED' : 'NOT SET'}${ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET ? ` (${ADOBE_CREDENTIAL_SOURCE})` : ''}`);
     if (cachedInfo.installed) {
       console.log(`[ConvertingHub Backend] LibreOffice ${cachedInfo.version} ready at ${cachedInfo.path}`);
     } else {

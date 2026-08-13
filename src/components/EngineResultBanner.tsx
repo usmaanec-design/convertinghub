@@ -3,7 +3,6 @@ import { Alert, Box, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 interface EngineResultBannerProps {
-  engineUsed?: string;
   filename?: string;
   durationMs?: number;
 }
@@ -17,10 +16,10 @@ export const EngineResultBanner: React.FC<EngineResultBannerProps> = ({ filename
     >
       <Box textAlign="left">
         <Typography variant="subtitle2" fontWeight="bold">
-          Conversion Complete! {filename ? `(${filename})` : ''}
+          Conversion complete! {filename ? `(${filename})` : ''}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          Document converted successfully. {durationMs ? `(${ (durationMs / 1000).toFixed(1) }s)` : ''}
+          Your document is ready. {durationMs ? `(${(durationMs / 1000).toFixed(1)}s)` : ''}
         </Typography>
       </Box>
     </Alert>

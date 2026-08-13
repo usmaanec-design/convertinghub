@@ -20,7 +20,7 @@ export interface ConversionOptions {
 
 export interface ConversionResult {
   blob: Blob | null;
-  engineUsed: 'LibreOffice Headless' | 'PDF Layout Extraction Engine' | 'PDF Table Extraction Engine';
+  engineUsed: 'primary' | 'backup' | 'client';
   filename: string;
   success: boolean;
   error?: string;
@@ -145,7 +145,7 @@ export class LibreOfficeEngine {
             }
             return {
               blob,
-              engineUsed: 'LibreOffice Headless',
+              engineUsed: 'primary',
               filename: outputFilename,
               success: true,
               durationMs
@@ -165,7 +165,7 @@ export class LibreOfficeEngine {
       const durationMs = Date.now() - startTime;
       return {
         blob: null,
-        engineUsed: 'LibreOffice Headless',
+        engineUsed: 'primary',
         filename: outputFilename,
         success: false,
         error: 'Document conversion service is temporarily unavailable. Please try again.',
@@ -183,7 +183,7 @@ export class LibreOfficeEngine {
       }
       return {
         blob: docxBlob,
-        engineUsed: 'PDF Layout Extraction Engine',
+        engineUsed: 'client',
         filename: outputFilename,
         success: true,
         durationMs
@@ -198,7 +198,7 @@ export class LibreOfficeEngine {
       }
       return {
         blob: pptxBlob,
-        engineUsed: 'PDF Layout Extraction Engine',
+        engineUsed: 'client',
         filename: outputFilename,
         success: true,
         durationMs
@@ -214,7 +214,7 @@ export class LibreOfficeEngine {
       }
       return {
         blob: xlsxBlob,
-        engineUsed: 'PDF Table Extraction Engine',
+        engineUsed: 'client',
         filename: outputFilename,
         success: true,
         durationMs
@@ -224,7 +224,7 @@ export class LibreOfficeEngine {
     const durationMs = Date.now() - startTime;
     return {
       blob: null,
-      engineUsed: 'LibreOffice Headless',
+      engineUsed: 'primary',
       filename: outputFilename,
       success: false,
       error: 'Document conversion service is temporarily unavailable. Please try again.',

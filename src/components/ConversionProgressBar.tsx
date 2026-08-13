@@ -9,30 +9,30 @@ interface ConversionProgressBarProps {
 
 export const ConversionProgressBar: React.FC<ConversionProgressBarProps> = ({
   isProcessing,
-  title = 'Converting document with LibreOffice Engine...'
+  title = 'Processing document...'
 }) => {
   const [progress, setProgress] = useState<number>(0);
-  const [stageText, setStageText] = useState<string>('Initializing conversion engine...');
+  const [stageText, setStageText] = useState<string>('Preparing your document...');
 
   useEffect(() => {
     let interval: any;
     if (isProcessing) {
       setProgress(5);
-      setStageText('Uploading document to LibreOffice engine...');
+      setStageText('Uploading your document...');
 
       interval = setInterval(() => {
         setProgress((prev) => {
           if (prev < 30) {
-            setStageText('Parsing document pages & vector layers...');
+            setStageText('Checking document structure...');
             return prev + 5;
           } else if (prev < 70) {
-            setStageText('Processing layout, fonts, and graphics with LibreOffice Headless...');
+            setStageText('Processing content and formatting...');
             return prev + 3;
           } else if (prev < 92) {
-            setStageText('Generating final presentation & layout structure...');
+            setStageText('Finalizing your document...');
             return prev + 1;
           }
-          return 95; // Hold at 95% until complete
+          return 95;
         });
       }, 400);
     } else {
