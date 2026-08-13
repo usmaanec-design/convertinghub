@@ -59,7 +59,9 @@ function getAdobeCredentialDiagnostic() {
     clientIdFirst4: RAW_ADOBE_CLIENT_ID ? RAW_ADOBE_CLIENT_ID.slice(0, 4) : null,
     clientIdLast4: RAW_ADOBE_CLIENT_ID ? RAW_ADOBE_CLIENT_ID.slice(-4) : null,
     clientSecretExists: Boolean(RAW_ADOBE_CLIENT_SECRET),
-    clientSecretLength: RAW_ADOBE_CLIENT_SECRET.length
+    clientSecretLength: RAW_ADOBE_CLIENT_SECRET.length,
+    clientSecretFirst3: RAW_ADOBE_CLIENT_SECRET ? RAW_ADOBE_CLIENT_SECRET.slice(0, 3) : null,
+    clientSecretLast3: RAW_ADOBE_CLIENT_SECRET ? RAW_ADOBE_CLIENT_SECRET.slice(-3) : null
   };
 }
 
