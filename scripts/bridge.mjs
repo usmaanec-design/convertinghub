@@ -5,6 +5,7 @@ import os from 'os';
 import { execFile, execSync } from 'child_process';
 import crypto from 'crypto';
 import { createReadStream } from 'fs';
+import { pipeline } from 'stream/promises';
 import JSZip from 'jszip';
 import { PDFDocument } from 'pdf-lib';
 import * as XLSX from 'xlsx';
@@ -296,6 +297,7 @@ function classifyAdobeFailure(reason) {
   const quotaLike = normalized.includes('quota') || normalized.includes('429') || normalized.includes('usage limit') || normalized.includes('rate limit') || normalized.includes('monthly quota') || normalized.includes('too many requests');
   const serviceLike = normalized.includes('service unavailable') || normalized.includes('temporary') || normalized.includes('5xx') || normalized.includes('503');
   const timeoutLike = normalized.includes('timeout') || normalized.includes('timed out');
+  const outputLike = normalized.includes('output download failed') || normalized.includes('readable content stream') || normalized.includes("reading 'pipe'");
 
   if (authLike) {
     return { kind: 'authentication', shouldFallback: false, reasonLabel: 'authentication/configuration' };
@@ -311,6 +313,10 @@ function classifyAdobeFailure(reason) {
 
   if (timeoutLike) {
     return { kind: 'timeout', shouldFallback: true, reasonLabel: 'timeout/temporary service issue' };
+  }
+
+  if (outputLike) {
+    return { kind: 'output', shouldFallback: false, reasonLabel: 'output download failure' };
   }
 
   return { kind: 'unknown', shouldFallback: false, reasonLabel: 'unknown Adobe error' };
@@ -702,14 +708,12 @@ async function convertWithAdobePdfServices(fileBuffer, targetFormat, jobId) {
 
     const outputAsset = response.result.asset;
     const streamAsset = await pdfServices.getContent({ asset: outputAsset });
+    if (!streamAsset?.readStream || typeof streamAsset.readStream.pipe !== 'function') {
+      throw new Error('Adobe output download failed: SDK did not return a readable content stream.');
+    }
 
     const outputFilePath = path.join(TEMP_DIR, `adobe_output_${jobId}.${targetFormat}`);
-    await new Promise((resolve, reject) => {
-      const writeStream = fs.createWriteStream(outputFilePath);
-      streamAsset.stream.pipe(writeStream);
-      writeStream.on('finish', resolve);
-      writeStream.on('error', reject);
-    });
+    await pipeline(streamAsset.readStream, fs.createWriteStream(outputFilePath));
 
     const convertedBuffer = fs.readFileSync(outputFilePath);
     console.log(`[Conversion] [Job: ${jobId}] Adobe output file written: ${convertedBuffer.length} bytes`);
@@ -953,12 +957,24 @@ async function startBridgeServer() {
               console.error(`[Conversion] [Job: ${jobId}] Adobe failed: ${adobeErrorMessage}`);
               console.error(`[Conversion] [Job: ${jobId}] Reason: ${classification.reasonLabel}`);
 
-              if (!classification.shouldFallback) {
+              if (classification.kind === 'authentication') {
                 const diagnostic = `Adobe authentication/configuration failed; backend config invalid. ${adobeErrorMessage}`;
                 console.error(`[Conversion] [Job: ${jobId}] Backend diagnostic: ${diagnostic}`);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: 'Adobe PDF Services backend configuration is invalid.', diagnostic, jobId }));
                 return;
+              }
+
+              if (classification.kind === 'output') {
+                const diagnostic = `Adobe conversion completed but its output could not be downloaded. ${adobeErrorMessage}`;
+                console.error(`[Conversion] [Job: ${jobId}] Backend diagnostic: ${diagnostic}`);
+                res.writeHead(502, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Document conversion output could not be retrieved. Please try again.', jobId }));
+                return;
+              }
+
+              if (!classification.shouldFallback) {
+                throw adobeErr;
               }
 
               if (cachedInfo.installed) {
