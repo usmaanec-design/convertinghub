@@ -65,6 +65,36 @@ function getAdobeCredentialDiagnostic() {
   };
 }
 
+function redactAdobeOAuthDiagnostic(value) {
+  const sensitiveKey = /^(access_?token|refresh_?token|id_?token|client_?secret|client_?id|authorization|credential|api_?key)$/i;
+
+  if (Array.isArray(value)) {
+    return value.map(redactAdobeOAuthDiagnostic);
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [
+      key,
+      sensitiveKey.test(key) ? '[REDACTED]' : redactAdobeOAuthDiagnostic(entry)
+    ]));
+  }
+
+  return value;
+}
+
+function serializeAdobeOAuthDiagnostic(rawBody) {
+  if (!rawBody) return '{}';
+
+  try {
+    return JSON.stringify(redactAdobeOAuthDiagnostic(JSON.parse(rawBody)));
+  } catch (err) {
+    const redactedBody = rawBody
+      .replace(/((?:access_?token|refresh_?token|id_?token|client_?secret|client_?id|authorization|credential|api_?key)\s*[:=]\s*["']?)[^\s,"'}]+/gi, '$1[REDACTED]')
+      .slice(0, 2000);
+    return JSON.stringify({ rawBody: redactedBody });
+  }
+}
+
 async function verifyAdobeOAuthCredentials() {
   if (!ADOBE_CLIENT_ID || !ADOBE_CLIENT_SECRET) {
     console.log('[ConvertingHub Backend] Adobe OAuth preflight: tokenObtained=false, status=not_configured');
@@ -84,18 +114,19 @@ async function verifyAdobeOAuthCredentials() {
       }),
       signal: controller.signal
     });
-    const payload = await response.json().catch(() => ({}));
+    const rawBody = await response.text();
+    const payload = (() => {
+      try { return JSON.parse(rawBody); } catch (err) { return {}; }
+    })();
     const tokenObtained = response.ok && Boolean(payload.access_token);
 
     console.log(`[ConvertingHub Backend] Adobe OAuth preflight: tokenObtained=${tokenObtained}, status=${response.status}`);
     if (!tokenObtained) {
-      const errorCode = payload.error || payload.errorCode || 'unknown_error';
-      const errorMessage = payload.error_description || payload.errorMessage || payload.message || 'No Adobe error message returned.';
-      console.error(`[ConvertingHub Backend] Adobe OAuth preflight failed: code=${errorCode}, message=${errorMessage}`);
+      console.error(`[ConvertingHub Backend] Adobe OAuth preflight failed: status=${response.status}, response=${serializeAdobeOAuthDiagnostic(rawBody)}`);
     }
   } catch (err) {
     const errorMessage = err?.name === 'AbortError' ? 'OAuth request timed out.' : (err?.message || String(err));
-    console.error(`[ConvertingHub Backend] Adobe OAuth preflight: tokenObtained=false, status=network_error, message=${errorMessage}`);
+    console.error(`[ConvertingHub Backend] Adobe OAuth preflight: tokenObtained=false, status=network_error, error=${JSON.stringify({ message: errorMessage })}`);
   } finally {
     clearTimeout(timeout);
   }
