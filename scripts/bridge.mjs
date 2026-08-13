@@ -49,6 +49,19 @@ const adobeCredentialConfig = resolveAdobeCredentials(process.env);
 const ADOBE_CLIENT_ID = adobeCredentialConfig.clientId;
 const ADOBE_CLIENT_SECRET = adobeCredentialConfig.clientSecret;
 const ADOBE_CREDENTIAL_SOURCE = adobeCredentialConfig.source || 'environment';
+const RAW_ADOBE_CLIENT_ID = String(process.env.ADOBE_CLIENT_ID || '').trim();
+const RAW_ADOBE_CLIENT_SECRET = String(process.env.ADOBE_CLIENT_SECRET || '').trim();
+
+function getAdobeCredentialDiagnostic() {
+  return {
+    clientIdExists: Boolean(RAW_ADOBE_CLIENT_ID),
+    clientIdLength: RAW_ADOBE_CLIENT_ID.length,
+    clientIdFirst4: RAW_ADOBE_CLIENT_ID ? RAW_ADOBE_CLIENT_ID.slice(0, 4) : null,
+    clientIdLast4: RAW_ADOBE_CLIENT_ID ? RAW_ADOBE_CLIENT_ID.slice(-4) : null,
+    clientSecretExists: Boolean(RAW_ADOBE_CLIENT_SECRET),
+    clientSecretLength: RAW_ADOBE_CLIENT_SECRET.length
+  };
+}
 
 let activeConversions = 0;
 let largePdfConversions = 0;
@@ -1074,6 +1087,7 @@ Output: ${outputFilename} (${convertedBuffer.length} bytes)`);
   server.listen(PORT, HOST, () => {
     console.log(`[ConvertingHub Backend] Server running on http://${HOST}:${PORT}`);
     console.log(`[ConvertingHub Backend] Adobe PDF Services Credentials: ${ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET ? 'CONFIGURED' : 'NOT SET'}${ADOBE_CLIENT_ID && ADOBE_CLIENT_SECRET ? ` (${ADOBE_CREDENTIAL_SOURCE})` : ''}`);
+    console.log(`[ConvertingHub Backend] Adobe credential diagnostic: ${JSON.stringify(getAdobeCredentialDiagnostic())}`);
     if (cachedInfo.installed) {
       console.log(`[ConvertingHub Backend] LibreOffice ${cachedInfo.version} ready at ${cachedInfo.path}`);
     } else {
