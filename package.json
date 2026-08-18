@@ -100,7 +100,8 @@
     "type-fest": "^4.35.0",
     "use-deep-compare-effect": "^1.8.1",
     "xlsx": "^0.20.3",
-    "yup": "^1.4.0"
+    "yup": "^1.4.0",
+    "@paddle/paddle-js": "^1.6.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
