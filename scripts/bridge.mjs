@@ -803,6 +803,28 @@ async function startBridgeServer() {
 
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
+    // GET /api/tokens/entitlement - Centralized 3-Stage Conversion Access Check
+    if (req.method === 'GET' && (url.pathname.includes('entitlement') || req.url.includes('entitlement'))) {
+      const authHeader = req.headers['authorization'] || '';
+      const userId = req.headers['x-user-id'] || (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null);
+      const clientTrialId = req.headers['x-client-trial-id'] || url.searchParams.get('clientTrialId') || null;
+      const tool = url.searchParams.get('tool') || 'pdf-to-word';
+
+      const entitlement = canConvert({ userId, tool, clientTrialId });
+      const isValidUser = userId && userId !== 'guest' && userId.trim().length > 0;
+      const wallet = isValidUser ? getUserWallet(userId) : null;
+      const sysConfig = getSystemConfig();
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        entitlement,
+        wallet: (wallet && wallet.plan === 'pro') ? wallet : null,
+        systemConfig: sysConfig
+      }));
+      return;
+    }
+
     if (url.pathname.startsWith('/api/libreoffice/api/')) {
       url.pathname = url.pathname.replace('/api/libreoffice/api/', '/api/');
     }
@@ -892,28 +914,6 @@ async function startBridgeServer() {
     // POST /api/paddle/portal-session - Paddle Customer Portal Session Handler
     if (req.method === 'POST' && url.pathname === '/api/paddle/portal-session') {
       await handleCustomerPortalSession(req, res);
-      return;
-    }
-
-    // GET /api/tokens/entitlement - Centralized 3-Stage Conversion Access Check
-    if (req.method === 'GET' && (url.pathname.includes('entitlement') || req.url.includes('entitlement'))) {
-      const authHeader = req.headers['authorization'] || '';
-      const userId = req.headers['x-user-id'] || (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null);
-      const clientTrialId = req.headers['x-client-trial-id'] || url.searchParams.get('clientTrialId') || null;
-      const tool = url.searchParams.get('tool') || 'pdf-to-word';
-
-      const entitlement = canConvert({ userId, tool, clientTrialId });
-      const isValidUser = userId && userId !== 'guest' && userId.trim().length > 0;
-      const wallet = isValidUser ? getUserWallet(userId) : null;
-      const sysConfig = getSystemConfig();
-
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        success: true,
-        entitlement,
-        wallet: (wallet && wallet.plan === 'pro') ? wallet : null,
-        systemConfig: sysConfig
-      }));
       return;
     }
 
