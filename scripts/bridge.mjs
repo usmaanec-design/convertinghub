@@ -348,9 +348,16 @@ function setCorsHeaders(req, res) {
   }
 
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-target-format, x-input-name, authorization, x-user-id, x-client-trial-id, x-trial-id, x-requested-with, *');
-  res.setHeader('Access-Control-Expose-Headers', 'x-engine-used, x-conversion-status, content-disposition');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+
+  const reqRequestedHeaders = req.headers['access-control-request-headers'];
+  if (reqRequestedHeaders) {
+    res.setHeader('Access-Control-Allow-Headers', reqRequestedHeaders);
+  } else {
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-target-format, x-input-name, x-user-id, x-client-trial-id, x-trial-id, x-requested-with, Accept, Origin, *');
+  }
+
+  res.setHeader('Access-Control-Expose-Headers', 'x-engine-used, x-conversion-status, content-disposition, x-tokens-remaining');
 }
 
 function getRawBody(req) {

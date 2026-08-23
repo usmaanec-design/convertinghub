@@ -3,7 +3,6 @@ import { imageTools } from '../pages/tools/image';
 import { DefinedTool, ToolCategory, UserType } from './defineTool';
 import { capitalizeFirstLetter } from '@utils/string';
 import { numberTools } from '../pages/tools/number';
-import { videoTools } from '../pages/tools/video';
 import { audioTools } from 'pages/tools/audio';
 import { listTools } from '../pages/tools/list';
 import { Entries } from 'type-fest';
@@ -19,36 +18,30 @@ import { TFunction } from 'i18next';
 import { FullI18nKey, I18nNamespaces } from '../i18n';
 
 const toolCategoriesOrder: ToolCategory[] = [
-  'converters',
   'pdf',
   'arc-maps',
   'image-generic',
   'string',
-  'video',
-  'time',
   'audio',
   'json',
   'list',
   'csv',
   'number',
-  'png',
-  'xml',
   'gif'
 ];
 export const tools: DefinedTool[] = [
-  ...convertersTools,
   ...pdfTools,
+  ...convertersTools,
+  ...timeTools,
+  ...xmlTools,
   ...arcMapsTools,
   ...imageTools,
   ...stringTools,
   ...jsonTools,
   ...listTools,
   ...csvTools,
-  ...videoTools,
   ...numberTools,
-  ...timeTools,
-  ...audioTools,
-  ...xmlTools
+  ...audioTools
 ];
 const categoriesConfig: {
   type: ToolCategory;
@@ -67,12 +60,6 @@ const categoriesConfig: {
     icon: 'solar:text-bold-duotone',
     value: 'translation:categories.string.description',
     title: 'translation:categories.string.title'
-  },
-  {
-    type: 'png',
-    icon: 'ph:file-png-thin',
-    value: 'translation:categories.png.description',
-    title: 'translation:categories.png.title'
   },
   {
     type: 'number',
@@ -105,22 +92,10 @@ const categoriesConfig: {
     title: 'translation:categories.csv.title'
   },
   {
-    type: 'video',
-    icon: 'lets-icons:video-light',
-    value: 'translation:categories.video.description',
-    title: 'translation:categories.video.title'
-  },
-  {
     type: 'pdf',
     icon: 'tabler:pdf',
     value: 'translation:categories.pdf.description',
     title: 'translation:categories.pdf.title'
-  },
-  {
-    type: 'time',
-    icon: 'fluent-mdl2:date-time',
-    value: 'translation:categories.time.description',
-    title: 'translation:categories.time.title'
   },
   {
     type: 'image-generic',
@@ -133,35 +108,23 @@ const categoriesConfig: {
     icon: 'ic:twotone-audiotrack',
     value: 'translation:categories.audio.description',
     title: 'translation:categories.audio.title'
-  },
-  {
-    type: 'xml',
-    icon: 'mdi-light:xml',
-    value: 'translation:categories.xml.description',
-    title: 'translation:categories.xml.title'
-  },
-  {
-    type: 'converters',
-    icon: 'streamline-plump:convert-pdf-1',
-    value: 'translation:categories.converters.description',
-    title: 'translation:categories.converters.title'
   }
 ];
 const CATEGORIES_USER_TYPES_MAPPINGS: Record<ToolCategory, UserType[]> = {
-  xml: ['developers', 'generalUsers'],
+  xml: [],
   csv: ['developers', 'generalUsers'],
   json: ['developers', 'generalUsers'],
   list: ['developers', 'generalUsers'],
   number: ['developers', 'generalUsers'],
   string: ['developers', 'generalUsers'],
-  time: ['developers', 'generalUsers'],
+  time: [],
   pdf: ['developers', 'generalUsers'],
   gif: ['generalUsers', 'developers'],
-  png: ['generalUsers', 'developers'],
+  png: [],
   'image-generic': ['generalUsers', 'developers'],
-  video: ['generalUsers', 'developers'],
+  video: [],
   audio: ['generalUsers', 'developers'],
-  converters: ['generalUsers', 'developers'],
+  converters: [],
   'arc-maps': ['generalUsers', 'developers']
 };
 
