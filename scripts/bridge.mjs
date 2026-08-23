@@ -896,7 +896,7 @@ async function startBridgeServer() {
     }
 
     // GET /api/tokens/entitlement - Centralized 3-Stage Conversion Access Check
-    if (req.method === 'GET' && url.pathname === '/api/tokens/entitlement') {
+    if (req.method === 'GET' && (url.pathname === '/api/tokens/entitlement' || url.pathname.includes('/tokens/entitlement'))) {
       const authHeader = req.headers['authorization'] || '';
       const userId = req.headers['x-user-id'] || (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null);
       const clientTrialId = req.headers['x-client-trial-id'] || url.searchParams.get('clientTrialId') || null;
@@ -918,7 +918,7 @@ async function startBridgeServer() {
     }
 
     // GET /api/tokens/balance - Token Balance & Wallet Status
-    if (req.method === 'GET' && (url.pathname === '/api/tokens/balance' || url.pathname === '/api/tokens')) {
+    if (req.method === 'GET' && (url.pathname === '/api/tokens/balance' || url.pathname === '/api/tokens' || url.pathname.includes('/tokens/balance'))) {
       const authHeader = req.headers['authorization'] || '';
       const userId = req.headers['x-user-id'] || (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : 'guest');
       const wallet = getUserWallet(userId);
