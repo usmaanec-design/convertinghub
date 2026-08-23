@@ -10,6 +10,20 @@ import JSZip from 'jszip';
 import { PDFDocument } from 'pdf-lib';
 import * as XLSX from 'xlsx';
 import { resolveAdobeCredentials } from './adobe-config.mjs';
+import { handlePaddleWebhook } from './paddleWebhook.mjs';
+import { handleCustomerPortalSession } from './paddlePortal.mjs';
+import {
+  getUserWallet,
+  setUserPlan,
+  getSystemConfig,
+  canConvert,
+  canPerformAdobeConversion,
+  consumeAccessAfterSuccess,
+  consumeTokenAfterSuccess,
+  logFailedConversion,
+  getAdminAdobeStats
+} from './db/tokenStore.mjs';
+
 import {
   PDFServices,
   MimeType,
@@ -31,8 +45,7 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
       'http://localhost:5173',
       'http://localhost:3000',
       'http://127.0.0.1:5173',
-      'http://127.0.0.1:3001',
-      '*'
+      'http://127.0.0.1:3001'
     ];
 
 const MAX_CONCURRENT_CONVERSIONS = parseInt(process.env.MAX_CONCURRENT_CONVERSIONS || '5', 10);
@@ -336,7 +349,7 @@ function setCorsHeaders(req, res) {
 
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-target-format, x-input-name, authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-target-format, x-input-name, authorization, x-user-id, x-client-trial-id, x-trial-id, x-requested-with, *');
   res.setHeader('Access-Control-Expose-Headers', 'x-engine-used, x-conversion-status, content-disposition');
 }
 
@@ -783,6 +796,10 @@ async function startBridgeServer() {
 
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
+    if (url.pathname.startsWith('/api/libreoffice/api/')) {
+      url.pathname = url.pathname.replace('/api/libreoffice/api/', '/api/');
+    }
+
     // GET /health or /api/health or /api/libreoffice/health or /api/libreoffice or /status
     if (req.method === 'GET' && (
       url.pathname === '/health' ||
@@ -856,6 +873,76 @@ async function startBridgeServer() {
       } finally {
         try { fs.rmSync(testDir, { recursive: true, force: true }); } catch (e) {}
       }
+      return;
+    }
+
+    // POST /api/paddle/webhook - Paddle Webhook Event Delivery Handler
+    if (req.method === 'POST' && url.pathname === '/api/paddle/webhook') {
+      await handlePaddleWebhook(req, res);
+      return;
+    }
+
+    // POST /api/paddle/portal-session - Paddle Customer Portal Session Handler
+    if (req.method === 'POST' && url.pathname === '/api/paddle/portal-session') {
+      await handleCustomerPortalSession(req, res);
+      return;
+    }
+
+    // GET /api/tokens/entitlement - Centralized 3-Stage Conversion Access Check
+    if (req.method === 'GET' && url.pathname === '/api/tokens/entitlement') {
+      const authHeader = req.headers['authorization'] || '';
+      const userId = req.headers['x-user-id'] || (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null);
+      const clientTrialId = req.headers['x-client-trial-id'] || url.searchParams.get('clientTrialId') || null;
+      const tool = url.searchParams.get('tool') || 'pdf-to-word';
+
+      const entitlement = canConvert({ userId, tool, clientTrialId });
+      const isValidUser = userId && userId !== 'guest' && userId.trim().length > 0;
+      const wallet = isValidUser ? getUserWallet(userId) : null;
+      const sysConfig = getSystemConfig();
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        entitlement,
+        wallet: (wallet && wallet.plan === 'pro') ? wallet : null,
+        systemConfig: sysConfig
+      }));
+      return;
+    }
+
+    // GET /api/tokens/balance - Token Balance & Wallet Status
+    if (req.method === 'GET' && (url.pathname === '/api/tokens/balance' || url.pathname === '/api/tokens')) {
+      const authHeader = req.headers['authorization'] || '';
+      const userId = req.headers['x-user-id'] || (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : 'guest');
+      const wallet = getUserWallet(userId);
+      const sysConfig = getSystemConfig();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, wallet, systemConfig: sysConfig }));
+      return;
+    }
+
+    // POST /api/tokens/set-plan - Update User Plan Status
+    if (req.method === 'POST' && url.pathname === '/api/tokens/set-plan') {
+      try {
+        const rawBody = await getRawBody(req);
+        const data = JSON.parse(rawBody.toString('utf-8') || '{}');
+        const userId = data.userId || 'guest';
+        const plan = data.plan || 'pro';
+        const updatedWallet = setUserPlan(userId, plan);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, wallet: updatedWallet }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+      return;
+    }
+
+    // GET /api/admin/adobe-stats - Admin Quota & Token Statistics
+    if (req.method === 'GET' && url.pathname === '/api/admin/adobe-stats') {
+      const stats = getAdminAdobeStats();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, stats }));
       return;
     }
 
@@ -1109,6 +1196,24 @@ async function startBridgeServer() {
           throw new Error('Generated output document was 0 bytes in size.');
         }
 
+        // Centralized 3-stage user entitlement & quota validation for paid tools (PDF to Word, PDF to Excel)
+        const authHeader = req.headers['authorization'] || '';
+        const userId = req.headers['x-user-id'] || (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null);
+        const clientTrialId = req.headers['x-client-trial-id'] || (req.headers['x-trial-id'] ? req.headers['x-trial-id'] : null);
+
+        let entitlementCheck = null;
+        if (inputExt === 'pdf' && (targetFormat === 'docx' || targetFormat === 'xlsx')) {
+          entitlementCheck = canConvert({ userId, tool: `pdf-to-${targetFormat}`, clientTrialId });
+          if (!entitlementCheck.allowed) {
+            console.warn(`[Conversion] [Job: ${jobId}] Entitlement check blocked: ${entitlementCheck.reason} - ${entitlementCheck.message}`);
+            logFailedConversion({ userId, clientTrialId, tool: `pdf-to-${targetFormat}`, reason: entitlementCheck.reason });
+            const statusCode = entitlementCheck.reason === 'LOGIN_REQUIRED' ? 401 : entitlementCheck.reason === 'PRO_REQUIRED' ? 403 : 429;
+            res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: entitlementCheck.message, reason: entitlementCheck.reason, jobId, entitlement: entitlementCheck }));
+            return;
+          }
+        }
+
         // Structural Validation Checks
         if (targetFormat === 'docx') {
           const isValid = await validateDocxStructure(convertedBuffer);
@@ -1119,6 +1224,17 @@ async function startBridgeServer() {
         } else if (targetFormat === 'pptx') {
           const isValid = await validatePptxStructure(convertedBuffer);
           if (!isValid) throw new Error('Generated PPTX file failed structural validation check.');
+        }
+
+        // ATOMIC ACCESS & TOKEN CONSUMPTION ONLY UPON SUCCESS
+        let tokensRemainingHeader = null;
+        if (inputExt === 'pdf' && (targetFormat === 'docx' || targetFormat === 'xlsx')) {
+          const accessType = entitlementCheck ? entitlementCheck.accessType : 'pro_token';
+          const tokenResult = consumeAccessAfterSuccess({ userId, tool: `pdf-to-${targetFormat}`, clientTrialId, accessType });
+          if (tokenResult && tokenResult.wallet && tokenResult.wallet.availableTokens !== undefined) {
+            tokensRemainingHeader = String(tokenResult.wallet.availableTokens);
+            console.log(`[Job: ${jobId}] Access consumed for ${userId || clientTrialId} (${accessType}). Available tokens remaining: ${tokensRemainingHeader}`);
+          }
         }
 
         const durationMs = Date.now() - startTime;
@@ -1132,14 +1248,20 @@ Output: ${outputFilename} (${convertedBuffer.length} bytes)`);
         const mimeType = MIME_TYPES[targetFormat] || 'application/octet-stream';
         const encodedFilename = encodeURIComponent(outputFilename);
 
-        res.writeHead(200, {
+        const responseHeaders = {
           'Content-Type': mimeType,
           'Content-Length': convertedBuffer.length,
           'Content-Disposition': `attachment; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`,
           'x-engine-used': engineUsedHeader,
           'x-conversion-status': 'success',
           'x-job-id': jobId
-        });
+        };
+
+        if (tokensRemainingHeader !== null) {
+          responseHeaders['x-tokens-remaining'] = tokensRemainingHeader;
+        }
+
+        res.writeHead(200, responseHeaders);
         res.end(convertedBuffer);
 
       } catch (err) {
