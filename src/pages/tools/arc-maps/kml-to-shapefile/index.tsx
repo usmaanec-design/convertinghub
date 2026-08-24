@@ -60,22 +60,30 @@ export default function KmlToShapefileConverter() {
 
       for (let i = 0; i < placemarks.length; i++) {
         const pm = placemarks[i];
-        const name = pm.getElementsByTagName('name')[0]?.textContent || `Placemark_${i + 1}`;
-        const description = pm.getElementsByTagName('description')[0]?.textContent || '';
+        const name =
+          pm.getElementsByTagName('name')[0]?.textContent ||
+          `Placemark_${i + 1}`;
+        const description =
+          pm.getElementsByTagName('description')[0]?.textContent || '';
 
         // Extract ExtendedData
-        const properties: Record<string, any> = { Name: name, Description: description };
+        const properties: Record<string, any> = {
+          Name: name,
+          Description: description
+        };
         const dataNodes = pm.getElementsByTagName('Data');
         for (let d = 0; d < dataNodes.length; d++) {
           const key = dataNodes[d].getAttribute('name');
-          const val = dataNodes[d].getElementsByTagName('value')[0]?.textContent || '';
+          const val =
+            dataNodes[d].getElementsByTagName('value')[0]?.textContent || '';
           if (key) properties[key] = val;
         }
 
         // Point
         const pointNode = pm.getElementsByTagName('Point')[0];
         if (pointNode) {
-          const coordsStr = pointNode.getElementsByTagName('coordinates')[0]?.textContent || '';
+          const coordsStr =
+            pointNode.getElementsByTagName('coordinates')[0]?.textContent || '';
           const parts = coordsStr.trim().split(',').map(Number);
           if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
             parsedFeatures.push({
@@ -90,7 +98,8 @@ export default function KmlToShapefileConverter() {
         // LineString
         const lineNode = pm.getElementsByTagName('LineString')[0];
         if (lineNode) {
-          const coordsStr = lineNode.getElementsByTagName('coordinates')[0]?.textContent || '';
+          const coordsStr =
+            lineNode.getElementsByTagName('coordinates')[0]?.textContent || '';
           const linePts = coordsStr
             .trim()
             .split(/\s+/)
@@ -111,7 +120,8 @@ export default function KmlToShapefileConverter() {
         // Polygon
         const polyNode = pm.getElementsByTagName('Polygon')[0];
         if (polyNode) {
-          const coordsStr = polyNode.getElementsByTagName('coordinates')[0]?.textContent || '';
+          const coordsStr =
+            polyNode.getElementsByTagName('coordinates')[0]?.textContent || '';
           const polyPts = coordsStr
             .trim()
             .split(/\s+/)
@@ -152,7 +162,10 @@ export default function KmlToShapefileConverter() {
     if (features.length === 0) return;
     try {
       setIsProcessing(true);
-      const blob = await createShapefileZip(features, layerName || 'kml_converted');
+      const blob = await createShapefileZip(
+        features,
+        layerName || 'kml_converted'
+      );
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -178,7 +191,9 @@ export default function KmlToShapefileConverter() {
         properties: f.properties
       }))
     };
-    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], {
+      type: 'application/json'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -197,7 +212,8 @@ export default function KmlToShapefileConverter() {
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Convert Google Earth KML files into ESRI Shapefile (.shp, .shx, .dbf, .prj) vector formats for ArcGIS 10.8 & ArcGIS Pro.
+          Convert Google Earth KML files into ESRI Shapefile (.shp, .shx, .dbf,
+          .prj) vector formats for ArcGIS 10.8 & ArcGIS Pro.
         </Typography>
       </Stack>
 
@@ -208,7 +224,7 @@ export default function KmlToShapefileConverter() {
       )}
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={6}>
           <Stack spacing={2}>
             <Button
               variant="outlined"
@@ -217,10 +233,17 @@ export default function KmlToShapefileConverter() {
               fullWidth
             >
               Upload KML File
-              <input type="file" accept=".kml,.xml" hidden onChange={handleFileUpload} />
+              <input
+                type="file"
+                accept=".kml,.xml"
+                hidden
+                onChange={handleFileUpload}
+              />
             </Button>
 
-            <Typography variant="subtitle2">Or Paste KML Document XML:</Typography>
+            <Typography variant="subtitle2">
+              Or Paste KML Document XML:
+            </Typography>
             <TextField
               multiline
               rows={12}
@@ -239,20 +262,41 @@ export default function KmlToShapefileConverter() {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Grid item xs={6}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             <Typography variant="subtitle2" gutterBottom>
               Layer Summary & Attribute Preview
             </Typography>
 
             <Stack direction="row" spacing={1} my={1}>
-              <Chip label={`Placemarks Found: ${features.length}`} color="primary" />
+              <Chip
+                label={`Placemarks Found: ${features.length}`}
+                color="primary"
+              />
               {features.length > 0 && (
-                <Chip label={`Geometry: ${features[0].geometryType}`} color="secondary" />
+                <Chip
+                  label={`Geometry: ${features[0].geometryType}`}
+                  color="secondary"
+                />
               )}
             </Stack>
 
-            <TableContainer sx={{ maxHeight: 250, border: '1px solid', borderColor: 'divider', my: 2 }}>
+            <TableContainer
+              sx={{
+                maxHeight: 250,
+                border: '1px solid',
+                borderColor: 'divider',
+                my: 2
+              }}
+            >
               <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
@@ -294,7 +338,9 @@ export default function KmlToShapefileConverter() {
                   onClick={handleDownloadShapefile}
                   disabled={features.length === 0 || isProcessing}
                 >
-                  {isProcessing ? 'Generating Zip...' : 'Download Shapefile (.zip)'}
+                  {isProcessing
+                    ? 'Generating Zip...'
+                    : 'Download Shapefile (.zip)'}
                 </Button>
                 <Button
                   variant="outlined"

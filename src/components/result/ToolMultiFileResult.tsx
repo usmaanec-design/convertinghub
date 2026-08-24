@@ -10,8 +10,10 @@ import greyPattern from '@assets/grey-pattern.png';
 import { globalInputHeight } from '../../config/uiConfig';
 import ResultFooter from './ResultFooter';
 import { useTranslation } from 'react-i18next';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { CustomSnackBarContext } from '../../contexts/CustomSnackBarContext';
+import { dispatchConversionSuccess } from '../../utils/conversionTracker';
+import { ConversionProgressBar } from '../ConversionProgressBar';
 
 export default function ToolMultiFileResult({
   title = 'Result',
@@ -29,6 +31,12 @@ export default function ToolMultiFileResult({
   const { t } = useTranslation();
   const theme = useTheme();
   const { showSnackBar } = useContext(CustomSnackBarContext);
+
+  useEffect(() => {
+    if ((value.length > 0 || zipFile) && !loading) {
+      dispatchConversionSuccess();
+    }
+  }, [value, zipFile, loading]);
 
   const getFileType = (
     file: File
@@ -90,16 +98,18 @@ export default function ToolMultiFileResult({
           <Box
             sx={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              height: globalInputHeight
+              height: '100%',
+              width: '100%',
+              p: 2
             }}
           >
-            <CircularProgress />
-            <Typography variant="body2" sx={{ mt: 2 }}>
-              {loadingText || t('toolMultiFileResult.loading')}
-            </Typography>
+            <ConversionProgressBar
+              isProcessing={true}
+              title={title || t('toolMultiFileResult.result')}
+              stageTextOverride={loadingText || t('toolMultiFileResult.loading')}
+            />
           </Box>
         ) : (
           value.length > 0 &&

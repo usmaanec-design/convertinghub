@@ -1,395 +1,348 @@
 {
   "audio": {
     "changeSpeed": {
-      "description": "Change the playback speed of audio files. Speed up or slow down audio while maintaining pitch.",
-      "name": "Change audio speed",
-      "shortDescription": "Change the speed of audio files"
+      "description": "تغيير سرعة تشغيل الملفات الصوتية. تسريع الصوت أو إبطاؤه مع الحفاظ على طبقة الصوت.",
+      "name": "تغيير سرعة الصوت",
+      "shortDescription": "تغيير سرعة الملفات الصوتية"
     },
     "extractAudio": {
-      "description": "Extract the audio track from a video file and save it as a separate audio file in your chosen format (AAC, MP3, WAV).",
-      "name": "Extract audio",
-      "shortDescription": "Extract audio from video files (MP4, MOV, etc.) to AAC, MP3, or WAV."
+      "description": "استخراج المسار الصوتي من ملف الفيديو وحفظه كملف صوتي منفصل بالتنسيق المطلوب (AAC, MP3, WAV).",
+      "name": "استخراج الصوت",
+      "shortDescription": "استخراج الصوت من ملفات الفيديو (MP4, MOV...) إلى AAC أو MP3 أو WAV."
     }
   },
   "baseFileInput": {
-    "copyFailed": "Failed to copy: {{error}}",
-    "dropFileHere": "Drop your {{type}} here",
-    "fileCopied": "File copied",
-    "selectFileDescription": "Click here to select a {{type}} from your device, press Ctrl+V to use a {{type}} from your clipboard, or drag and drop a file from desktop"
+    "copyFailed": "فشل النسخ: {{error}}",
+    "dropFileHere": "أسقط ملف {{type}} هنا",
+    "fileCopied": "تم نسخ الملف",
+    "selectFileDescription": "انقر هنا لاختيار {{type}} من جهازك، أو اضغط Ctrl+V لاستخدام ملف من الحافظة، أو اسحب الملف وأسقطه هنا"
   },
   "categories": {
     "arc-maps": {
-      "description": "Tools for ArcGIS 10.8 & ArcGIS Pro – spatial data processing, shapefile & KML conversion, coordinate system transformations, and map layer utilities.",
-      "title": "Arc Maps Tools",
-      "coordinateConverter": {
-        "name": "ArcGIS Coordinate Converter",
-        "description": "Convert spatial coordinates between Decimal Degrees, DMS, and UTM projections for ArcMap and ArcGIS Pro.",
-        "shortDescription": "Convert spatial coordinates between DD, DMS, and UTM."
-      },
-      "removeDuplicateVertices": {
-        "name": "Remove Duplicate Vertices",
-        "description": "Upload CSV/spreadsheet to detect total and duplicate locations, and drag slider to clean vertices.",
-        "shortDescription": "Detect and clean duplicate vertices in spreadsheets."
-      },
-      "kmlToShapefile": {
-        "name": "KML to Shapefile Converter",
-        "description": "Convert Google Earth KML files to ESRI Shapefile vector formats.",
-        "shortDescription": "Convert Google Earth KML files to ESRI Shapefile vector formats."
-      },
-      "shapefileToKml": {
-        "name": "Shapefile to KML Converter",
-        "description": "Convert ESRI Shapefiles (.shp/.dbf/.zip) to Google Earth KML format.",
-        "shortDescription": "Convert ESRI Shapefiles to Google Earth KML format."
-      },
-      "shapefileToGeojson": {
-        "name": "Shapefile to GeoJSON",
-        "description": "Transform Shapefile (.shp/.dbf) into standard GeoJSON objects.",
-        "shortDescription": "Transform Shapefile (.shp/.dbf) into standard GeoJSON objects."
-      },
-      "csvToShapefile": {
-        "name": "CSV (Lat/Lon) to Shapefile",
-        "description": "Convert CSV coordinate tables into spatial point Shapefiles.",
-        "shortDescription": "Convert CSV coordinate tables into spatial point Shapefiles."
-      },
-      "shapefileToGeodatabase": {
-        "name": "Shapefile to File Geodatabase",
-        "description": "Convert ESRI Shapefiles into File Geodatabase / Spatial Database packages.",
-        "shortDescription": "Convert ESRI Shapefiles to File Geodatabase containers."
-      },
-      "geodatabaseToShapefile": {
-        "name": "File Geodatabase to Shapefile",
-        "description": "Extract File Geodatabase feature classes into ESRI Shapefiles.",
-        "shortDescription": "Extract File Geodatabase feature classes into ESRI Shapefiles."
-      },
-      "shapefileToRoadNetwork": {
-        "name": "Shapefile to Road Network",
-        "description": "Extract node-link road networks, junction nodes, and line segment topologies from polyline Shapefiles.",
-        "shortDescription": "Extract road network topology and junction nodes from polyline Shapefiles."
-      }
+      "description": "أدوات ArcGIS 10.8 و ArcGIS Pro – معالجة البيانات المكانية، تحويل Shapefile و KML، تحويل أنظمة الإحداثيات، وأدوات طبقات الخرائط.",
+      "title": "أدوات الخرائط الجغرافية Arc Maps"
     },
     "audio": {
-      "description": "Tools for working with audio – extract audio from video, adjusting audio speed, merging multiple audio files and much more.",
-      "title": "Audio Tools"
+      "description": "أدوات معالجة الصوتيات – استخراج الصوت من الفيديو، تعديل سرعة الصوت، دمج الملفات الصوتية والمزيد.",
+      "title": "أدوات الصوت"
     },
     "converters": {
-      "description": "Tools for converting data between different formats – convert images, audio, video, text, and more.",
-      "title": "Converter Tools"
+      "description": "أدوات تحويل البيانات بين التنسيقات المختلفة – تحويل الصور والصوتيات والفيديو والنصوص والمزيد.",
+      "title": "أدوات التحويل"
     },
     "csv": {
-      "description": "Tools for working with CSV files - convert CSV to different formats, manipulate CSV data, validate CSV structure, and process CSV files efficiently.",
-      "title": "CSV Tools"
+      "description": "أدوات معالجة ملفات CSV - تحويل CSV إلى تنسيقات مختلفة، تعديل البيانات، والتحقق من بنية البيانات.",
+      "title": "أدوات CSV"
     },
     "gif": {
-      "description": "Tools for working with GIF animations – create transparent GIFs, extract GIF frames, add text to GIF, crop, rotate, reverse GIFs, and much more.",
-      "title": "GIF Tools"
+      "description": "أدوات الرسوم المتحركة GIF – إنشاء ملفات GIF شفافة، استخراج الإطارات، إضافة نصوص، اقتصاص، وتدوير وعكس الصور.",
+      "title": "أدوات GIF"
     },
     "image-generic": {
-      "description": "Tools for working with pictures – compress, resize, crop, convert to JPG, rotate, remove background and much more.",
-      "title": "Image Tools"
+      "description": "أدوات تعديل الصور – ضغط الصور، تغيير الحجم، الاقتصاص، التحويل إلى JPG، وإزالة الخلفية.",
+      "title": "أدوات الصور"
     },
     "json": {
-      "description": "Tools for working with JSON data structures – prettify and minify JSON objects, flatten JSON arrays, stringify JSON values, analyze data, and much more",
-      "title": "JSON Tools"
+      "description": "أدوات معالجة بيانات JSON – تنسيق وضغط كائنات JSON، تسطيح المصفوفات، وتحليل البيانات.",
+      "title": "أدوات JSON"
     },
     "list": {
-      "description": "Tools for working with lists – sort, reverse, randomize lists, find unique and duplicate list items, change list item separators, and much more.",
-      "title": "List Tools"
+      "description": "أدوات معالجة القوائم – فرز القوائم، عكس ترتيب العناصر، عشوائية القوائم، وإزالة التكرار.",
+      "title": "أدوات القوائم"
     },
     "number": {
-      "description": "Tools for working with numbers – generate number sequences, convert numbers to words and words to numbers, sort, round, factor numbers, and much more.",
-      "title": "Number Tools"
+      "description": "أدوات معالجة الأرقام – توليد سلاسل الأرقام، تحويل الأرقام إلى كلمات والعكس، الفرز والتقريب والتحليل.",
+      "title": "أدوات الأرقام"
     },
     "pdf": {
-      "description": "Tools for working with PDF files - extract text from PDFs, convert PDFs to other formats, manipulate PDFs, and much more.",
-      "title": "PDF Tools"
+      "description": "أدوات معالجة ملفات PDF - استخراج النصوص، تحويل PDF إلى صيغ أخرى، دمج وتقسيم وحماية ملفات PDF.",
+      "title": "أدوات PDF"
     },
     "png": {
-      "description": "Tools for working with PNG images – convert PNGs to JPGs, create transparent PNGs, change PNG colors, crop, rotate, resize PNGs, and much more.",
-      "title": "PNG Tools"
+      "description": "أدوات معالجة صور PNG – تحويل PNG إلى JPG، إنشاء خلفيات شفافة، وتعديل الألوان والحجم.",
+      "title": "أدوات PNG"
     },
-    "seeAll": "See all {{title}}",
+    "seeAll": "عرض جميع أدوات {{title}}",
     "string": {
-      "description": "Tools for working with text – convert text to images, find and replace text, split text into fragments, join text lines, repeat text, and much more.",
-      "title": "Text Tools"
+      "description": "أدوات معالجة النصوص – تحويل النص إلى صور، البحث والاستبدال، تقسيم النصوص، ودمج السطور.",
+      "title": "أدوات النصوص"
     },
     "time": {
-      "description": "Tools for working with time and date – calculate time differences, convert between time zones, format dates, generate date sequences, and much more.",
-      "title": "Time Tools"
+      "description": "أدوات التاريخ والوقت – حساب فروق الوقت، التحويل بين المناطق الزمنية، وتنسيق التواريخ.",
+      "title": "أدوات الوقت والتاريخ"
     },
-    "try": "Try {{title}}",
+    "try": "تجربة {{title}}",
     "video": {
-      "description": "Tools for working with videos – extract frames from videos, create GIFs from videos, convert videos to different formats, and much more.",
-      "title": "Video Tools"
+      "description": "أدوات معالجة الفيديو – استخراج الإطارات، إنشاء رسوم GIF، وتحويل مقاطع الفيديو.",
+      "title": "أدوات الفيديو"
     },
     "xml": {
-      "description": "Tools for working with XML data structures - viewer, beautifier, validator and much more",
-      "title": "XML Tools"
+      "description": "أدوات معالجة بيانات XML – عرض وتنسيق والتحقق من صحة ملفات XML.",
+      "title": "أدوات XML"
     }
   },
   "converters": {
     "audioconverter": {
-      "description": "Convert audio files between different formats.",
-      "longDescription": "This tool allows you to convert audio files from one format to another, supporting a wide range of audio formats for seamless conversion.",
-      "shortDescription": "Convert audio files to various formats.",
-      "title": "Audio Converter"
+      "description": "تحويل الملفات الصوتية بين التنسيقات المختلفة.",
+      "longDescription": "تتيح لك هذه الأداة تحويل الملفات الصوتية من تنسيق إلى آخر مع دعم مجموعة واسعة من الصيغ الصوتية.",
+      "shortDescription": "تحويل الملفات الصوتية إلى صيغ متعددة.",
+      "title": "محول الصوتيات"
     }
   },
   "csv": {
     "findIncompleteCsvRecords": {
-      "description": "Just upload your CSV file in the form below and this tool will automatically check if none of the rows or columns are missing values. In the tool options, you can adjust the input file format (specify the delimiter, quote character, and comment character). Additionally, you can enable checking for empty values, skip empty lines, and set a limit on the number of error messages in the output.",
-      "name": "Find incomplete CSV records",
-      "shortDescription": "Quickly find rows and columns in CSV that are missing values."
+      "description": "قم بتحميل ملف CSV للتحقق تلقائياً من الصفوف أو الأعمدة التي تحتوي على قيم مفقودة.",
+      "name": "البحث عن سجلات CSV غير المكتملة",
+      "shortDescription": "البحث السريع عن القيم المفقودة في ملفات CSV."
     }
   },
   "hero": {
-    "brand": "OmniTools",
-    "description": "Boost your productivity with OmniTools, the ultimate toolkit for getting things done quickly! Access thousands of user-friendly utilities for editing images, text, lists, and data, all directly from your browser.",
+    "brand": "ConvertingHub",
+    "description": "عزز إنتاجيتك مع ConvertingHub، الأدوات الاحترافية لإنجاز مهامك بسرعة! استخدم آلاف الأدوات المجانية لتحرير الصور والنصوص والقوائم وملفات PDF والبيانات مباشرة من متصفحك.",
     "examples": {
-      "calculateNumberSum": "Calculate number sum",
-      "changeGifSpeed": "Change GIF speed",
-      "compressPng": "Compress PNG",
-      "createTransparentImage": "Create a transparent image",
-      "prettifyJson": "Prettify JSON",
-      "sortList": "Sort a list",
-      "splitPdf": "Split PDF",
-      "splitText": "Split a text",
-      "trimVideo": "Trim video"
+      "calculateNumberSum": "حساب مجموع الأرقام",
+      "changeGifSpeed": "تعديل سرعة GIF",
+      "compressPng": "ضغط صورة PNG",
+      "createTransparentImage": "إنشاء صورة شفافة",
+      "prettifyJson": "تنسيق JSON",
+      "sortList": "فرز القائمة",
+      "splitPdf": "تقسيم PDF",
+      "splitText": "تقسيم النص",
+      "trimVideo": "قص الفيديو"
     },
     "search": {
-      "noResult": "No results found, Try adjusting your search or filter criteria",
-      "placeholder": "Search all tools"
+      "noResult": "لم يتم العثور على نتائج، جرب تعديل معايير البحث",
+      "placeholder": "البحث في جميع الأدوات..."
     },
-    "title": "Get Things Done Quickly with"
+    "title": "أنقذ وقتك وأنجز مهامك بسرعة مع"
   },
   "inputFooter": {
-    "clear": "Clear",
-    "copyToClipboard": "Copy to clipboard",
-    "importFromFile": "Import from file"
+    "clear": "مسح",
+    "copyToClipboard": "نسخ إلى الحافظة",
+    "importFromFile": "استيراد من ملف"
   },
   "list": {
     "group": {
-      "description": "World's simplest browser-based utility for grouping list items. Input your list and specify grouping criteria to organize items into logical groups. Perfect for categorizing data, organizing information, or creating structured lists. Supports custom separators and various grouping options.",
-      "name": "Group",
-      "shortDescription": "Group list items by common properties"
+      "description": "أداة بسيطة لتجميع عناصر القائمة بناءً على خصائص مشتركة.",
+      "name": "تجميع",
+      "shortDescription": "تجميع عناصر القائمة حسب الخصائص المشتركة"
     },
     "reverse": {
-      "description": "This is a super simple browser-based application prints all list items in reverse. The input items can be separated by any symbol and you can also change the separator of the reversed list items.",
-      "name": "Reverse",
-      "shortDescription": "Quickly reverse a list"
+      "description": "أداة لعكس ترتيب عناصر القائمة فوراً.",
+      "name": "عكس الترتيب",
+      "shortDescription": "عكس ترتيب القائمة بسرعة"
     },
     "sort": {
-      "description": "This is a super simple browser-based application that sorts items in a list and arranges them in increasing or decreasing order. You can sort the items alphabetically, numerically, or by their length. You can also remove duplicate and empty items, as well as trim individual items that have whitespace around them. You can use any separator character to separate the input list items or alternatively use a regular expression to separate them. Additionally, you can create a new delimiter for the sorted output list.",
-      "name": "Sort",
-      "shortDescription": "Quickly sort a list"
+      "description": "أداة لفرز عناصر القائمة أبجدياً أو رقمياً أو حسب الطول.",
+      "name": "فرز القائمة",
+      "shortDescription": "فرز القائمة تصاعدياً أو تنازلياً"
     }
   },
   "navbar": {
-    "buyMeACoffee": "Buy me a coffee",
-    "hireMe": "Contact with me",
-    "home": "Home",
-    "tools": "Tools"
+    "buyMeACoffee": "دعم المشروع",
+    "hireMe": "تواصل معي",
+    "home": "الرئيسية",
+    "tools": "الأدوات"
   },
   "number": {
     "generate": {
-      "description": "Quickly calculate a list of integers in your browser. To get your list, just specify the first integer, change value and total count in the options below, and this utility will generate that many integers",
-      "name": "Generate numbers",
-      "shortDescription": "Quickly calculate a list of integers in your browser"
+      "description": "توليد سلسلة من الأعداد الصحيحة في المتصفح.",
+      "name": "توليد الأرقام",
+      "shortDescription": "توليد قائمة أرقام صحيحة بسرعة"
     },
     "sum": {
-      "description": "This is a super simple browser-based application that sums numbers. The input numbers can be separated by any symbol and you can also change the separator of the summed numbers.",
-      "name": "Sum numbers",
-      "shortDescription": "Quickly sum a list of numbers"
+      "description": "حساب مجموع قائمة من الأرقام بسهولة.",
+      "name": "مجموع الأرقام",
+      "shortDescription": "حساب مجموع قائمة الأرقام بسرعة"
     }
   },
   "numericInputWithUnit": {
-    "unit": "Unit"
+    "unit": "الوحدة"
   },
   "pdf": {
     "pdfToWord": {
-      "name": "PDF to Word",
-      "description": "Convert PDF documents into editable Microsoft Word (.doc/.docx) files.",
-      "shortDescription": "Convert PDF documents to editable Microsoft Word files."
+      "name": "تحويل PDF إلى Word",
+      "description": "تحويل مستندات PDF إلى ملفات Word قابلة للتعديل (.doc/.docx).",
+      "shortDescription": "تحويل مستندات PDF إلى ملفات Word قابلة للتعديل."
     },
     "pdfToPpt": {
-      "name": "PDF to PowerPoint (PPT)",
-      "description": "Transform PDF pages into editable PowerPoint (.ppt/.pptx) presentation slides.",
-      "shortDescription": "Convert PDF pages to PowerPoint slide presentations."
+      "name": "تحويل PDF إلى PowerPoint",
+      "description": "تحويل صفحات PDF إلى عروض تقديمية قابلة للتعديل (.ppt/.pptx).",
+      "shortDescription": "تحويل صفحات PDF إلى شرائح PowerPoint."
     },
     "pdfToExcel": {
-      "name": "PDF to Excel",
-      "description": "Extract tables and tabular data from PDF files into Excel (.xlsx/.csv) spreadsheets.",
-      "shortDescription": "Extract tables from PDF files into Excel spreadsheets."
+      "name": "تحويل PDF إلى Excel",
+      "description": "استخراج الجداول والبيانات من ملفات PDF إلى جداول بيانات Excel (.xlsx/.csv).",
+      "shortDescription": "استخراج الجداول من PDF إلى ملفات Excel."
     },
     "wordToPdf": {
-      "name": "Word to PDF",
-      "description": "Make DOC and DOCX files easy to read by converting them to PDF.",
-      "shortDescription": "Convert DOC and DOCX files to PDF."
+      "name": "تحويل Word إلى PDF",
+      "description": "تحويل مستندات Word إلى صيغة PDF عالية الجودة.",
+      "shortDescription": "تحويل ملفات DOC و DOCX إلى PDF."
     },
     "pptToPdf": {
-      "name": "PowerPoint to PDF",
-      "description": "Make PPT and PPTX slideshows easy to view by converting them to PDF.",
-      "shortDescription": "Convert PPT and PPTX slideshows to PDF."
+      "name": "تحويل PowerPoint إلى PDF",
+      "description": "تحويل عروض PowerPoint التقديمية إلى مستندات PDF سهلة العرض.",
+      "shortDescription": "تحويل شرائح PPT و PPTX إلى PDF."
     },
     "excelToPdf": {
-      "name": "Excel to PDF",
-      "description": "Make EXCEL spreadsheets easy to read by converting them to PDF.",
-      "shortDescription": "Convert EXCEL spreadsheets to PDF."
+      "name": "تحويل Excel إلى PDF",
+      "description": "تحويل جداول بيانات Excel إلى مستندات PDF جاهزة للطباعة.",
+      "shortDescription": "تحويل جداول EXCEL إلى PDF."
     },
     "jpgToPdf": {
-      "name": "JPG to PDF",
-      "description": "Convert JPG images to PDF in seconds. Easily adjust orientation and margins.",
-      "shortDescription": "Convert JPG and PNG images to PDF."
+      "name": "تحويل JPG إلى PDF",
+      "description": "تحويل الصور إلى ملفات PDF في ثوانٍ مع التحكم في الاتجاه والهوامش.",
+      "shortDescription": "تحويل صور JPG و PNG إلى PDF."
     },
     "watermarkPdf": {
-      "name": "Watermark",
-      "description": "Stamp an image or text over your PDF in seconds. Choose typography, transparency and position.",
-      "shortDescription": "Stamp custom watermarks onto PDF pages."
+      "name": "إضافة علامة مائية لـ PDF",
+      "description": "إضافة صورة أو نص كعلامة مائية على مستند PDF مع التحكم في الشفافية والموقع.",
+      "shortDescription": "إضافة علامات مائية مخصصة لملفات PDF."
     },
     "pageNumbers": {
-      "name": "Page numbers",
-      "description": "Add page numbers into PDFs with ease. Choose your positions, dimensions, typography.",
-      "shortDescription": "Add page numbers to PDF documents."
+      "name": "أرقام الصفحات",
+      "description": "إضافة أرقام الصفحات لمستندات PDF بسهولة مع اختيار الموقع والخط.",
+      "shortDescription": "إضافة أرقام الصفحات إلى مستندات PDF."
     },
     "organizePdf": {
-      "name": "Organize PDF",
-      "description": "Sort pages of your PDF file however you like. Delete PDF pages or add PDF pages to your document.",
-      "shortDescription": "Sort, reorder, or delete pages in PDF."
+      "name": "تنظيم PDF",
+      "description": "إعادة ترتيب صفحات PDF، تدويرها، أو حذف وإضافة صفحات جديدة بسهولة.",
+      "shortDescription": "ترتيب وتدوير وحذف صفحات PDF."
     },
     "unlockPdf": {
-      "name": "Unlock PDF",
-      "description": "Remove PDF password security, giving you the freedom to use your PDFs as you want.",
-      "shortDescription": "Remove PDF password security & restriction permissions."
+      "name": "إزالة كلمة سر PDF",
+      "description": "إزالة الحماية وكلمات السر من ملفات PDF لاستخدامها بحرية.",
+      "shortDescription": "فك حماية ملفات PDF وإزالة قيود الطباعة والنسخ."
     },
     "signPdf": {
-      "name": "Sign PDF",
-      "description": "Sign yourself or request electronic signatures from others.",
-      "shortDescription": "Add electronic signatures to PDF documents."
+      "name": "توقيع PDF",
+      "description": "إضافة توقيع إلكتروني مخصص على مستندات PDF.",
+      "shortDescription": "توقيع مستندات PDF إلكترونياً."
     },
     "cropPdf": {
-      "name": "Crop PDF",
-      "description": "Crop margins of PDF documents or select specific areas, then apply the changes.",
-      "shortDescription": "Crop margins of PDF documents."
+      "name": "قص صفحات PDF",
+      "description": "قص هوامش مستندات PDF وتحديد المناطق المطلوبة بدقة.",
+      "shortDescription": "قص هوامش ومساحات ملفات PDF."
     },
     "pdfAiSummarizer": {
-      "name": "AI Summarizer",
-      "description": "Quickly generate concise summaries from articles, paragraphs, and essays in seconds.",
-      "shortDescription": "Generate concise AI summaries from PDF documents."
+      "name": "ملخص PDF بالذكاء الاصطناعي",
+      "description": "إنشاء ملخصات مركزة ودقيقة من المقالات والمستندات المطولة في ثوانٍ.",
+      "shortDescription": "توليد ملخصات الذكاء الاصطناعي من ملفات PDF."
     },
     "translatePdf": {
-      "name": "Translate PDF",
-      "description": "Easily translate PDF files powered by AI. Keep fonts, layout, and formatting perfectly intact.",
-      "shortDescription": "Translate PDF files while keeping layout intact."
+      "name": "ترجمة PDF",
+      "description": "ترجمة ملفات PDF بالذكاء الاصطناعي مع الحفاظ التام على التنسيق والخطوط.",
+      "shortDescription": "ترجمة مستندات PDF مع الحفاظ على التنسيق."
     },
     "compressPdf": {
-      "description": "Reduce PDF file size while maintaining quality using Ghostscript",
-      "name": "Compress PDF",
-      "shortDescription": "Compress PDF files securely in your browser"
+      "description": "تقليل حجم ملف PDF مع الحفاظ على الجودة العالية.",
+      "name": "ضغط PDF",
+      "shortDescription": "ضغط ملفات PDF بأمان في متصفحك"
     },
     "mergePdf": {
-      "description": "Combine multiple PDF files into a single document.",
-      "name": "Merge PDF",
-      "shortDescription": "Merge multiple PDF files into a single document"
+      "description": "دمج عدة ملفات PDF في مستند واحد.",
+      "name": "دمج PDF",
+      "shortDescription": "دمج عدة ملفات PDF في مستند واحد"
     },
     "pdfToEpub": {
-      "description": "Transform PDF documents into EPUB files for better e-reader compatibility.",
-      "name": "PDF to EPUB",
-      "shortDescription": "Convert PDF files to EPUB format"
+      "description": "تحويل مستندات PDF إلى صيغة EPUB للكتب الإلكترونية.",
+      "name": "تحويل PDF إلى EPUB",
+      "shortDescription": "تحويل ملفات PDF إلى صيغة EPUB"
     },
     "protectPdf": {
-      "description": "Add password protection to your PDF files securely in your browser",
-      "name": "Protect PDF",
-      "shortDescription": "Password protect PDF files securely"
+      "description": "تشفير وإضافة كلمة سر لحماية ملفات PDF في متصفحك.",
+      "name": "حماية PDF",
+      "shortDescription": "حماية ملفات PDF بكلمة سر"
     },
     "splitPdf": {
-      "description": "Extract specific pages from a PDF file using page numbers or ranges (e.g., 1,5-8)",
-      "name": "Split PDF",
-      "shortDescription": "Extract specific pages from a PDF file"
+      "description": "استخراج صفحات معينة من ملف PDF أو تقسيم المستند حسب النطاقات.",
+      "name": "تقسيم PDF",
+      "shortDescription": "استخراج صفحات محددة من ملف PDF"
     }
   },
   "resultFooter": {
-    "copy": "Copy to clipboard",
-    "download": "Download"
+    "copy": "نسخ إلى الحافظة",
+    "download": "تنزيل"
   },
   "string": {
     "createPalindrome": {
-      "description": "World's simplest browser-based utility for creating palindromes from any text. Input text and instantly transform it into a palindrome that reads the same forward and backward. Perfect for word games, creating symmetrical text patterns, or exploring linguistic curiosities.",
-      "name": "Create palindrome",
-      "shortDescription": "Create text that reads the same forward and backward"
+      "description": "إنشاء جمل متناظرة تقرأ من الإمام والخلف بنفس الطريقة.",
+      "name": "إنشاء نص متناظر",
+      "shortDescription": "إنشاء نصوص تقرأ بالاتجاهين بنفس الشكل"
     },
     "palindrome": {
-      "description": "World's simplest browser-based utility for checking if text is a palindrome. Instantly verify if your text reads the same forward and backward. Perfect for word puzzles, linguistic analysis, or validating symmetrical text patterns. Supports various delimiters and multi-word palindrome detection.",
-      "name": "Palindrome",
-      "shortDescription": "Check if text reads the same forward and backward"
+      "description": "فحص ما إذا كان النص متناظراً ويقرأ من الاتجاهين بنفس الطريقة.",
+      "name": "فحص التناظر النصي",
+      "shortDescription": "التحقق من تناظر النص"
     },
     "repeat": {
-      "description": "This tool allows you to repeat a given text multiple times with an optional separator.",
-      "name": "Repeat text",
-      "shortDescription": "Repeat text multiple times"
+      "description": "تكرار النص المدخل عدة مرات مع فاصل اختياري.",
+      "name": "تكرار النص",
+      "shortDescription": "تكرار النص عدة مرات"
     },
     "reverse": {
-      "description": "World's simplest browser-based utility for reversing text. Input any text and get it instantly reversed, character by character. Perfect for creating mirror text, analyzing palindromes, or playing with text patterns. Preserves spaces and special characters while reversing.",
-      "name": "Reverse",
-      "shortDescription": "Reverse any text character by character"
+      "description": "عكس ترتيب الأحرف في النص المدخل فوراً.",
+      "name": "عكس النص",
+      "shortDescription": "عكس الأحرف في النص حرفاً بحرف"
     },
     "toMorse": {
-      "description": "World's simplest browser-based utility for converting text to Morse code. Load your text in the input form on the left and you'll instantly get Morse code in the output area. Powerful, free, and fast. Load text – get Morse code.",
-      "name": "String To morse",
-      "shortDescription": "Quickly encode text to morse"
+      "description": "تحويل النص إلى شفرة مورس بسهولة وسرعة.",
+      "name": "تحويل النص إلى شفرة مورس",
+      "shortDescription": "تحويل النص إلى شفرة مورس"
     },
     "uppercase": {
-      "description": "World's simplest browser-based utility for converting text to uppercase. Just input your text and it will be automatically converted to all capital letters. Perfect for creating headlines, emphasizing text, or standardizing text format. Supports various text formats and preserves special characters.",
-      "name": "Uppercase",
-      "shortDescription": "Convert text to uppercase letters"
+      "description": "تحويل الأحرف إلى أحرف كبيرة.",
+      "name": "تحويل إلى أحرف كبيرة",
+      "shortDescription": "تحويل الأحرف إلى أحرف كبيرة"
     }
   },
   "toolExamples": {
-    "subtitle": "Click to try!",
-    "title": "{{title}} Examples"
+    "subtitle": "انقر للتجربة!",
+    "title": "أمثلة على أداة {{title}}"
   },
   "toolFileResult": {
-    "copied": "File copied",
-    "copyFailed": "Failed to copy: {{error}}",
-    "loading": "Loading... This may take a moment.",
-    "result": "Result"
+    "copied": "تم نسخ الملف",
+    "copyFailed": "فشل النسخ: {{error}}",
+    "loading": "جاري التحميل... قد يستغرق ذلك لحظات.",
+    "result": "النتيجة"
   },
   "toolHeader": {
-    "seeExamples": "See Examples"
+    "seeExamples": "عرض الأمثلة"
   },
   "toolLayout": {
-    "allToolsTitle": "All {{type}}"
+    "allToolsTitle": "جميع أدوات {{type}}"
   },
   "toolMultiFileResult": {
-    "copied": "File copied",
-    "copyFailed": "Failed to copy: {{error}}",
-    "loading": "Loading... This may take a moment.",
-    "result": "Result"
+    "copied": "تم نسخ الملفات",
+    "copyFailed": "فشل النسخ: {{error}}",
+    "loading": "جاري التحميل... قد يستغرق ذلك لحظات.",
+    "result": "النتيجة"
   },
   "toolMultipleInput": {
-    "deleteFile": "Delete file",
-    "inputTitle": "Input {{type}}",
-    "noFilesSelected": "No files selected"
+    "deleteFile": "حذف الملف",
+    "inputTitle": "إدخال {{type}}",
+    "noFilesSelected": "لم يتم تحديد أي ملفات"
   },
   "toolOptions": {
-    "title": "Tool options"
+    "title": "خيارات الأداة"
   },
   "toolTextInput": {
-    "copied": "Text copied",
-    "copyFailed": "Failed to copy: {{error}}",
-    "input": "Input text",
-    "placeholder": "Enter your text here..."
+    "copied": "تم نسخ النص",
+    "copyFailed": "فشل النسخ: {{error}}",
+    "input": "النص المدخل",
+    "placeholder": "أدخل النص هنا..."
   },
   "toolTextResult": {
-    "copied": "Text copied",
-    "copyFailed": "Failed to copy: {{error}}",
-    "loading": "Loading... This may take a moment.",
-    "result": "Result"
+    "copied": "تم نسخ النص",
+    "copyFailed": "فشل النسخ: {{error}}",
+    "loading": "جاري التحميل... قد يستغرق ذلك لحظات.",
+    "result": "النتيجة"
   },
   "userTypes": {
-    "developers": "Developers",
-    "generalUsers": "General users"
+    "developers": "للمطورين",
+    "generalUsers": "للمستخدمين"
   },
-  "navbar.hireMe": "تواصل معي / السيرة الذاتية",
-  "toolLayout.allToolsTitle": "جميع أدوات {{type}}",
   "home": "الرئيسية",
   "tools": "الأدوات",
   "search": "بحث...",

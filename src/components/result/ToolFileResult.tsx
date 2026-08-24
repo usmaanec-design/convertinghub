@@ -6,6 +6,8 @@ import { globalInputHeight } from '../../config/uiConfig';
 import ResultFooter from './ResultFooter';
 import { CustomSnackBarContext } from '../../contexts/CustomSnackBarContext';
 import { useTranslation } from 'react-i18next';
+import { dispatchConversionSuccess } from '../../utils/conversionTracker';
+import { ConversionProgressBar } from '../ConversionProgressBar';
 
 export default function ToolFileResult({
   title = 'Result',
@@ -26,7 +28,8 @@ export default function ToolFileResult({
   const theme = useTheme();
 
   React.useEffect(() => {
-    if (value) {
+    if (value && !loading) {
+      dispatchConversionSuccess();
       const objectUrl = URL.createObjectURL(value);
       setPreview(objectUrl);
 
@@ -34,7 +37,7 @@ export default function ToolFileResult({
     } else {
       setPreview(null);
     }
-  }, [value]);
+  }, [value, loading]);
 
   const handleCopy = () => {
     if (value) {
@@ -108,16 +111,17 @@ export default function ToolFileResult({
           <Box
             sx={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              height: '100%'
+              height: '100%',
+              p: 3
             }}
           >
-            <CircularProgress />
-            <Typography variant="body2" sx={{ mt: 2 }}>
-              {loadingText || t('toolFileResult.loading')}
-            </Typography>
+            <ConversionProgressBar
+              isProcessing={true}
+              title={title || t('toolFileResult.result')}
+              stageTextOverride={loadingText || t('toolFileResult.loading')}
+            />
           </Box>
         ) : (
           preview && (

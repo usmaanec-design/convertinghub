@@ -21,10 +21,15 @@ import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import TransformIcon from '@mui/icons-material/Transform';
 import JSZip from 'jszip';
-import { parseShapefileBuffers, ParsedShapefileResult } from '../utils/shapefile';
+import {
+  parseShapefileBuffers,
+  ParsedShapefileResult
+} from '../utils/shapefile';
 
 export default function ShapefileToGeoJson() {
-  const [geoResult, setGeoResult] = useState<ParsedShapefileResult | null>(null);
+  const [geoResult, setGeoResult] = useState<ParsedShapefileResult | null>(
+    null
+  );
   const [fileName, setFileName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
@@ -50,7 +55,9 @@ export default function ShapefileToGeoJson() {
         const dbfFile = Object.keys(zip.files).find((f) => f.endsWith('.dbf'));
 
         if (!shpFile) {
-          throw new Error('No .shp file found inside the uploaded ZIP archive.');
+          throw new Error(
+            'No .shp file found inside the uploaded ZIP archive.'
+          );
         }
 
         shpBuf = await zip.files[shpFile].async('arraybuffer');
@@ -67,7 +74,9 @@ export default function ShapefileToGeoJson() {
       }
 
       if (!shpBuf) {
-        throw new Error('Please upload a valid .shp file or .zip shapefile archive.');
+        throw new Error(
+          'Please upload a valid .shp file or .zip shapefile archive.'
+        );
       }
 
       const res = parseShapefileBuffers(shpBuf, dbfBuf || undefined);
@@ -106,7 +115,8 @@ export default function ShapefileToGeoJson() {
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Transform ESRI Shapefiles (.shp, .dbf, or .zip packages) into standard GeoJSON spatial objects.
+          Transform ESRI Shapefiles (.shp, .dbf, or .zip packages) into standard
+          GeoJSON spatial objects.
         </Typography>
       </Stack>
 
@@ -117,7 +127,7 @@ export default function ShapefileToGeoJson() {
       )}
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={5}>
+        <Grid item xs={5}>
           <Stack spacing={2}>
             <Button
               variant="contained"
@@ -137,11 +147,21 @@ export default function ShapefileToGeoJson() {
             </Button>
 
             {fileName && (
-              <Chip label={`Selected: ${fileName}`} color="info" variant="outlined" />
+              <Chip
+                label={`Selected: ${fileName}`}
+                color="info"
+                variant="outlined"
+              />
             )}
 
             {geoResult && (
-              <Box p={2} border="1px solid" borderColor="divider" borderRadius={1} bgcolor="action.hover">
+              <Box
+                p={2}
+                border="1px solid"
+                borderColor="divider"
+                borderRadius={1}
+                bgcolor="action.hover"
+              >
                 <Typography variant="subtitle2" gutterBottom>
                   Shapefile Metadata
                 </Typography>
@@ -149,11 +169,16 @@ export default function ShapefileToGeoJson() {
                   <strong>Total Features:</strong> {geoResult.features.length}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Geometry Type:</strong> {geoResult.features[0]?.geometry.type || 'N/A'}
+                  <strong>Geometry Type:</strong>{' '}
+                  {geoResult.features[0]?.geometry.type || 'N/A'}
                 </Typography>
                 {geoResult.bbox && (
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: 11, mt: 1 }}>
-                    <strong>BBox:</strong> [{geoResult.bbox.map((b) => b.toFixed(4)).join(', ')}]
+                  <Typography
+                    variant="body2"
+                    sx={{ fontFamily: 'monospace', fontSize: 11, mt: 1 }}
+                  >
+                    <strong>BBox:</strong> [
+                    {geoResult.bbox.map((b) => b.toFixed(4)).join(', ')}]
                   </Typography>
                 )}
               </Box>
@@ -161,15 +186,30 @@ export default function ShapefileToGeoJson() {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} md={7}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Grid item xs={7}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             <Typography variant="subtitle2" gutterBottom>
               Attribute Table & GeoJSON Result
             </Typography>
 
             {geoResult ? (
               <>
-                <TableContainer sx={{ maxHeight: 180, border: '1px solid', borderColor: 'divider', mb: 2 }}>
+                <TableContainer
+                  sx={{
+                    maxHeight: 180,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    mb: 2
+                  }}
+                >
                   <Table size="small" stickyHeader>
                     <TableHead>
                       <TableRow>
@@ -183,7 +223,9 @@ export default function ShapefileToGeoJson() {
                         <TableRow key={i}>
                           <TableCell>{i + 1}</TableCell>
                           <TableCell>{f.geometry.type}</TableCell>
-                          <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>
+                          <TableCell
+                            sx={{ fontFamily: 'monospace', fontSize: 11 }}
+                          >
                             {JSON.stringify(f.properties)}
                           </TableCell>
                         </TableRow>
@@ -198,14 +240,26 @@ export default function ShapefileToGeoJson() {
                   fullWidth
                   InputProps={{ readOnly: true }}
                   value={geoJsonString}
-                  sx={{ fontFamily: 'monospace', fontSize: 12, bgcolor: 'action.hover' }}
+                  sx={{
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    bgcolor: 'action.hover'
+                  }}
                 />
 
                 <Stack direction="row" spacing={2} mt={2}>
-                  <Button variant="contained" startIcon={<ContentCopyIcon />} onClick={handleCopy}>
+                  <Button
+                    variant="contained"
+                    startIcon={<ContentCopyIcon />}
+                    onClick={handleCopy}
+                  >
                     Copy GeoJSON
                   </Button>
-                  <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleDownload}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<DownloadIcon />}
+                    onClick={handleDownload}
+                  >
                     Download .geojson
                   </Button>
                 </Stack>

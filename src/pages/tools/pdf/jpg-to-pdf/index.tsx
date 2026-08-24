@@ -1,12 +1,22 @@
 import { useState } from 'react';
-import { Box, Button, Typography, Stack, Paper, Alert, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Stack,
+  Paper,
+  Alert,
+  CircularProgress
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ImageIcon from '@mui/icons-material/Image';
 import { jsPDF } from 'jspdf';
+import { usePendingConversionFile } from '../../../../hooks';
 
 export default function JpgToPdf() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [convertedBlob, setConvertedBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +85,11 @@ export default function JpgToPdf() {
           Convert JPG and PNG images to PDF in seconds.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -89,8 +103,19 @@ export default function JpgToPdf() {
           }}
           component="label"
         >
-          <input type="file" accept="image/jpeg,image/png,image/jpg" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 48, color: file ? 'primary.main' : 'text.secondary', mb: 1 }} />
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/jpg"
+            hidden
+            onChange={handleFileUpload}
+          />
+          <UploadFileIcon
+            sx={{
+              fontSize: 48,
+              color: file ? 'primary.main' : 'text.secondary',
+              mb: 1
+            }}
+          />
           <Typography variant="subtitle1" fontWeight="bold">
             {file ? file.name : 'Click to select or drop a JPG/PNG image here'}
           </Typography>
@@ -106,7 +131,11 @@ export default function JpgToPdf() {
             size="large"
             onClick={handleConvert}
             disabled={isProcessing}
-            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
+            startIcon={
+              isProcessing ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : null
+            }
             fullWidth
           >
             {isProcessing ? 'Converting JPG to PDF...' : 'Convert Image to PDF'}

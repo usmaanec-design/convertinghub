@@ -8,7 +8,7 @@ export const tool = defineTool('pdf', {
     shortDescription: 'translation:pdf.unlockPdf.shortDescription'
   },
   path: 'unlock-pdf',
-  icon: 'material-symbols:lock-open-outline',
+  icon: 'flat-color-icons:unlock',
   keywords: ['unlock', 'password', 'decrypt', 'permissions', 'pdf', 'security'],
   component: lazy(() => import('./index'))
 });

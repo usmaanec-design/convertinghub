@@ -21,11 +21,12 @@ import React, { useEffect } from 'react';
 import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
-import { Helmet } from 'react-helmet';
 import UserTypeFilter from '@components/UserTypeFilter';
 import { useTranslation } from 'react-i18next';
 import { I18nNamespaces, validNamespaces } from '../../i18n';
 import { useUserTypeFilter } from '../../providers/UserTypeFilterProvider';
+import SEOHead from 'components/SEOHead';
+import { getCategorySeoData } from 'seo/seoConfig';
 
 const StyledLink = styled(Link)(({ theme }) => ({
   '&:hover': {
@@ -55,6 +56,12 @@ export default function ToolsByCategory() {
     t
   );
 
+  const categorySeo = getCategorySeoData(
+    categoryName as string,
+    rawTitle,
+    toolsByCategory?.description || ''
+  );
+
   useEffect(() => {
     if (mainContentRef.current) {
       mainContentRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -63,11 +70,14 @@ export default function ToolsByCategory() {
 
   return (
     <Box sx={{ backgroundColor: 'background.default' }}>
-      <Helmet>
-        <title>{rawTitle}</title>
-      </Helmet>
+      <SEOHead
+        title={categorySeo.title}
+        description={categorySeo.description}
+        canonicalUrl={categorySeo.canonicalUrl}
+        ogImage={categorySeo.ogImage}
+      />
       <Box
-        padding={{ xs: 1, md: 3, lg: 5 }}
+        padding={5}
         display={'flex'}
         flexDirection={'column'}
         alignItems={'center'}
@@ -77,7 +87,7 @@ export default function ToolsByCategory() {
         <Hero />
       </Box>
       <Divider sx={{ borderColor: theme.palette.primary.main }} />
-      <Box ref={mainContentRef} mt={3} ml={{ xs: 1, md: 2, lg: 3 }} padding={3}>
+      <Box ref={mainContentRef} mt={3} ml={0} px={{ xs: 2, sm: 3, md: 4 }} py={3}>
         <Stack direction={'row'} justifyContent={'space-between'} spacing={2}>
           <Stack direction={'row'} alignItems={'center'} spacing={1}>
             <IconButton onClick={() => navigate('/')}>
@@ -114,45 +124,63 @@ export default function ToolsByCategory() {
             onUserTypesChange={setSelectedUserTypes}
           />
         </Box>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           {categoryTools.map((tool, index) => (
-            <Grid item xs={12} md={6} lg={4} key={tool.path}>
+            <Grid item xs={12} sm={6} md={4} key={tool.path}>
               <Stack
                 sx={{
                   backgroundColor: 'background.paper',
-                  boxShadow: `5px 4px 2px ${
-                    theme.palette.mode === 'dark' ? 'black' : '#E9E9ED'
-                  }`,
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 4px 12px rgba(0,0,0,0.4)'
+                    : '0 4px 12px rgba(0,0,0,0.06)',
                   cursor: 'pointer',
                   height: '100%',
+                  minHeight: '140px',
+                  transition: 'all 0.2s ease-in-out',
                   '&:hover': {
-                    backgroundColor: theme.palette.background.hover
+                    backgroundColor: theme.palette.background.hover,
+                    transform: 'translateY(-3px)'
                   }
                 }}
                 onClick={() => navigate('/' + tool.path)}
                 direction={'row'}
                 alignItems={'center'}
-                spacing={2}
-                padding={2}
-                border={`1px solid ${theme.palette.background.default}`}
-                borderRadius={2}
+                spacing={3}
+                p={{ xs: 2.5, sm: 3.5 }}
+                border={`1.5px solid ${theme.palette.divider}`}
+                borderRadius={4}
               >
-                <Icon
-                  icon={tool.icon ?? 'ph:compass-tool-thin'}
-                  fontSize={'60px'}
-                  color={categoriesColors[index % categoriesColors.length]}
-                />
-                <Box>
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 3,
+                    bgcolor: 'action.hover',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                >
+                  <Icon
+                    icon={tool.icon ?? 'ph:compass-tool-thin'}
+                    fontSize={'54px'}
+                    color={categoriesColors[index % categoriesColors.length]}
+                  />
+                </Box>
+                <Box sx={{ minWidth: 0, flexGrow: 1 }}>
                   <StyledLink
                     style={{
-                      fontSize: 20
+                      fontSize: 22,
+                      fontWeight: 800,
+                      lineHeight: 1.3,
+                      textDecoration: 'none'
                     }}
                     to={'/' + tool.path}
                   >
                     {/*@ts-ignore*/}
                     {t(tool.name)}
                   </StyledLink>
-                  <Typography sx={{ mt: 2 }}>
+                  <Typography sx={{ mt: 1, fontSize: 15.5, color: 'text.secondary', lineHeight: 1.6, fontWeight: 500 }}>
                     {/*@ts-ignore*/}
                     {t(tool.shortDescription)}
                   </Typography>

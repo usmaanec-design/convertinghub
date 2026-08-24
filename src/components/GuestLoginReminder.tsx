@@ -1,10 +1,25 @@
 import React from 'react';
-import { Snackbar, Alert, Button, Stack, Typography, Box } from '@mui/material';
+import {
+  Snackbar,
+  Alert,
+  Button,
+  Stack,
+  Typography,
+  Box,
+  CircularProgress
+} from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import { useAuth } from '../contexts/AuthContext';
 
 export const GuestLoginReminder: React.FC = () => {
-  const { showLoginPrompt, dismissLoginPrompt, signInWithGoogle, authError, clearAuthError } = useAuth();
+  const {
+    showLoginPrompt,
+    dismissLoginPrompt,
+    signInWithGoogle,
+    authError,
+    clearAuthError,
+    isSigningIn
+  } = useAuth();
 
   const handleGoogleLogin = async () => {
     try {
@@ -23,7 +38,12 @@ export const GuestLoginReminder: React.FC = () => {
         onClose={clearAuthError}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert onClose={clearAuthError} severity="warning" variant="filled" sx={{ width: '100%', fontWeight: 'bold' }}>
+        <Alert
+          onClose={clearAuthError}
+          severity="warning"
+          variant="filled"
+          sx={{ width: '100%', fontWeight: 'bold' }}
+        >
           {authError}
         </Alert>
       </Snackbar>
@@ -57,14 +77,21 @@ export const GuestLoginReminder: React.FC = () => {
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.secondary">
-                Enjoying ConvertingHub? Sign in with Google to keep your experience connected across devices.
+                Enjoying ConvertingHub? Sign in with Google to keep your
+                experience connected across devices.
               </Typography>
-              <Stack direction="row" spacing={1.5} justifyContent="flex-end" pt={0.5}>
+              <Stack
+                direction="row"
+                spacing={1.5}
+                justifyContent="flex-end"
+                pt={0.5}
+              >
                 <Button
                   size="small"
                   variant="text"
                   color="inherit"
                   onClick={dismissLoginPrompt}
+                  disabled={isSigningIn}
                   sx={{ fontWeight: 'bold' }}
                 >
                   Maybe Later
@@ -73,11 +100,18 @@ export const GuestLoginReminder: React.FC = () => {
                   size="small"
                   variant="contained"
                   color="primary"
-                  startIcon={<GoogleIcon />}
+                  disabled={isSigningIn}
+                  startIcon={
+                    isSigningIn ? (
+                      <CircularProgress size={14} color="inherit" />
+                    ) : (
+                      <GoogleIcon />
+                    )
+                  }
                   onClick={handleGoogleLogin}
                   sx={{ borderRadius: '50px', fontWeight: 'bold', px: 2 }}
                 >
-                  Login with Google
+                  {isSigningIn ? 'Connecting...' : 'Continue with Google'}
                 </Button>
               </Stack>
             </Stack>

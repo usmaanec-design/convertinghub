@@ -5,9 +5,13 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 interface EngineResultBannerProps {
   filename?: string;
   durationMs?: number;
+  engineUsed?: 'primary' | 'client' | 'backup';
 }
 
-export const EngineResultBanner: React.FC<EngineResultBannerProps> = ({ filename, durationMs }) => {
+export const EngineResultBanner: React.FC<EngineResultBannerProps> = ({
+  filename,
+  durationMs
+}) => {
   return (
     <Alert
       severity="success"
@@ -19,7 +23,8 @@ export const EngineResultBanner: React.FC<EngineResultBannerProps> = ({ filename
           Conversion complete! {filename ? `(${filename})` : ''}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          Your document is ready. {durationMs ? `(${(durationMs / 1000).toFixed(1)}s)` : ''}
+          Your document is ready.{' '}
+          {durationMs ? `(${(durationMs / 1000).toFixed(1)}s)` : ''}
         </Typography>
       </Box>
     </Alert>

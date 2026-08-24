@@ -11,7 +11,7 @@ export const tool = defineTool('pdf', {
   },
 
   path: 'rotate-pdf',
-  icon: 'carbon:rotate',
+  icon: 'flat-color-icons:rules',
 
   keywords: [
     'rotation',

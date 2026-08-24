@@ -10,7 +10,7 @@ export const tool = defineTool('pdf', {
   },
 
   path: 'editor',
-  icon: 'mdi:file-document-edit',
+  icon: 'flat-color-icons:edit-image',
 
   keywords: [
     'pdf',

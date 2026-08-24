@@ -1,139 +1,139 @@
 {
   "compressPdf": {
-    "compressedFileSize": "Compressed File Size",
-    "compressingPdf": "Compressing PDF...",
-    "compressionLevel": "Compression Level",
-    "compressionSettings": "Compression Settings",
-    "description": "Reduce PDF file size while maintaining quality using Ghostscript",
-    "errorCompressingPdf": "Failed to compress PDF: {{error}}",
-    "errorReadingPdf": "Failed to read PDF file. Please make sure it is a valid PDF.",
-    "fileSize": "Original File Size",
-    "highCompression": "High Compression",
-    "highCompressionDescription": "Maximum file size reduction with some quality loss",
-    "inputTitle": "Input PDF",
-    "longDescription": "Compress PDF files securely in your browser using Ghostscript. Your files never leave your device, ensuring complete privacy while reducing file sizes for email sharing, uploading to websites, or saving storage space. Powered by WebAssembly technology.",
-    "lowCompression": "Low Compression",
-    "lowCompressionDescription": "Slightly reduce file size with minimal quality loss",
-    "mediumCompression": "Medium Compression",
-    "mediumCompressionDescription": "Balance between file size and quality",
-    "pages": "Number of Pages",
-    "resultTitle": "Compressed PDF",
-    "shortDescription": "Compress PDF files securely in your browser",
-    "title": "Compress PDF"
+    "compressedFileSize": "حجم الملف المضغوط",
+    "compressingPdf": "جاري ضغط ملف PDF...",
+    "compressionLevel": "مستوى الضغط",
+    "compressionSettings": "إعدادات الضغط",
+    "description": "تقليل حجم ملف PDF مع الحفاظ على الجودة في المتصفح",
+    "errorCompressingPdf": "فشل ضغط ملف PDF: {{error}}",
+    "errorReadingPdf": "فشل قراءة ملف PDF. يُرجى التأكد من أنه ملف PDF صالح.",
+    "fileSize": "الحجم الأصلي للملف",
+    "highCompression": "ضغط عالي",
+    "highCompressionDescription": "أقصى تقليل للحجم مع بعض الفقدان في الجودة",
+    "inputTitle": "ملف PDF المدخل",
+    "longDescription": "قم بضغط ملفات PDF بأمان مباشر في متصفحك. تبقى ملفاتك خاصة تماماً على جهازك.",
+    "lowCompression": "ضغط منخفض",
+    "lowCompressionDescription": "تقليل طفيف للحجم مع الحفاظ التام على الجودة",
+    "mediumCompression": "ضغط متوسط",
+    "mediumCompressionDescription": "توازن مثالي بين حجم الملف والجودة",
+    "pages": "عدد الصفحات",
+    "resultTitle": "ملف PDF المضغوط",
+    "shortDescription": "ضغط ملفات PDF بأمان في متصفحك",
+    "title": "ضغط PDF"
   },
   "convertToPdf": {
-    "description": "Convert various image formats (PNG, GIF, JPG, WEBP, HEIC, HEIF) to PDF, with options to scale the image and choose page orientation.",
-    "inputTitle": "Input Images",
+    "description": "تحويل مختلف صيغ الصور (PNG, GIF, JPG, WEBP, HEIC) إلى ملف PDF مع خيارات الاتجاه والهوامش.",
+    "inputTitle": "الصور المدخلة",
     "options": {
-      "a4": "A4 Page",
-      "fullsize": "Full Size (Image size)",
-      "image": "Image",
-      "landscape": "Landscape (Horizontal)",
-      "orientation": "Orientation",
-      "portrait": "Portrait (Vertical)",
-      "scale": "Scale",
-      "type": "PDF Type"
+      "a4": "صفحة A4",
+      "fullsize": "الحجم الكامل (حجم الصورة الأصلي)",
+      "image": "صورة",
+      "landscape": "أفقي (عرضي)",
+      "orientation": "الاتجاه",
+      "portrait": "رأسي (طولي)",
+      "scale": "المقياس",
+      "type": "نوع PDF"
     },
-    "resultTitle": "Output PDF",
-    "shortDescription": "Convert images to PDF with scale and orientation control",
-    "title": "Images to PDF"
+    "resultTitle": "ملف PDF الناتج",
+    "shortDescription": "تحويل الصور إلى PDF مع التحكم في الاتجاه والمقياس",
+    "title": "تحويل الصور إلى PDF"
   },
   "editor": {
-    "description": "Advanced PDF editor with annotation, form-fill, highlight, and export capabilities. Edit your PDFs directly in the browser with professional-grade tools including text insertion, drawing, highlighting, signing and form filling.",
-    "shortDescription": "Edit PDFs with advanced annotation, signing and editing tools",
-    "title": "PDF Editor"
+    "description": "محرر PDF متقدم لإضافة الملاحظات، ملء الاستمارات، التظليل، والتوقيع مباشرة في المتصفح.",
+    "shortDescription": "تعديل وتوقيع وتظليل ملفات PDF بخصائص متقدمة",
+    "title": "محرر PDF"
   },
   "extractImagesFromPdf": {
-    "description": "Extract all embedded images from your PDF file in their original quality.",
-    "inputTitle": "Input PDF",
-    "longDescription": "Upload a PDF document to automatically extract all embedded images. The tool preserves the original image quality and supports common formats such as JPG, PNG, and more. Ideal for recovering illustrations, photos, scanned pages, or assets from PDF documents.",
-    "resultTitle": "Extracted Images",
-    "shortDescription": "Extract images from a PDF file.",
-    "title": "Extract Images from PDF"
+    "description": "استخراج جميع الصور المضمنة في ملف PDF بجودتها الأصلية.",
+    "inputTitle": "ملف PDF المدخل",
+    "longDescription": "استخراج الصور المضمنة في مستند PDF بجودتها العالية وحفظها بصيغ JPG أو PNG.",
+    "resultTitle": "الصور المستخرجة",
+    "shortDescription": "استخراج الصور من ملف PDF.",
+    "title": "استخراج الصور من PDF"
   },
   "merge": {
-    "inputTitle": "Input PDF",
-    "loadingText": "Extracting pages",
-    "resultTitle": "Output merged PDF",
+    "inputTitle": "ملف PDF المدخل",
+    "loadingText": "جاري استخراج الصفحات",
+    "resultTitle": "ملف PDF المدمج الناتج",
     "toolInfo": {
-      "description": "This tool allows you to merge multiple PDF files into a single document. To use the tool, simply upload the PDF files you want to merge. The tool will then combine all pages from the input files into a single PDF document.",
-      "title": "How to Use the Merge PDF Tool?"
+      "description": "تتيح لك هذه الأداة دمج عدة ملفات PDF في مستند واحد بسهولة وسرعة.",
+      "title": "كيفية استخدام أداة دمج PDF؟"
     }
   },
   "mergePdf": {
-    "description": "Combine multiple PDF files into a single document.",
-    "inputTitle": "Input PDFs",
-    "mergingPdfs": "Merging PDFs",
-    "pdfOptions": "PDF Options",
-    "resultTitle": "Merged PDF",
-    "shortDescription": "Merge multiple PDF files into a single document",
-    "sortByFileName": "Sort by file name",
-    "sortByFileNameDescription": "Sort PDFs alphabetically by file name",
-    "sortByUploadOrder": "Sort by upload order",
-    "sortByUploadOrderDescription": "Keep PDFs in the order they were uploaded",
-    "title": "Merge PDF",
+    "description": "دمج عدة ملفات PDF في مستند واحد.",
+    "inputTitle": "ملفات PDF المدخلة",
+    "mergingPdfs": "جاري دمج ملفات PDF",
+    "pdfOptions": "خيارات PDF",
+    "resultTitle": "ملف PDF المدمج",
+    "shortDescription": "دمج عدة ملفات PDF في مستند واحد",
+    "sortByFileName": "الترتيب حسب اسم الملف",
+    "sortByFileNameDescription": "ترتيب الملفات أبجدياً حسب الاسم",
+    "sortByUploadOrder": "الترتيب حسب أسبقية الرفع",
+    "sortByUploadOrderDescription": "الحفاظ على نفس ترتيب الرفع",
+    "title": "دمج PDF",
     "toolInfo": {
-      "description": "This tool allows you to combine multiple PDF files into a single document. You can choose how to sort the PDFs and the tool will merge them in the specified order.",
-      "title": "Merge PDF Files"
+      "description": "تدمج هذه الأداة ملفات PDF متعددة بالترتيب الذي تحدده بكل سهولة.",
+      "title": "دمج ملفات PDF"
     }
   },
   "pdfToEpub": {
-    "description": "Transform PDF documents into EPUB files for better e-reader compatibility.",
-    "shortDescription": "Convert PDF files to EPUB format",
-    "title": "PDF to EPUB"
+    "description": "تحويل مستندات PDF إلى صيغة EPUB للكتب الإلكترونية.",
+    "shortDescription": "تحويل ملفات PDF إلى صيغة EPUB",
+    "title": "تحويل PDF إلى EPUB"
   },
   "pdfToPng": {
-    "description": "Transform PDF documents into PNG panels.",
-    "longDescription": "Upload a PDF and convert each page into a high-quality PNG image directly in your browser. This tool is ideal for extracting visual content or sharing individual pages. No data is uploaded — everything runs locally.",
-    "shortDescription": "Convert PDF into PNG images",
-    "title": "PDF to PNG"
+    "description": "تحويل صفحات مستند PDF إلى صور PNG عالية الجودة.",
+    "longDescription": "تحويل كل صفحة في مستند PDF إلى صورة PNG عالية الدقة مباشرة في متصفحك.",
+    "shortDescription": "تحويل PDF إلى صور PNG",
+    "title": "تحويل PDF إلى PNG"
   },
   "protectPdf": {
-    "description": "Add password protection to your PDF files securely in your browser",
-    "shortDescription": "Password protect PDF files securely",
-    "title": "Protect PDF"
+    "description": "تشفير وإضافة كلمة سر لحماية ملفات PDF في متصفحك.",
+    "shortDescription": "حماية ملفات PDF بكلمة سر بأمان",
+    "title": "حماية PDF"
   },
   "rotatePdf": {
-    "allPagesWillBeRotated": "All {{count}} pages will be rotated",
+    "allPagesWillBeRotated": "سيتم تدوير جميع الصفحات الـ {{count}}",
     "angleOptions": {
-      "clockwise90": "90° Clockwise",
-      "counterClockwise270": "270° (90° Counter-clockwise)",
-      "upsideDown180": "180° (Upside down)"
+      "clockwise90": "90° مع اتجاه عقارب الساعة",
+      "counterClockwise270": "270° (90° عكس اتجاه عقارب الساعة)",
+      "upsideDown180": "180° (رأساً على عقب)"
     },
-    "applyToAllPages": "Apply to all pages",
-    "description": "Rotate pages in a PDF document.",
-    "inputTitle": "Input PDF",
-    "longDescription": "Change the orientation of PDF pages by rotating them 90, 180, or 270 degrees. Useful for fixing incorrectly scanned documents or preparing PDFs for printing.",
-    "pageRangesDescription": "Enter page numbers or ranges separated by commas (e.g., 1,3,5-7)",
-    "pageRangesPlaceholder": "e.g., 1,5-8",
-    "pagesWillBeRotated": "{{count}} page{{plural}} will be rotated",
-    "pdfPageCount": "PDF has {{count}} page{{plural}}",
-    "resultTitle": "Rotated PDF",
-    "rotatingPages": "Rotating pages",
-    "rotationAngle": "Rotation Angle",
-    "rotationSettings": "Rotation Settings",
-    "shortDescription": "Rotate pages in a PDF document",
-    "title": "Rotate PDF",
+    "applyToAllPages": "تطبيق على جميع الصفحات",
+    "description": "تدوير الصفحات في مستند PDF.",
+    "inputTitle": "ملف PDF المدخل",
+    "longDescription": "تغيير اتجاه صفحات PDF بتدويرها 90 أو 180 أو 270 درجة لتصحيح المستندات الممسوحة ضوئياً.",
+    "pageRangesDescription": "أدخل أرقام الصفحات أو النطاقات مفصولة بفاصلة (مثال: 1,3,5-7)",
+    "pageRangesPlaceholder": "مثال: 1,5-8",
+    "pagesWillBeRotated": "سيتم تدوير {{count}} صفحة",
+    "pdfPageCount": "يحتوي ملف PDF على {{count}} صفحة",
+    "resultTitle": "ملف PDF المدور",
+    "rotatingPages": "جاري تدوير الصفحات",
+    "rotationAngle": "زاوية التدوير",
+    "rotationSettings": "إعدادات التدوير",
+    "shortDescription": "تدوير الصفحات في مستند PDF",
+    "title": "تدوير PDF",
     "toolInfo": {
-      "description": "This tool allows you to rotate pages in a PDF document. You can rotate all pages or specify individual pages to rotate. Choose a rotation angle: 90° Clockwise, 180° (Upside down), or 270° (90° Counter-clockwise). To rotate specific pages, uncheck \"Apply to all pages\" and enter page numbers or ranges separated by commas (e.g., 1,3,5-7).",
-      "title": "How to Use the Rotate PDF Tool"
+      "description": "تدوير جميع صفحات PDF أو تحديد صفحات معينة وتدويرها بالزاوية المطلوبة.",
+      "title": "كيفية استخدام أداة تدوير PDF"
     }
   },
   "splitPdf": {
-    "description": "Extract specific pages from a PDF document.",
-    "extractingPages": "Extracting pages",
-    "inputTitle": "Input PDF",
-    "pageExtractionPreview": "{{count}} page{{ plural }} will be extracted",
-    "pageRangesDescription": "Enter page numbers or ranges separated by commas (e.g., 1,3,5-7)",
-    "pageRangesPlaceholder": "e.g., 1,5-8",
-    "pageSelection": "Page Selection",
-    "pdfPageCount": "PDF has {{count}} page{{plural}}",
-    "resultTitle": "Extracted PDF",
-    "shortDescription": "Extract specific pages from a PDF file",
-    "title": "Split PDF",
+    "description": "استخراج صفحات محددة من مستند PDF.",
+    "extractingPages": "جاري استخراج الصفحات",
+    "inputTitle": "ملف PDF المدخل",
+    "pageExtractionPreview": "سيتم استخراج {{count}} صفحة",
+    "pageRangesDescription": "أدخل أرقام الصفحات أو النطاقات مفصولة بفاصلة (مثال: 1,3,5-7)",
+    "pageRangesPlaceholder": "مثال: 1,5-8",
+    "pageSelection": "تحديد الصفحات",
+    "pdfPageCount": "يحتوي ملف PDF على {{count}} صفحة",
+    "resultTitle": "ملف PDF المستخرج",
+    "shortDescription": "استخراج صفحات محددة من ملف PDF",
+    "title": "تقسيم PDF",
     "toolInfo": {
-      "description": "This tool allows you to extract specific pages from a PDF document. You can specify individual pages or ranges of pages to extract.",
-      "title": "Split PDF"
+      "description": "استخراج صفحات مفردة أو نطاق من الصفحات من مستند PDF بسهولة.",
+      "title": "تقسيم PDF"
     }
   }
 }

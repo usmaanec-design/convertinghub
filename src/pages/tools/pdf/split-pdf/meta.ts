@@ -2,7 +2,7 @@ import { defineTool } from '@tools/defineTool';
 import { lazy } from 'react';
 
 export const meta = defineTool('pdf', {
-  icon: 'material-symbols-light:call-split-rounded',
+  icon: 'flat-color-icons:scissors',
   component: lazy(() => import('./index')),
   keywords: ['extract', 'pages', 'range', 'document', 'remove'],
   path: 'split-pdf',

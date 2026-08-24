@@ -1,17 +1,16 @@
 import { Box, useTheme } from '@mui/material';
 import Hero from 'components/Hero';
 import Categories from './Categories';
-import { Helmet } from 'react-helmet';
+import SEOHead from 'components/SEOHead';
+import { getHomeSeoData } from 'seo/seoConfig';
 
 export default function Home() {
   const theme = useTheme();
+  const homeSeo = getHomeSeoData();
+
   return (
     <Box
-      padding={{
-        xs: 1,
-        md: 1.5,
-        lg: 2
-      }}
+      padding={2}
       sx={{
         background: `url(/assets/${
           theme.palette.mode === 'dark'
@@ -26,7 +25,12 @@ export default function Home() {
       justifyContent={'center'}
       width={'100%'}
     >
-      <Helmet title={'ConvertingHub - Professional Document & PDF Tools'} />
+      <SEOHead
+        title={homeSeo.title}
+        description={homeSeo.description}
+        canonicalUrl={homeSeo.canonicalUrl}
+        ogImage={homeSeo.ogImage}
+      />
       <Hero />
       <Box mt={2} width={'100%'} display={'flex'} justifyContent={'center'}>
         <Categories />

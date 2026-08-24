@@ -4,6 +4,8 @@ import DownloadIcon from '@mui/icons-material/Download';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
+import { executeProtectedDownload } from '../../utils/downloadInterceptor';
 
 export default function ResultFooter({
   handleDownload,
@@ -19,11 +21,20 @@ export default function ResultFooter({
   downloadLabel?: string;
 }) {
   const { t } = useTranslation();
+  const { isAuthenticated, signInWithGoogle } = useAuth();
+
+  const onDownloadClick = () => {
+    executeProtectedDownload(handleDownload, {
+      isAuthenticated,
+      signInWithGoogle
+    });
+  };
+
   return (
     <Stack mt={1} direction={'row'} spacing={2}>
       <Button
         disabled={disabled}
-        onClick={handleDownload}
+        onClick={onDownloadClick}
         startIcon={<DownloadIcon />}
       >
         {downloadLabel || t('resultFooter.download')}

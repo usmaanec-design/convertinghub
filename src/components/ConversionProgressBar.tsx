@@ -3,46 +3,51 @@ import { Box, LinearProgress, Typography, Paper, Stack } from '@mui/material';
 import MemoryIcon from '@mui/icons-material/Memory';
 
 interface ConversionProgressBarProps {
-  isProcessing: boolean;
+  isProcessing?: boolean;
   title?: string;
+  stageTextOverride?: string;
 }
 
 export const ConversionProgressBar: React.FC<ConversionProgressBarProps> = ({
-  isProcessing,
-  title = 'Processing document...'
+  isProcessing = true,
+  title = 'Processing file...',
+  stageTextOverride
 }) => {
   const [progress, setProgress] = useState<number>(0);
-  const [stageText, setStageText] = useState<string>('Preparing your document...');
+  const [stageText, setStageText] = useState<string>(
+    stageTextOverride || 'Preparing conversion...'
+  );
 
   useEffect(() => {
     let interval: any;
     if (isProcessing) {
       setProgress(5);
-      setStageText('Uploading your document...');
+      setStageText(stageTextOverride || 'Uploading and reading file structure...');
 
       interval = setInterval(() => {
         setProgress((prev) => {
           if (prev < 30) {
-            setStageText('Checking document structure...');
-            return prev + 5;
+            setStageText(stageTextOverride || 'Analyzing format and structure...');
+            return prev + 6;
           } else if (prev < 70) {
-            setStageText('Processing content and formatting...');
-            return prev + 3;
-          } else if (prev < 92) {
-            setStageText('Finalizing your document...');
-            return prev + 1;
+            setStageText(stageTextOverride || 'Processing conversion & encoding content...');
+            return prev + 4;
+          } else if (prev < 94) {
+            setStageText(stageTextOverride || 'Finalizing output file...');
+            return prev + 2;
           }
           return 95;
         });
-      }, 400);
+      }, 300);
     } else {
       setProgress(100);
+      setStageText('Conversion completed!');
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isProcessing]);
+  }, [isProcessing, stageTextOverride]);
 
   if (!isProcessing) return null;
 
@@ -61,12 +66,25 @@ export const ConversionProgressBar: React.FC<ConversionProgressBarProps> = ({
       <Stack spacing={2}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center" gap={1}>
-            <MemoryIcon color="primary" sx={{ animation: 'spin 2s linear infinite', '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }} />
+            <MemoryIcon
+              color="primary"
+              sx={{
+                animation: 'spin 1.5s linear infinite',
+                '@keyframes spin': {
+                  '0%': { transform: 'rotate(0deg)' },
+                  '100%': { transform: 'rotate(360deg)' }
+                }
+              }}
+            />
             <Typography variant="subtitle2" fontWeight="bold">
               {title}
             </Typography>
           </Box>
-          <Typography variant="subtitle2" fontWeight="bold" color="primary.main">
+          <Typography
+            variant="subtitle2"
+            fontWeight="bold"
+            color="primary.main"
+          >
             {Math.round(progress)}%
           </Typography>
         </Box>
@@ -80,7 +98,7 @@ export const ConversionProgressBar: React.FC<ConversionProgressBarProps> = ({
             bgcolor: 'grey.200',
             '& .MuiLinearProgress-bar': {
               borderRadius: 5,
-              transition: 'transform 0.3s ease-in-out'
+              transition: 'transform 0.25s ease-in-out'
             }
           }}
         />

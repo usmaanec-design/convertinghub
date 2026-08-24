@@ -42,57 +42,87 @@ const SingleCategory = function ({
   });
 
   return (
-    <Grid
-      item
-      xs={12}
-      sm={6}
-      md={4}
-      onMouseEnter={toggleHover}
-      onMouseLeave={toggleHover}
-    >
+    <Grid item xs={12} sm={6} md={4} onMouseEnter={toggleHover} onMouseLeave={toggleHover}>
       <Card
+        elevation={hovered ? 6 : 1}
         sx={{
           height: '100%',
-          backgroundColor: hovered ? 'background.hover' : 'background.paper'
+          borderRadius: 4,
+          border: '1.5px solid',
+          borderColor: hovered ? 'primary.main' : 'divider',
+          backgroundColor: hovered ? 'background.hover' : 'background.paper',
+          transition: 'all 0.25s ease-in-out',
+          transform: hovered ? 'translateY(-3px)' : 'none'
         }}
       >
-        <CardContent sx={{ height: '100%', p: 2, '&:last-child': { pb: 2 } }}>
+        <CardContent sx={{ height: '100%', p: { xs: 3, sm: 3.5 }, '&:last-child': { pb: 3.5 } }}>
           <Stack
             direction={'column'}
             height={'100%'}
             justifyContent={'space-between'}
+            spacing={2.5}
           >
             <Box>
-              <Stack direction={'row'} spacing={1.5} alignItems={'center'}>
-                <Icon
-                  icon={category.icon}
-                  fontSize={'42px'}
-                  style={{
-                    transform: `scale(${hovered ? 1.08 : 1})`
+              <Stack direction={'row'} spacing={2} alignItems={'center'}>
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 3.5,
+                    bgcolor: 'action.hover',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
                   }}
-                  color={categoriesColors[index % categoriesColors.length]}
-                />
+                >
+                  <Icon
+                    icon={category.icon}
+                    fontSize={'52px'}
+                    style={{
+                      transform: `scale(${hovered ? 1.08 : 1})`,
+                      transition: 'transform 0.2s ease'
+                    }}
+                    color={categoriesColors[index % categoriesColors.length]}
+                  />
+                </Box>
                 <Link
                   style={{
-                    fontSize: 17,
-                    fontWeight: 700,
-                    color: theme.palette.mode === 'dark' ? 'white' : 'black'
+                    fontSize: 23,
+                    fontWeight: 800,
+                    lineHeight: 1.3,
+                    textDecoration: 'none',
+                    color: theme.palette.mode === 'dark' ? '#ffffff' : '#0f172a'
                   }}
                   to={'/categories/' + category.type}
                 >
                   {categoryTitle}
                 </Link>
               </Stack>
-              <Typography sx={{ mt: 1, fontSize: 13, color: 'text.secondary' }}>
+              <Typography
+                sx={{
+                  mt: 2,
+                  fontSize: 16,
+                  lineHeight: 1.6,
+                  color: 'text.secondary',
+                  fontWeight: 500
+                }}
+              >
                 {categoryDescription}
               </Typography>
             </Box>
-            <Grid container spacing={1} mt={1.5}>
+            <Grid container spacing={2} mt={1}>
               <Grid item xs={6}>
                 <Button
                   fullWidth
-                  size="small"
-                  sx={{ height: '100%', fontSize: 12, py: 0.75 }}
+                  size="large"
+                  sx={{
+                    height: '100%',
+                    fontSize: 14.5,
+                    py: 1.2,
+                    borderRadius: 3,
+                    fontWeight: 700,
+                    textTransform: 'none'
+                  }}
                   onClick={() => navigate('/categories/' + category.type)}
                   variant={'contained'}
                 >
@@ -101,9 +131,17 @@ const SingleCategory = function ({
               </Grid>
               <Grid item xs={6}>
                 <Button
-                  sx={{ backgroundColor: 'background.default', height: '100%', fontSize: 12, py: 0.75 }}
+                  sx={{
+                    backgroundColor: 'background.default',
+                    height: '100%',
+                    fontSize: 14.5,
+                    py: 1.2,
+                    borderRadius: 3,
+                    fontWeight: 700,
+                    textTransform: 'none'
+                  }}
                   fullWidth
-                  size="small"
+                  size="large"
                   onClick={() => navigate(category.example.path)}
                   variant={'outlined'}
                 >
@@ -124,10 +162,12 @@ export default function Categories() {
   const categories = getToolsByCategory(selectedUserTypes, t);
 
   return (
-    <Grid width={{ xs: '95%', md: '90%' }} container spacing={2}>
-      {categories.map((category, index) => (
-        <SingleCategory key={category.type} category={category} index={index} />
-      ))}
-    </Grid>
+    <Box width="100%" px={{ xs: 1.5, sm: 3, md: 4 }}>
+      <Grid container spacing={3}>
+        {categories.map((category, index) => (
+          <SingleCategory key={category.type} category={category} index={index} />
+        ))}
+      </Grid>
+    </Box>
   );
 }

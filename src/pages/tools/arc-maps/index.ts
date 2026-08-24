@@ -19,5 +19,3 @@ export const arcMapsTools = [
   geodatabaseToShapefile,
   shapefileToRoadNetwork
 ];
-
-

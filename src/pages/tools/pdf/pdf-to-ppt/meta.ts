@@ -9,6 +9,14 @@ export const tool = defineTool('pdf', {
   },
   path: 'pdf-to-ppt',
   icon: 'vscode-icons:file-type-powerpoint',
-  keywords: ['pdf', 'ppt', 'pptx', 'powerpoint', 'presentation', 'slides', 'convert'],
+  keywords: [
+    'pdf',
+    'ppt',
+    'pptx',
+    'powerpoint',
+    'presentation',
+    'slides',
+    'convert'
+  ],
   component: lazy(() => import('./index'))
 });

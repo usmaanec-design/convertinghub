@@ -1,12 +1,26 @@
 import { useState } from 'react';
-import { Box, Button, TextField, Typography, Stack, Paper, Alert, CircularProgress, Grid } from '@mui/material';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Stack,
+  Paper,
+  Alert,
+  CircularProgress,
+  Grid
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CropIcon from '@mui/icons-material/Crop';
 import { PDFDocument } from 'pdf-lib';
+import { useAuth } from '../../../../contexts/AuthContext';
+import { executeProtectedDownload } from '../../../../utils/downloadInterceptor';
+import { usePendingConversionFile } from '../../../../hooks';
 
 export default function CropPdf() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [marginTop, setMarginTop] = useState<number>(20);
   const [marginBottom, setMarginBottom] = useState<number>(20);
   const [marginLeft, setMarginLeft] = useState<number>(20);
@@ -46,7 +60,9 @@ export default function CropPdf() {
       });
 
       const pdfBytes = await pdfDoc.save();
-      setConvertedBlob(new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' }));
+      setConvertedBlob(
+        new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' })
+      );
     } catch (err: any) {
       setError(`Failed to crop PDF: ${err.message}`);
     } finally {
@@ -54,14 +70,21 @@ export default function CropPdf() {
     }
   };
 
+  const { isAuthenticated, signInWithGoogle } = useAuth();
+
   const handleDownload = () => {
     if (!convertedBlob || !file) return;
-    const url = URL.createObjectURL(convertedBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${file.name.replace(/\.pdf$/i, '')}_cropped.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
+    executeProtectedDownload(
+      () => {
+        const url = URL.createObjectURL(convertedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${file.name.replace(/\.pdf$/i, '')}_cropped.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      { isAuthenticated, signInWithGoogle }
+    );
   };
 
   return (
@@ -75,10 +98,15 @@ export default function CropPdf() {
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          Crop margins of PDF documents or select specific areas, then apply changes to all pages.
+          Crop margins of PDF documents or select specific areas, then apply
+          changes to all pages.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -93,7 +121,13 @@ export default function CropPdf() {
           component="label"
         >
           <input type="file" accept=".pdf" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 48, color: file ? 'primary.main' : 'text.secondary', mb: 1 }} />
+          <UploadFileIcon
+            sx={{
+              fontSize: 48,
+              color: file ? 'primary.main' : 'text.secondary',
+              mb: 1
+            }}
+          />
           <Typography variant="subtitle1" fontWeight="bold">
             {file ? file.name : 'Click to select or drop a PDF file here'}
           </Typography>
@@ -147,7 +181,11 @@ export default function CropPdf() {
             size="large"
             onClick={handleCrop}
             disabled={isProcessing}
-            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
+            startIcon={
+              isProcessing ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : null
+            }
             fullWidth
           >
             {isProcessing ? 'Cropping PDF...' : 'Crop PDF Margins'}

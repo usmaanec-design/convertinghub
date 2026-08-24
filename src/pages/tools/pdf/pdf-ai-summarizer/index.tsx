@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { Box, Button, Typography, Stack, Paper, Alert, CircularProgress, Card, CardContent } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Stack,
+  Paper,
+  Alert,
+  CircularProgress,
+  Card,
+  CardContent
+} from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -7,8 +17,12 @@ import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min?url';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
+import { summarizeDocument } from '../../../../utils/aiService';
+import { usePendingConversionFile } from '../../../../hooks';
+
 export default function PdfAiSummarizer() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [summary, setSummary] = useState<string[]>([]);
   const [wordCount, setWordCount] = useState<number>(0);
@@ -31,24 +45,25 @@ export default function PdfAiSummarizer() {
 
       const arrayBuffer = await file.arrayBuffer();
       const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      
+
       let fullText = '';
       for (let i = 1; i <= Math.min(10, pdfDoc.numPages); i++) {
         const page = await pdfDoc.getPage(i);
         const textContent = await page.getTextContent();
-        fullText += textContent.items.map((item: any) => item.str).join(' ') + ' ';
+        fullText +=
+          textContent.items.map((item: any) => item.str).join(' ') + ' ';
       }
 
       const words = fullText.trim().split(/\s+/).filter(Boolean);
       setWordCount(words.length);
 
-      const sentences = fullText
-        .split(/[.!?]+/)
-        .map((s) => s.trim())
-        .filter((s) => s.length > 25);
+      if (!fullText.trim()) {
+        throw new Error('No readable text extracted from the uploaded PDF document.');
+      }
 
-      const keyPoints = sentences.slice(0, 5);
-      setSummary(keyPoints.length > 0 ? keyPoints : ['Extracted document contents and key themes.']);
+      // Call GenAI Summarization Service
+      const keyPoints = await summarizeDocument(fullText);
+      setSummary(keyPoints);
     } catch (err: any) {
       setError(`Failed to summarize PDF: ${err.message}`);
     } finally {
@@ -67,10 +82,15 @@ export default function PdfAiSummarizer() {
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          Quickly generate concise summaries, bullet points, and key insights from PDF documents in seconds.
+          Quickly generate concise summaries, bullet points, and key insights
+          from PDF documents in seconds.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -85,7 +105,13 @@ export default function PdfAiSummarizer() {
           component="label"
         >
           <input type="file" accept=".pdf" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 48, color: file ? 'primary.main' : 'text.secondary', mb: 1 }} />
+          <UploadFileIcon
+            sx={{
+              fontSize: 48,
+              color: file ? 'primary.main' : 'text.secondary',
+              mb: 1
+            }}
+          />
           <Typography variant="subtitle1" fontWeight="bold">
             {file ? file.name : 'Click to select or drop a PDF file here'}
           </Typography>
@@ -98,7 +124,13 @@ export default function PdfAiSummarizer() {
             size="large"
             onClick={handleSummarize}
             disabled={isProcessing}
-            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : <AutoAwesomeIcon />}
+            startIcon={
+              isProcessing ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <AutoAwesomeIcon />
+              )
+            }
             fullWidth
           >
             {isProcessing ? 'Generating AI Summary...' : 'Generate AI Summary'}
@@ -106,14 +138,39 @@ export default function PdfAiSummarizer() {
         )}
 
         {summary.length > 0 && (
-          <Card sx={{ width: '100%', textAlign: 'left', bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
+          <Card
+            sx={{
+              width: '100%',
+              textAlign: 'left',
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider'
+            }}
+          >
             <CardContent>
-              <Typography variant="h6" color="primary.main" fontWeight="bold" gutterBottom display="flex" alignItems="center" gap={1}>
-                <AutoAwesomeIcon /> Executive Summary ({wordCount} words analyzed)
+              <Typography
+                variant="h6"
+                color="primary.main"
+                fontWeight="bold"
+                gutterBottom
+                display="flex"
+                alignItems="center"
+                gap={1}
+              >
+                <AutoAwesomeIcon /> Executive Summary ({wordCount} words
+                analyzed)
               </Typography>
               <Stack spacing={1} mt={2}>
                 {summary.map((point, i) => (
-                  <Typography key={i} variant="body2" sx={{ pl: 2, borderLeft: '3px solid', borderColor: 'primary.main' }}>
+                  <Typography
+                    key={i}
+                    variant="body2"
+                    sx={{
+                      pl: 2,
+                      borderLeft: '3px solid',
+                      borderColor: 'primary.main'
+                    }}
+                  >
                     • {point}.
                   </Typography>
                 ))}

@@ -3,7 +3,7 @@ import { lazy } from 'react';
 
 export const tool = defineTool('pdf', {
   path: 'protect-pdf',
-  icon: 'material-symbols:lock',
+  icon: 'flat-color-icons:lock',
 
   keywords: [
     'password',

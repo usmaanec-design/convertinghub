@@ -13,7 +13,8 @@ import {
   LinearProgress,
   Tooltip,
   Divider,
-  Badge
+  Badge,
+  Chip
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -40,8 +41,11 @@ export interface PageItem {
   selected: boolean;
 }
 
+import { usePendingConversionFile } from '../../../../hooks';
+
 export default function OrganizePdf() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [pages, setPages] = useState<PageItem[]>([]);
   const [originalPages, setOriginalPages] = useState<PageItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -50,14 +54,19 @@ export default function OrganizePdf() {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [convertedBlob, setConvertedBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
 
-  // Drag and Drop state
+  // Drag and Drop state for thumbnail reordering
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploaded = e.target.files?.[0];
+  const processUploadedFile = async (uploaded: File) => {
     if (!uploaded) return;
+
+    if (!uploaded.type.includes('pdf') && !uploaded.name.toLowerCase().endsWith('.pdf')) {
+      setError('Please select or drop a valid PDF document (.pdf).');
+      return;
+    }
 
     setFile(uploaded);
     setConvertedBlob(null);
@@ -105,7 +114,7 @@ export default function OrganizePdf() {
       }
 
       setPages(generatedPages);
-      setOriginalPages(generatedPages.map(p => ({ ...p })));
+      setOriginalPages(generatedPages.map((p) => ({ ...p })));
     } catch (err: any) {
       console.error('[Organize PDF] Error rendering thumbnails:', err);
       setError(`Failed to read PDF pages: ${err.message}`);
@@ -113,6 +122,37 @@ export default function OrganizePdf() {
       setLoading(false);
       setProgressText('');
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploaded = e.target.files?.[0];
+    if (uploaded) {
+      processUploadedFile(uploaded);
+    }
+  };
+
+  // Dropzone Drag & Drop Handlers for File Uploading
+  const handleFileDrop = (e: React.DragEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile) {
+      processUploadedFile(droppedFile);
+    }
+  };
+
+  const handleFileDragOver = (e: React.DragEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleFileDragLeave = (e: React.DragEvent<HTMLElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
   };
 
   // Drag & Drop Handlers
@@ -144,7 +184,7 @@ export default function OrganizePdf() {
 
   // Rotation & Deletion Handlers
   const handleRotate = (index: number, direction: 'cw' | 'ccw') => {
-    setPages(prev => {
+    setPages((prev) => {
       const copy = [...prev];
       const current = copy[index].rotation || 0;
       const delta = direction === 'cw' ? 90 : -90;
@@ -157,11 +197,11 @@ export default function OrganizePdf() {
   };
 
   const handleDelete = (index: number) => {
-    setPages(prev => prev.filter((_, i) => i !== index));
+    setPages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleToggleSelect = (index: number) => {
-    setPages(prev => {
+    setPages((prev) => {
       const copy = [...prev];
       copy[index] = { ...copy[index], selected: !copy[index].selected };
       return copy;
@@ -170,28 +210,30 @@ export default function OrganizePdf() {
 
   // Toolbar Actions
   const handleSelectAll = () => {
-    setPages(prev => prev.map(p => ({ ...p, selected: true })));
+    setPages((prev) => prev.map((p) => ({ ...p, selected: true })));
   };
 
   const handleDeselectAll = () => {
-    setPages(prev => prev.map(p => ({ ...p, selected: false })));
+    setPages((prev) => prev.map((p) => ({ ...p, selected: false })));
   };
 
   const handleDeleteSelected = () => {
-    setPages(prev => prev.filter(p => !p.selected));
+    setPages((prev) => prev.filter((p) => !p.selected));
   };
 
   const handleRotateSelected = (direction: 'cw' | 'ccw') => {
-    setPages(prev => prev.map(p => {
-      if (!p.selected) return p;
-      const current = p.rotation || 0;
-      const delta = direction === 'cw' ? 90 : -90;
-      return { ...p, rotation: (current + delta + 360) % 360 };
-    }));
+    setPages((prev) =>
+      prev.map((p) => {
+        if (!p.selected) return p;
+        const current = p.rotation || 0;
+        const delta = direction === 'cw' ? 90 : -90;
+        return { ...p, rotation: (current + delta + 360) % 360 };
+      })
+    );
   };
 
   const handleResetOrder = () => {
-    setPages(originalPages.map(p => ({ ...p })));
+    setPages(originalPages.map((p) => ({ ...p })));
   };
 
   // Final PDF Generation
@@ -207,18 +249,24 @@ export default function OrganizePdf() {
       const newDoc = await PDFDocument.create();
 
       for (const item of pages) {
-        const [copiedPage] = await newDoc.copyPages(srcDoc, [item.originalIndex]);
+        const [copiedPage] = await newDoc.copyPages(srcDoc, [
+          item.originalIndex
+        ]);
 
         if (item.rotation) {
           const existingAngle = copiedPage.getRotation().angle;
-          copiedPage.setRotation(degrees((existingAngle + item.rotation) % 360));
+          copiedPage.setRotation(
+            degrees((existingAngle + item.rotation) % 360)
+          );
         }
 
         newDoc.addPage(copiedPage);
       }
 
       const pdfBytes = await newDoc.save();
-      const blob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+      const blob = new Blob([pdfBytes.buffer as ArrayBuffer], {
+        type: 'application/pdf'
+      });
       setConvertedBlob(blob);
     } catch (err: any) {
       console.error('[Organize PDF] Generation error:', err);
@@ -238,61 +286,94 @@ export default function OrganizePdf() {
     URL.revokeObjectURL(url);
   };
 
-  const selectedCount = pages.filter(p => p.selected).length;
+  const selectedCount = pages.filter((p) => p.selected).length;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1250, mx: 'auto' }}>
-      {/* Header */}
-      <Stack spacing={1} alignItems="center" textAlign="center" mb={3}>
-        <Box display="flex" alignItems="center" gap={1}>
-          <GridViewIcon color="primary" sx={{ fontSize: 40 }} />
-          <Typography variant="h4" fontWeight="bold">
-            Organize PDF
-          </Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          Drag and drop page thumbnails to reorder pages, rotate, or delete pages visually.
-        </Typography>
-      </Stack>
+    <Box sx={{ p: { xs: 1, sm: 3 }, maxWidth: 1250, mx: 'auto', width: '100%' }}>
+      {error && (
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
-
-      {/* Main Upload Box when no file uploaded */}
+      {/* Main Upload Dropzone Box when no file uploaded */}
       {!file && !loading && (
         <Paper
+          onDragOver={handleFileDragOver}
+          onDragLeave={handleFileDragLeave}
+          onDrop={handleFileDrop}
           sx={{
-            p: 6,
-            maxWidth: 700,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: { xs: 4, sm: 6 },
+            width: '100%',
+            maxWidth: 680,
             mx: 'auto',
+            my: 3,
             textAlign: 'center',
-            border: '2px dashed',
-            borderColor: 'divider',
-            borderRadius: 3,
-            bgcolor: 'action.hover',
+            border: '2.5px dashed',
+            borderColor: isDragOver ? 'primary.main' : 'divider',
+            borderRadius: 4,
+            bgcolor: isDragOver ? 'action.selected' : 'action.hover',
             cursor: 'pointer',
-            transition: '0.2s hover',
-            '&:hover': { borderColor: 'primary.main', bgcolor: 'action.selected' }
+            transition: 'all 0.2s ease-in-out',
+            boxShadow: isDragOver ? 4 : 0,
+            '&:hover': {
+              borderColor: 'primary.main',
+              bgcolor: 'action.selected',
+              transform: 'translateY(-2px)'
+            }
           }}
           component="label"
         >
           <input type="file" accept=".pdf" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
-            Select PDF File
+          <Box
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              bgcolor: 'primary.50',
+              color: 'primary.main',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 2,
+              border: '2px solid',
+              borderColor: 'primary.light'
+            }}
+          >
+            <UploadFileIcon sx={{ fontSize: 44 }} />
+          </Box>
+          <Typography variant="h6" fontWeight="bold" gutterBottom color="text.primary">
+            {isDragOver ? 'Drop PDF File Here' : 'Select PDF File or Drag & Drop Here'}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Click to upload a PDF file and organize its pages
+          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto', mb: 1.5 }}>
+            Click to browse or drop your PDF document to visually reorder, rotate, or delete pages
           </Typography>
+          <Chip
+            label="Supports PDF files (.pdf)"
+            size="small"
+            color="primary"
+            variant="outlined"
+            sx={{ fontWeight: 600 }}
+          />
         </Paper>
       )}
 
       {/* Thumbnail Loading State */}
       {loading && (
-        <Paper sx={{ p: 5, maxWidth: 600, mx: 'auto', textAlign: 'center' }}>
+        <Paper sx={{ p: 5, maxWidth: 600, mx: 'auto', textAlign: 'center', borderRadius: 3 }}>
           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
             {progressText || 'Extracting PDF Pages...'}
           </Typography>
-          <LinearProgress variant="determinate" value={progressPercent} sx={{ height: 10, borderRadius: 5, my: 2 }} />
+          <LinearProgress
+            variant="determinate"
+            value={progressPercent}
+            sx={{ height: 10, borderRadius: 5, my: 2 }}
+          />
           <Typography variant="caption" color="text.secondary">
             Generating high-fidelity page thumbnails for drag & drop organizer...
           </Typography>
@@ -304,12 +385,22 @@ export default function OrganizePdf() {
         <Stack spacing={3}>
           {/* Action Toolbar */}
           <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
-            <Grid container spacing={2} alignItems="center" justifyContent="space-between">
+            <Grid
+              container
+              spacing={2}
+              alignItems="center"
+              justifyContent="space-between"
+            >
               {/* File Info */}
               <Grid item xs={12} sm={4}>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Badge badgeContent={pages.length} color="primary">
-                    <Typography variant="subtitle1" fontWeight="bold" noWrap sx={{ maxWidth: 220 }}>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      noWrap
+                      sx={{ maxWidth: 220 }}
+                    >
                       {file.name}
                     </Typography>
                   </Badge>
@@ -322,7 +413,12 @@ export default function OrganizePdf() {
                       sx={{ textTransform: 'none', ml: 1 }}
                     >
                       Change File
-                      <input type="file" accept=".pdf" hidden onChange={handleFileUpload} />
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        hidden
+                        onChange={handleFileUpload}
+                      />
                     </Button>
                   </Tooltip>
                 </Stack>
@@ -330,7 +426,13 @@ export default function OrganizePdf() {
 
               {/* Control Actions */}
               <Grid item xs={12} sm={8}>
-                <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent={{ xs: 'flex-start', sm: 'flex-end' }} gap={1}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  flexWrap="wrap"
+                  justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
+                  gap={1}
+                >
                   <Button
                     size="small"
                     variant="outlined"
@@ -386,10 +488,11 @@ export default function OrganizePdf() {
             {pages.map((page, index) => (
               <Grid
                 item
-                xs={6}
-                sm={4}
-                md={3}
-                lg={2.4}
+                xs={12}
+                sm={6}
+                md={4}
+                lg={3}
+                xl={2.4 as any}
                 key={page.id}
                 draggable
                 onDragStart={() => handleDragStart(index)}
@@ -405,7 +508,9 @@ export default function OrganizePdf() {
                     borderColor: page.selected ? 'primary.main' : 'divider',
                     borderRadius: 2,
                     p: 1.5,
-                    bgcolor: page.selected ? 'action.selected' : 'background.paper',
+                    bgcolor: page.selected
+                      ? 'action.selected'
+                      : 'background.paper',
                     transition: 'transform 0.15s ease, box-shadow 0.15s ease',
                     cursor: 'grab',
                     '&:hover': {
@@ -419,7 +524,12 @@ export default function OrganizePdf() {
                   }}
                 >
                   {/* Top Card Bar: Selection Checkbox & Drag Handle & Quick Actions */}
-                  <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    mb={1}
+                  >
                     <Checkbox
                       size="small"
                       checked={page.selected}
@@ -428,21 +538,35 @@ export default function OrganizePdf() {
                     />
                     <Stack direction="row" spacing={0.5} alignItems="center">
                       <Tooltip title="Rotate Left 90°">
-                        <IconButton size="small" onClick={() => handleRotate(index, 'ccw')}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRotate(index, 'ccw')}
+                        >
                           <RotateLeftIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Rotate Right 90°">
-                        <IconButton size="small" onClick={() => handleRotate(index, 'cw')}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRotate(index, 'cw')}
+                        >
                           <RotateRightIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete Page">
-                        <IconButton size="small" color="error" onClick={() => handleDelete(index)}>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDelete(index)}
+                        >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <DragHandleIcon color="action" fontSize="small" sx={{ ml: 0.5 }} />
+                      <DragHandleIcon
+                        color="action"
+                        fontSize="small"
+                        sx={{ ml: 0.5 }}
+                      />
                     </Stack>
                   </Stack>
 
@@ -475,7 +599,13 @@ export default function OrganizePdf() {
                   </Box>
 
                   {/* Bottom Footer: Page Position Indicator */}
-                  <Typography variant="subtitle2" fontWeight="bold" align="center" mt={1} color="text.primary">
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    align="center"
+                    mt={1}
+                    color="text.primary"
+                  >
                     Page {index + 1}
                   </Typography>
                 </Card>
@@ -486,18 +616,27 @@ export default function OrganizePdf() {
           <Divider sx={{ my: 2 }} />
 
           {/* Bottom Sticky Action Bar */}
-          <Paper elevation={3} sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between">
+          <Paper
+            elevation={3}
+            sx={{ p: 2.5, borderRadius: 2, bgcolor: 'background.paper' }}
+          >
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <Box>
                 <Typography variant="subtitle1" fontWeight="bold">
                   {pages.length} Pages Ready
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Final PDF will be compiled in the exact visual sequence shown above.
+                  Final PDF will be compiled in the exact visual sequence shown
+                  above.
                 </Typography>
               </Box>
 
-              <Stack direction="row" spacing={2} width={{ xs: '100%', sm: 'auto' }}>
+              <Stack direction="row" spacing={2} width="auto">
                 <Button
                   variant="outlined"
                   color="secondary"
@@ -522,13 +661,19 @@ export default function OrganizePdf() {
           {/* Success Banner & Download Button */}
           {convertedBlob && (
             <Alert severity="success" sx={{ width: '100%', p: 2 }}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between">
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 <Box>
                   <Typography variant="subtitle1" fontWeight="bold">
                     Organized PDF Generated Successfully!
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Your PDF has been reordered according to the visual grid above.
+                    Your PDF has been reordered according to the visual grid
+                    above.
                   </Typography>
                 </Box>
                 <Button

@@ -1,402 +1,355 @@
 {
   "audio": {
     "changeSpeed": {
-      "description": "Change the playback speed of audio files. Speed up or slow down audio while maintaining pitch.",
-      "name": "Change audio speed",
-      "shortDescription": "Change the speed of audio files"
+      "description": "آڈیو فائلوں کی پلے بیک اسپیڈ دیکھیں۔ پچ برقرار رکھتے ہوئے آواز تیز یا آہستہ کریں۔",
+      "name": "آڈیو اسپیڈ تبدیل کریں",
+      "shortDescription": "آڈیو فائلوں کی رفتار تبدیل کریں"
     },
     "extractAudio": {
-      "description": "Extract the audio track from a video file and save it as a separate audio file in your chosen format (AAC, MP3, WAV).",
-      "name": "Extract audio",
-      "shortDescription": "Extract audio from video files (MP4, MOV, etc.) to AAC, MP3, or WAV."
+      "description": "ویڈیو فائل سے آڈیو ٹریک نکالیں اور اسے اپنی منتخب کردہ فارمیٹ (AAC, MP3, WAV) میں محفوظ کریں۔",
+      "name": "آڈیو نکالیں",
+      "shortDescription": "ویڈیو فائلوں سے آڈیو ایکسٹریکٹ کریں"
     }
   },
   "baseFileInput": {
-    "copyFailed": "Failed to copy: {{error}}",
-    "dropFileHere": "Drop your {{type}} here",
-    "fileCopied": "File copied",
-    "selectFileDescription": "Click here to select a {{type}} from your device, press Ctrl+V to use a {{type}} from your clipboard, or drag and drop a file from desktop"
+    "copyFailed": "کاپی کرنے میں ناکامی: {{error}}",
+    "dropFileHere": "اپنی {{type}} فائل یہاں ڈراپ کریں",
+    "fileCopied": "فائل کاپی ہوگئی",
+    "selectFileDescription": "اپنے ڈیوائس سے {{type}} منتخب کرنے کے لیے یہاں کلک کریں، یا فائل یہاں ڈریگ اینڈ ڈراپ کریں"
   },
   "categories": {
     "arc-maps": {
-      "description": "Tools for ArcGIS 10.8 & ArcGIS Pro – spatial data processing, shapefile & KML conversion, coordinate system transformations, and map layer utilities.",
-      "title": "Arc Maps Tools",
-      "coordinateConverter": {
-        "name": "ArcGIS Coordinate Converter",
-        "description": "Convert spatial coordinates between Decimal Degrees, DMS, and UTM projections for ArcMap and ArcGIS Pro.",
-        "shortDescription": "Convert spatial coordinates between DD, DMS, and UTM."
-      },
-      "removeDuplicateVertices": {
-        "name": "Remove Duplicate Vertices",
-        "description": "Upload CSV/spreadsheet to detect total and duplicate locations, and drag slider to clean vertices.",
-        "shortDescription": "Detect and clean duplicate vertices in spreadsheets."
-      },
-      "kmlToShapefile": {
-        "name": "KML to Shapefile Converter",
-        "description": "Convert Google Earth KML files to ESRI Shapefile vector formats.",
-        "shortDescription": "Convert Google Earth KML files to ESRI Shapefile vector formats."
-      },
-      "shapefileToKml": {
-        "name": "Shapefile to KML Converter",
-        "description": "Convert ESRI Shapefiles (.shp/.dbf/.zip) to Google Earth KML format.",
-        "shortDescription": "Convert ESRI Shapefiles to Google Earth KML format."
-      },
-      "shapefileToGeojson": {
-        "name": "Shapefile to GeoJSON",
-        "description": "Transform Shapefile (.shp/.dbf) into standard GeoJSON objects.",
-        "shortDescription": "Transform Shapefile (.shp/.dbf) into standard GeoJSON objects."
-      },
-      "csvToShapefile": {
-        "name": "CSV (Lat/Lon) to Shapefile",
-        "description": "Convert CSV coordinate tables into spatial point Shapefiles.",
-        "shortDescription": "Convert CSV coordinate tables into spatial point Shapefiles."
-      },
-      "shapefileToGeodatabase": {
-        "name": "Shapefile to File Geodatabase",
-        "description": "Convert ESRI Shapefiles into File Geodatabase / Spatial Database packages.",
-        "shortDescription": "Convert ESRI Shapefiles to File Geodatabase containers."
-      },
-      "geodatabaseToShapefile": {
-        "name": "File Geodatabase to Shapefile",
-        "description": "Extract File Geodatabase feature classes into ESRI Shapefiles.",
-        "shortDescription": "Extract File Geodatabase feature classes into ESRI Shapefiles."
-      },
-      "shapefileToRoadNetwork": {
-        "name": "Shapefile to Road Network",
-        "description": "Extract node-link road networks, junction nodes, and line segment topologies from polyline Shapefiles.",
-        "shortDescription": "Extract road network topology and junction nodes from polyline Shapefiles."
-      }
+      "description": "ArcGIS 10.8 اور ArcGIS Pro کے لیے ٹولز – مکانی ڈیٹا پروسیسنگ، Shapefile اور KML کنورژن، کوآرڈینیٹ ٹرانسفارمیشنز اور نقشہ لیئر یوٹیلیٹیز۔",
+      "title": "آرک میپس جیو ٹولز"
     },
     "audio": {
-      "description": "Tools for working with audio – extract audio from video, adjusting audio speed, merging multiple audio files and much more.",
-      "title": "Audio Tools"
+      "description": "آڈیو پروسیسنگ ٹولز – ویڈیو سے آڈیو ایکسٹریکٹ کریں، رفتار تبدیل کریں، اور آڈیو فائلیں مرج کریں۔",
+      "title": "آڈیو ٹولز"
     },
     "converters": {
-      "description": "Tools for converting data between different formats – convert images, audio, video, text, and more.",
-      "title": "Converter Tools"
+      "description": "مختلف فارمیٹس کے درمیان ڈیٹا کنورٹ کرنے کے ٹولز – تصاویر، آڈیو، ویڈیو اور ٹیکسٹ کنورٹ کریں۔",
+      "title": "کنورٹر ٹولز"
     },
     "csv": {
-      "description": "Tools for working with CSV files - convert CSV to different formats, manipulate CSV data, validate CSV structure, and process CSV files efficiently.",
-      "title": "CSV Tools"
+      "description": "CSV فائلوں کے لیے ٹولز - CSV کی ساخت چیک کریں، ڈیٹا تبدیل کریں، اور پراسیس کریں۔",
+      "title": "سی ایس وی ٹولز"
     },
     "gif": {
-      "description": "Tools for working with GIF animations – create transparent GIFs, extract GIF frames, add text to GIF, crop, rotate, reverse GIFs, and much more.",
-      "title": "GIF Tools"
+      "description": "GIF اینیمیشنز کے لیے ٹولز – شفاف GIF بنائیں، فریمز نکالیں، اور کراپ یا روٹیٹ کریں۔",
+      "title": "GIF ٹولز"
     },
     "image-generic": {
-      "description": "Tools for working with pictures – compress, resize, crop, convert to JPG, rotate, remove background and much more.",
-      "title": "Image Tools"
+      "description": "تصاویر ایڈٹ کرنے کے ٹولز – سائز کم کریں، کراپ کریں، JPG میں تبدیل کریں، اور بیک گراؤنڈ ختم کریں۔",
+      "title": "امیج ٹولز"
     },
     "json": {
-      "description": "Tools for working with JSON data structures – prettify and minify JSON objects, flatten JSON arrays, stringify JSON values, analyze data, and much more",
-      "title": "JSON Tools"
+      "description": "JSON ڈیٹا اسٹرکچرز کے لیے ٹولز – JSON فارمیٹ کریں، ڈیٹا کا تجزیہ کریں، اور کم کریں۔",
+      "title": "JSON ٹولز"
     },
     "list": {
-      "description": "Tools for working with lists – sort, reverse, randomize lists, find unique and duplicate list items, change list item separators, and much more.",
-      "title": "List Tools"
+      "description": "لسٹ پروسیسنگ ٹولز – فہرستیں مرتب کریں، الٹ ترتیب دیں، اور ڈوپلیکیٹ آئٹمز ختم کریں۔",
+      "title": "لسٹ ٹولز"
     },
     "number": {
-      "description": "Tools for working with numbers – generate number sequences, convert numbers to words and words to numbers, sort, round, factor numbers, and much more.",
-      "title": "Number Tools"
+      "description": "نمبرز اور اعداد کے لیے ٹولز – نمبرز جنریٹ کریں، الفاظ میں تبدیل کریں، اور جمع کریں۔",
+      "title": "نمبر ٹولز"
     },
     "pdf": {
-      "description": "Tools for working with PDF files - extract text from PDFs, convert PDFs to other formats, manipulate PDFs, and much more.",
-      "title": "PDF Tools"
+      "description": "PDF فائلوں کے لیے ٹولز - متن نکالیں، دوسرے فارمیٹس میں کنورٹ کریں، مرج اور اسپلٹ کریں۔",
+      "title": "پی ڈی ایف ٹولز"
     },
     "png": {
-      "description": "Tools for working with PNG images – convert PNGs to JPGs, create transparent PNGs, change PNG colors, crop, rotate, resize PNGs, and much more.",
-      "title": "PNG Tools"
+      "description": "PNG تصاویر کے لیے ٹولز – PNG کو JPG بنائیں، شفاف بیک گراؤنڈ بنائیں، اور سائز بدلاؤ۔",
+      "title": "PNG ٹولز"
     },
-    "seeAll": "See all {{title}}",
+    "seeAll": "تمام {{title}} دیکھیں",
     "string": {
-      "description": "Tools for working with text – convert text to images, find and replace text, split text into fragments, join text lines, repeat text, and much more.",
-      "title": "Text Tools"
+      "description": "ٹیکسٹ اور متن کے لیے ٹولز – متن تلاش اور تبدیل کریں، لائنیں تقسیم کریں، اور فارمیٹ بنائیں۔",
+      "title": "ٹیکسٹ ٹولز"
     },
     "time": {
-      "description": "Tools for working with time and date – calculate time differences, convert between time zones, format dates, generate date sequences, and much more.",
-      "title": "Time Tools"
+      "description": "وقت اور تاریخ کے ٹولز – وقت کا فرق معلوم کریں، ٹائم زونز تبدیل کریں، اور تاریخیں فارمیٹ کریں۔",
+      "title": "ٹائم اور تاریخ ٹولز"
     },
-    "try": "Try {{title}}",
+    "try": "{{title}} ٹرائے کریں",
     "video": {
-      "description": "Tools for working with videos – extract frames from videos, create GIFs from videos, convert videos to different formats, and much more.",
-      "title": "Video Tools"
+      "description": "ویڈیوز کے لیے ٹولز – فریمز نکالیں، GIF اینیمیشن بنائیں، اور ویڈیوز کنورٹ کریں۔",
+      "title": "ویڈیو ٹولز"
     },
     "xml": {
-      "description": "Tools for working with XML data structures - viewer, beautifier, validator and much more",
-      "title": "XML Tools"
+      "description": "XML ڈیٹا فارمیٹنگ اور ویلیڈیشن کے ٹولز۔",
+      "title": "XML ٹولز"
     }
   },
   "converters": {
     "audioconverter": {
-      "description": "Convert audio files between different formats.",
-      "longDescription": "This tool allows you to convert audio files from one format to another, supporting a wide range of audio formats for seamless conversion.",
-      "shortDescription": "Convert audio files to various formats.",
-      "title": "Audio Converter"
+      "description": "مختلف فارمیٹس کے درمیان آڈیو فائلیں تبدیل کریں۔",
+      "longDescription": "یہ ٹول آپ کو ایک فارمیٹ سے دوسرے فارمیٹ میں آڈیو تبدیل کرنے کی سہولت فراہم کرتا ہے۔",
+      "shortDescription": "آڈیو فائلوں کو مختلف فارمیٹس میں کنورٹ کریں۔",
+      "title": "آڈیو کنورٹر"
     }
   },
   "csv": {
     "findIncompleteCsvRecords": {
-      "description": "Just upload your CSV file in the form below and this tool will automatically check if none of the rows or columns are missing values. In the tool options, you can adjust the input file format (specify the delimiter, quote character, and comment character). Additionally, you can enable checking for empty values, skip empty lines, and set a limit on the number of error messages in the output.",
-      "name": "Find incomplete CSV records",
-      "shortDescription": "Quickly find rows and columns in CSV that are missing values."
+      "description": "اپنی CSV فائل اپلوڈ کریں اور یہ ٹول خود بخود نامکمل ریکارڈز چیک کرے گا۔",
+      "name": "نامکمل CSV ریکارڈز تلاش کریں",
+      "shortDescription": "CSV میں مِسنگ ویلیوز والے ریکارڈز تلاش کریں۔"
     }
   },
   "hero": {
-    "brand": "OmniTools",
-    "description": "Boost your productivity with OmniTools, the ultimate toolkit for getting things done quickly! Access thousands of user-friendly utilities for editing images, text, lists, and data, all directly from your browser.",
+    "brand": "ConvertingHub",
+    "description": "ConvertingHub کے ساتھ اپنے کام کی رفتار تیز کریں! براہ راست اپنے براؤزر سے تصاویر، پی ڈی ایف، لسٹس اور ڈیٹا پروسیسنگ کے ہزاروں مفت ٹولز استعمال کریں۔",
     "examples": {
-      "calculateNumberSum": "Calculate number sum",
-      "changeGifSpeed": "Change GIF speed",
-      "compressPng": "Compress PNG",
-      "createTransparentImage": "Create a transparent image",
-      "prettifyJson": "Prettify JSON",
-      "sortList": "Sort a list",
-      "splitPdf": "Split PDF",
-      "splitText": "Split a text",
-      "trimVideo": "Trim video"
+      "calculateNumberSum": "نمبرز کا مجموعہ معلوم کریں",
+      "changeGifSpeed": "GIF اسپیڈ تبدیل کریں",
+      "compressPng": "PNG سائز کم کریں",
+      "createTransparentImage": "شفاف تصویر بنائیں",
+      "prettifyJson": "JSON فارمیٹ کریں",
+      "sortList": "لسٹ ترتیب دیں",
+      "splitPdf": "PDF تقسیم کریں",
+      "splitText": "ٹیکسٹ اسپلٹ کریں",
+      "trimVideo": "ویڈیو ٹرم کریں"
     },
     "search": {
-      "noResult": "No results found, Try adjusting your search or filter criteria",
-      "placeholder": "Search all tools"
+      "noResult": "کوئی نتائج نہیں ملے، اپنی سرچ یا فلٹر کو تبدیل کرنے کی کوشش کریں",
+      "placeholder": "تمام ٹولز میں تلاش کریں..."
     },
-    "title": "Get Things Done Quickly with"
+    "title": "اپنے کام تیز اور آسانی سے کریں"
   },
   "inputFooter": {
-    "clear": "Clear",
-    "copyToClipboard": "Copy to clipboard",
-    "importFromFile": "Import from file"
+    "clear": "صاف کریں",
+    "copyToClipboard": "کلپ بورڈ پر کاپی کریں",
+    "importFromFile": "فائل سے امپورٹ کریں"
   },
   "list": {
     "group": {
-      "description": "World's simplest browser-based utility for grouping list items. Input your list and specify grouping criteria to organize items into logical groups. Perfect for categorizing data, organizing information, or creating structured lists. Supports custom separators and various grouping options.",
-      "name": "Group",
-      "shortDescription": "Group list items by common properties"
+      "description": "لسٹ آئٹمز کو خصوصیات کے مطابق گروپس میں ترتیب دینے کے لیے یوٹیلیٹی۔",
+      "name": "گروپ",
+      "shortDescription": "مشترکہ خصوصیات کی بنا پر آئٹمز گروپ کریں"
     },
     "reverse": {
-      "description": "This is a super simple browser-based application prints all list items in reverse. The input items can be separated by any symbol and you can also change the separator of the reversed list items.",
-      "name": "Reverse",
-      "shortDescription": "Quickly reverse a list"
+      "description": "لسٹ آئٹمز کی ترتیب فوراً الٹ دینے کا ٹول۔",
+      "name": "الٹ ترتیب",
+      "shortDescription": "لسٹ کی ترتیب تیز الٹ دیں"
     },
     "sort": {
-      "description": "This is a super simple browser-based application that sorts items in a list and arranges them in increasing or decreasing order. You can sort the items alphabetically, numerically, or by their length. You can also remove duplicate and empty items, as well as trim individual items that have whitespace around them. You can use any separator character to separate the input list items or alternatively use a regular expression to separate them. Additionally, you can create a new delimiter for the sorted output list.",
-      "name": "Sort",
-      "shortDescription": "Quickly sort a list"
+      "description": "لسٹ کے آئٹمز کو حروف تہجی یا عددی ترتیب میں سارٹ کرنے کی یوٹیلیٹی۔",
+      "name": "لسٹ سارٹ کریں",
+      "shortDescription": "لسٹ کی ترتیب درست کریں"
     }
   },
   "navbar": {
-    "buyMeACoffee": "Buy me a coffee",
-    "hireMe": "Contact with me",
-    "home": "Home",
-    "tools": "Tools"
+    "buyMeACoffee": "سپورٹ کریں",
+    "hireMe": "رابطہ کریں",
+    "home": "ہوم",
+    "tools": "ٹولز"
   },
   "number": {
     "generate": {
-      "description": "Quickly calculate a list of integers in your browser. To get your list, just specify the first integer, change value and total count in the options below, and this utility will generate that many integers",
-      "name": "Generate numbers",
-      "shortDescription": "Quickly calculate a list of integers in your browser"
+      "description": "براؤزر میں اعداد کی فہرست جنریٹ کریں۔",
+      "name": "نمبرز جنریٹ کریں",
+      "shortDescription": "اعداد کی لسٹ آسانی سے بنائیں"
     },
     "sum": {
-      "description": "This is a super simple browser-based application that sums numbers. The input numbers can be separated by any symbol and you can also change the separator of the summed numbers.",
-      "name": "Sum numbers",
-      "shortDescription": "Quickly sum a list of numbers"
+      "description": "تمام اعداد کا مجموعہ حساب کریں۔",
+      "name": "نمبرز جمع کریں",
+      "shortDescription": "نمبرز کا کل مجموعہ معلوم کریں"
     }
   },
   "numericInputWithUnit": {
-    "unit": "Unit"
+    "unit": "یونٹ"
   },
   "pdf": {
     "pdfToWord": {
-      "name": "PDF to Word",
-      "description": "Convert PDF documents into editable Microsoft Word (.doc/.docx) files.",
-      "shortDescription": "Convert PDF documents to editable Microsoft Word files."
+      "name": "PDF سے Word کنورٹر",
+      "description": "پی ڈی ایف ڈاکومنٹس کو ایڈٹ ایبل ورڈ (.doc/.docx) فائلوں میں تبدیل کریں۔",
+      "shortDescription": "PDF کو ورڈ فائلوں میں کنورٹ کریں۔"
     },
     "pdfToPpt": {
-      "name": "PDF to PowerPoint (PPT)",
-      "description": "Transform PDF pages into editable PowerPoint (.ppt/.pptx) presentation slides.",
-      "shortDescription": "Convert PDF pages to PowerPoint slide presentations."
+      "name": "PDF سے PowerPoint کنورٹر",
+      "description": "پی ڈی ایف صفحات کو پاور پوائنٹ (.ppt/.pptx) پریزنٹیشن سلائیڈز میں تبدیل کریں۔",
+      "shortDescription": "PDF صفحات کو پاور پوائنٹ سلائیڈز بنائیں۔"
     },
     "pdfToExcel": {
-      "name": "PDF to Excel",
-      "description": "Extract tables and tabular data from PDF files into Excel (.xlsx/.csv) spreadsheets.",
-      "shortDescription": "Extract tables from PDF files into Excel spreadsheets."
+      "name": "PDF سے Excel کنورٹر",
+      "description": "پی ڈی ایف سے ٹیبلز اور ڈیٹا ایکسسل (.xlsx/.csv) اسپرڈ شیٹس میں ایکسٹریکٹ کریں۔",
+      "shortDescription": "PDF سے ایکسل شیٹس میں ڈیٹا نکالیں۔"
     },
     "wordToPdf": {
-      "name": "Word to PDF",
-      "description": "Make DOC and DOCX files easy to read by converting them to PDF.",
-      "shortDescription": "Convert DOC and DOCX files to PDF."
+      "name": "Word سے PDF کنورٹر",
+      "description": "DOC اور DOCX فائلوں کو پی ڈی ایف میں تبدیل کریں۔",
+      "shortDescription": "ورڈ فائلوں کو پی ڈی ایف میں کنورٹ کریں۔"
     },
     "pptToPdf": {
-      "name": "PowerPoint to PDF",
-      "description": "Make PPT and PPTX slideshows easy to view by converting them to PDF.",
-      "shortDescription": "Convert PPT and PPTX slideshows to PDF."
+      "name": "PowerPoint سے PDF کنورٹر",
+      "description": "پاور پوائنٹ پریزنٹیشنز کو پی ڈی ایف میں دیکھیں۔",
+      "shortDescription": "پاور پوائنٹ سلائیڈز کو PDF بنائیں。"
     },
     "excelToPdf": {
-      "name": "Excel to PDF",
-      "description": "Make EXCEL spreadsheets easy to read by converting them to PDF.",
-      "shortDescription": "Convert EXCEL spreadsheets to PDF."
+      "name": "Excel سے PDF کنورٹر",
+      "description": "ایکسسل اسپرڈ شیٹس کو پی ڈی ایف میں تبدیل کریں۔",
+      "shortDescription": "ایکسسل شیٹس کو PDF بنائیں。"
     },
     "jpgToPdf": {
-      "name": "JPG to PDF",
-      "description": "Convert JPG images to PDF in seconds. Easily adjust orientation and margins.",
-      "shortDescription": "Convert JPG and PNG images to PDF."
+      "name": "JPG سے PDF کنورٹر",
+      "description": "تصاویر کو فوراً پی ڈی ایف فائلوں میں کنورٹ کریں۔",
+      "shortDescription": "JPG اور PNG تصاویر کو PDF میں تبدیل کریں۔"
     },
     "watermarkPdf": {
-      "name": "Watermark",
-      "description": "Stamp an image or text over your PDF in seconds. Choose typography, transparency and position.",
-      "shortDescription": "Stamp custom watermarks onto PDF pages."
+      "name": "PDF واٹر مارک",
+      "description": "پی ڈی ایف پر کسٹم تصویر یا ٹیکسٹ کا واٹر مارک لگائیں۔",
+      "shortDescription": "PDF میں واٹر مارک شامل کریں۔"
     },
     "pageNumbers": {
-      "name": "Page numbers",
-      "description": "Add page numbers into PDFs with ease. Choose your positions, dimensions, typography.",
-      "shortDescription": "Add page numbers to PDF documents."
+      "name": "پیج نمبرز",
+      "description": "پی ڈی ایف فائلوں پر صفحہ نمبرز شامل کریں۔",
+      "shortDescription": "PDF ڈاکومنٹس میں پیج نمبرز لگائیں۔"
     },
     "organizePdf": {
-      "name": "Organize PDF",
-      "description": "Sort pages of your PDF file however you like. Delete PDF pages or add PDF pages to your document.",
-      "shortDescription": "Sort, reorder, or delete pages in PDF."
+      "name": "PDF آرگنائزر",
+      "description": "پی ڈی ایف کے صفحات کی ترتیب تبدیل کریں، گھمائیں یا حذف کریں۔",
+      "shortDescription": "PDF کے صفحات کی ترتیب اور روٹیشن درست کریں۔"
     },
     "unlockPdf": {
-      "name": "Unlock PDF",
-      "description": "Remove PDF password security, giving you the freedom to use your PDFs as you want.",
-      "shortDescription": "Remove PDF password security & restriction permissions."
+      "name": "PDF پاس ورڈ انلاک",
+      "description": "پی ڈی ایف کا پاس ورڈ اور سیکیورٹی ختم کریں۔",
+      "shortDescription": "PDF سے پاس ورڈ اور پابندیاں ختم کریں۔"
     },
     "signPdf": {
-      "name": "Sign PDF",
-      "description": "Sign yourself or request electronic signatures from others.",
-      "shortDescription": "Add electronic signatures to PDF documents."
+      "name": "PDF سائین",
+      "description": "پی ڈی ایف ڈاکومنٹس پر اپنا الیکٹرانک دستخط شامل کریں۔",
+      "shortDescription": "PDF پر ڈیجیٹل دستخط شامل کریں۔"
     },
     "cropPdf": {
-      "name": "Crop PDF",
-      "description": "Crop margins of PDF documents or select specific areas, then apply the changes.",
-      "shortDescription": "Crop margins of PDF documents."
+      "name": "PDF کراپ کریں",
+      "description": "پی ڈی ایف کے مارجنز اور اضافی حصہ کراپ کریں۔",
+      "shortDescription": "PDF مارجنز کراپ کریں۔"
     },
     "pdfAiSummarizer": {
-      "name": "AI Summarizer",
-      "description": "Quickly generate concise summaries from articles, paragraphs, and essays in seconds.",
-      "shortDescription": "Generate concise AI summaries from PDF documents."
+      "name": "PDF AI خلاصہ",
+      "description": "مضامین اور ڈاکومنٹس کا AI سے فوری خلاصہ تیار کریں۔",
+      "shortDescription": "PDF کا فوری AI خلاصہ تیار کریں۔"
     },
     "translatePdf": {
-      "name": "Translate PDF",
-      "description": "Easily translate PDF files powered by AI. Keep fonts, layout, and formatting perfectly intact.",
-      "shortDescription": "Translate PDF files while keeping layout intact."
+      "name": "PDF ترجمہ",
+      "description": "فارمیٹنگ اور فاؤنٹ برقرار رکھتے ہوئے PDF کا ترجمہ کریں۔",
+      "shortDescription": "PDF ڈاکومنٹس کا ترجمہ کریں۔"
     },
     "compressPdf": {
-      "description": "Reduce PDF file size while maintaining quality using Ghostscript",
-      "name": "Compress PDF",
-      "shortDescription": "Compress PDF files securely in your browser"
+      "description": "کوالٹی خراب کیے بغیر PDF فائل کا سائز کم کریں۔",
+      "name": "PDF کمپریس کریں",
+      "shortDescription": "براؤزر میں محفوظ طریقے سے PDF کا سائز کم کریں"
     },
     "mergePdf": {
-      "description": "Combine multiple PDF files into a single document.",
-      "name": "Merge PDF",
-      "shortDescription": "Merge multiple PDF files into a single document"
+      "description": "متعدد PDF فائلوں کو ایک فائل میں جوڑیں۔",
+      "name": "PDF مرج کریں",
+      "shortDescription": "متعدد PDF فائلوں کو ملا کر ایک بنائیں"
     },
     "pdfToEpub": {
-      "description": "Transform PDF documents into EPUB files for better e-reader compatibility.",
-      "name": "PDF to EPUB",
-      "shortDescription": "Convert PDF files to EPUB format"
+      "description": "پی ڈی ایف کو ای بک EPUB فارمیٹ میں تبدیل کریں۔",
+      "name": "PDF سے EPUB کنورٹر",
+      "shortDescription": "PDF فائلوں کو EPUB میں کنورٹ کریں"
     },
     "protectPdf": {
-      "description": "Add password protection to your PDF files securely in your browser",
-      "name": "Protect PDF",
-      "shortDescription": "Password protect PDF files securely"
+      "description": "اپنی PDF فائلوں پر سیکیورٹی پاس ورڈ لگائیں۔",
+      "name": "PDF پروٹیکٹ کریں",
+      "shortDescription": "PDF پر پاس ورڈ لگائیں"
     },
     "splitPdf": {
-      "description": "Extract specific pages from a PDF file using page numbers or ranges (e.g., 1,5-8)",
-      "name": "Split PDF",
-      "shortDescription": "Extract specific pages from a PDF file"
+      "description": "پی ڈی ایف سے مخصوص صفحات علیحدہ کریں۔",
+      "name": "PDF اسپلٹ کریں",
+      "shortDescription": "PDF سے مخصوص صفحات الگ کریں"
     }
   },
   "resultFooter": {
-    "copy": "Copy to clipboard",
-    "download": "Download"
+    "copy": "کلپ بورڈ پر کاپی کریں",
+    "download": "ڈاؤن لوڈ کریں"
   },
   "string": {
     "createPalindrome": {
-      "description": "World's simplest browser-based utility for creating palindromes from any text. Input text and instantly transform it into a palindrome that reads the same forward and backward. Perfect for word games, creating symmetrical text patterns, or exploring linguistic curiosities.",
-      "name": "Create palindrome",
-      "shortDescription": "Create text that reads the same forward and backward"
+      "description": "ایسے جملے اور متن جنریٹ کریں جو آگے اور پیچھے سے ایک ہی طرح پڑھے جائیں۔",
+      "name": "متناظر متن بنائیں",
+      "shortDescription": "ایک ہی جیسے پڑھے جانے والے جملے بنائیں"
     },
     "palindrome": {
-      "description": "World's simplest browser-based utility for checking if text is a palindrome. Instantly verify if your text reads the same forward and backward. Perfect for word puzzles, linguistic analysis, or validating symmetrical text patterns. Supports various delimiters and multi-word palindrome detection.",
-      "name": "Palindrome",
-      "shortDescription": "Check if text reads the same forward and backward"
+      "description": "چیک کریں کہ کیا متن دونوں سمتوں میں ایک جیسا پڑھا جاتا ہے۔",
+      "name": "متن کا تناظر چیک کریں",
+      "shortDescription": "متن کی سیمٹری اور تناظر چیک کریں"
     },
     "repeat": {
-      "description": "This tool allows you to repeat a given text multiple times with an optional separator.",
-      "name": "Repeat text",
-      "shortDescription": "Repeat text multiple times"
+      "description": "دیے گئے متن کو متعدد بار دہرائیں۔",
+      "name": "متن دہرائیں",
+      "shortDescription": "متن بار بار دہرائیں"
     },
     "reverse": {
-      "description": "World's simplest browser-based utility for reversing text. Input any text and get it instantly reversed, character by character. Perfect for creating mirror text, analyzing palindromes, or playing with text patterns. Preserves spaces and special characters while reversing.",
-      "name": "Reverse",
-      "shortDescription": "Reverse any text character by character"
+      "description": "متن کے تمام حروف کی ترتیب الٹ دیں۔",
+      "name": "متن الٹیں",
+      "shortDescription": "متن کا ایک ایک حرف الٹ دیں"
     },
     "toMorse": {
-      "description": "World's simplest browser-based utility for converting text to Morse code. Load your text in the input form on the left and you'll instantly get Morse code in the output area. Powerful, free, and fast. Load text – get Morse code.",
-      "name": "String To morse",
-      "shortDescription": "Quickly encode text to morse"
+      "description": "متن کو مورس کوڈ میں تبدیل کریں۔",
+      "name": "متن سے مورس کوڈ",
+      "shortDescription": "متن کو مورس کوڈ بنائیں"
     },
     "uppercase": {
-      "description": "World's simplest browser-based utility for converting text to uppercase. Just input your text and it will be automatically converted to all capital letters. Perfect for creating headlines, emphasizing text, or standardizing text format. Supports various text formats and preserves special characters.",
-      "name": "Uppercase",
-      "shortDescription": "Convert text to uppercase letters"
+      "description": "تمام حروف کو بڑے حروف (Capital Letters) میں تبدیل کریں۔",
+      "name": "بڑے حروف (Uppercase)",
+      "shortDescription": "حروف کو بڑے حروف میں تبدیل کریں"
     }
   },
   "toolExamples": {
-    "subtitle": "Click to try!",
-    "title": "{{title}} Examples"
+    "subtitle": "کوشش کے لیے کلک کریں!",
+    "title": "{{title}} کی مثالیں"
   },
   "toolFileResult": {
-    "copied": "File copied",
-    "copyFailed": "Failed to copy: {{error}}",
-    "loading": "Loading... This may take a moment.",
-    "result": "Result"
+    "copied": "فائل کاپی ہو گئی",
+    "copyFailed": "کاپی کرنے میں ناکامی: {{error}}",
+    "loading": "لوڈ ہو رہا ہے... براہ کرم انتظار کریں۔",
+    "result": "نتیجہ"
   },
   "toolHeader": {
-    "seeExamples": "See Examples"
+    "seeExamples": "مثالیں دیکھیں"
   },
   "toolLayout": {
-    "allToolsTitle": "All {{type}}"
+    "allToolsTitle": "تمام {{type}} ٹولز"
   },
   "toolMultiFileResult": {
-    "copied": "File copied",
-    "copyFailed": "Failed to copy: {{error}}",
-    "loading": "Loading... This may take a moment.",
-    "result": "Result"
+    "copied": "فائلیں کاپی ہو گئیں",
+    "copyFailed": "کاپی کرنے میں ناکامی: {{error}}",
+    "loading": "لوڈ ہو رہا ہے... براہ کرم انتظار کریں۔",
+    "result": "نتیجہ"
   },
   "toolMultipleInput": {
-    "deleteFile": "Delete file",
-    "inputTitle": "Input {{type}}",
-    "noFilesSelected": "No files selected"
+    "deleteFile": "فائل حذف کریں",
+    "inputTitle": "ان پٹ {{type}}",
+    "noFilesSelected": "کوئی فائل منتخب نہیں کی گئی"
   },
   "toolOptions": {
-    "title": "Tool options"
+    "title": "ٹول کی ترتیبات"
   },
   "toolTextInput": {
-    "copied": "Text copied",
-    "copyFailed": "Failed to copy: {{error}}",
-    "input": "Input text",
-    "placeholder": "Enter your text here..."
+    "copied": "متن کاپی ہو گیا",
+    "copyFailed": "کاپی کرنے میں ناکامی: {{error}}",
+    "input": "ان پٹ متن",
+    "placeholder": "اپنا متن یہاں درج کریں..."
   },
   "toolTextResult": {
-    "copied": "Text copied",
-    "copyFailed": "Failed to copy: {{error}}",
-    "loading": "Loading... This may take a moment.",
-    "result": "Result"
+    "copied": "متن کاپی ہو گیا",
+    "copyFailed": "کاپی کرنے میں ناکامی: {{error}}",
+    "loading": "لوڈ ہو رہا ہے... براہ کرم انتظار کریں۔",
+    "result": "نتیجہ"
   },
   "userTypes": {
-    "developers": "Developers",
-    "generalUsers": "General users"
+    "developers": "ڈویلپرز کے لیے",
+    "generalUsers": "عام صارفین کے لیے"
   },
-  "navbar.hireMe": "مجھ سے رابطہ کریں / سی وی",
-  "toolLayout.allToolsTitle": "تمام {{type}} ٹولز",
   "home": "ہوم",
   "tools": "ٹولز",
   "search": "تلاش کریں...",
   "convert": "تبدیل کریں",
   "download": "ڈاؤن لوڈ کریں",
   "organize": "ترتیب دیں",
-  "delete": "خارج کریں",
+  "delete": "حذف کریں",
   "rotate": "گھمائیں",
   "reset": "ری سیٹ کریں",
   "select_all": "تمام منتخب کریں",

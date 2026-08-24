@@ -8,9 +8,13 @@ export function dmsToDecimal(dmsStr: string | number): number {
   if (!isNaN(directNum)) return directNum;
 
   // Extract degrees, minutes, seconds, and direction (N/S/E/W)
-  const isNegative = str.includes('S') || str.includes('W') || str.startsWith('-');
+  const isNegative =
+    str.includes('S') || str.includes('W') || str.startsWith('-');
   const cleanStr = str.replace(/[^\d.\s]/g, ' ').trim();
-  const parts = cleanStr.split(/\s+/).map(Number).filter((n) => !isNaN(n));
+  const parts = cleanStr
+    .split(/\s+/)
+    .map(Number)
+    .filter((n) => !isNaN(n));
 
   if (parts.length === 0) return NaN;
 
@@ -68,7 +72,12 @@ export function convertCoordinateValue(
   }
 
   if (targetFormat === 'utm') {
-    const otherDd = pairVal !== undefined ? (typeof pairVal === 'number' ? pairVal : dmsToDecimal(pairVal)) : 0;
+    const otherDd =
+      pairVal !== undefined
+        ? typeof pairVal === 'number'
+          ? pairVal
+          : dmsToDecimal(pairVal)
+        : 0;
     const lat = isLat ? dd : otherDd;
     const lon = isLat ? otherDd : dd;
     return decimalToUtm(lat, lon);

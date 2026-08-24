@@ -21,7 +21,10 @@ import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import AltRouteIcon from '@mui/icons-material/AltRoute';
 import JSZip from 'jszip';
-import { parseShapefileBuffers, ParsedShapefileResult } from '../utils/shapefile';
+import {
+  parseShapefileBuffers,
+  ParsedShapefileResult
+} from '../utils/shapefile';
 
 interface NetworkEdge {
   edgeId: number;
@@ -39,7 +42,9 @@ interface NetworkNode {
 }
 
 export default function ShapefileToRoadNetwork() {
-  const [geoResult, setGeoResult] = useState<ParsedShapefileResult | null>(null);
+  const [geoResult, setGeoResult] = useState<ParsedShapefileResult | null>(
+    null
+  );
   const [fileName, setFileName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
@@ -63,7 +68,10 @@ export default function ShapefileToRoadNetwork() {
         const shpFile = Object.keys(zip.files).find((f) => f.endsWith('.shp'));
         const dbfFile = Object.keys(zip.files).find((f) => f.endsWith('.dbf'));
 
-        if (!shpFile) throw new Error('No .shp file found inside the uploaded ZIP archive.');
+        if (!shpFile)
+          throw new Error(
+            'No .shp file found inside the uploaded ZIP archive.'
+          );
 
         shpBuf = await zip.files[shpFile].async('arraybuffer');
         if (dbfFile) dbfBuf = await zip.files[dbfFile].async('arraybuffer');
@@ -75,7 +83,10 @@ export default function ShapefileToRoadNetwork() {
         }
       }
 
-      if (!shpBuf) throw new Error('Please upload a valid .shp file or .zip shapefile archive.');
+      if (!shpBuf)
+        throw new Error(
+          'Please upload a valid .shp file or .zip shapefile archive.'
+        );
 
       const res = parseShapefileBuffers(shpBuf, dbfBuf || undefined);
       setGeoResult(res);
@@ -86,7 +97,8 @@ export default function ShapefileToRoadNetwork() {
 
   // Build Road Network Topology (Nodes & Edges)
   const { nodes, edges } = useMemo(() => {
-    if (!geoResult || geoResult.features.length === 0) return { nodes: [], edges: [] };
+    if (!geoResult || geoResult.features.length === 0)
+      return { nodes: [], edges: [] };
 
     const nodeMap = new Map<string, NetworkNode>();
     const edgeList: NetworkEdge[] = [];
@@ -100,7 +112,11 @@ export default function ShapefileToRoadNetwork() {
         existing.degree++;
         return existing;
       }
-      const newNode: NetworkNode = { nodeId: nextNodeId++, coordinates: coord, degree: 1 };
+      const newNode: NetworkNode = {
+        nodeId: nextNodeId++,
+        coordinates: coord,
+        degree: 1
+      };
       nodeMap.set(key, newNode);
       return newNode;
     };
@@ -109,7 +125,12 @@ export default function ShapefileToRoadNetwork() {
       const gType = feat.geometry.type;
       const coords = feat.geometry.coordinates;
 
-      const lines: [number, number][][] = gType === 'MultiLineString' ? coords : gType === 'LineString' ? [coords] : [];
+      const lines: [number, number][][] =
+        gType === 'MultiLineString'
+          ? coords
+          : gType === 'LineString'
+            ? [coords]
+            : [];
 
       lines.forEach((line) => {
         if (line.length >= 2) {
@@ -139,7 +160,11 @@ export default function ShapefileToRoadNetwork() {
 
   const outputJsonString = useMemo(() => {
     if (edges.length === 0) return '';
-    return JSON.stringify({ networkNodes: nodes, networkEdges: edges }, null, 2);
+    return JSON.stringify(
+      { networkNodes: nodes, networkEdges: edges },
+      null,
+      2
+    );
   }, [nodes, edges]);
 
   const handleCopy = () => {
@@ -151,13 +176,17 @@ export default function ShapefileToRoadNetwork() {
   const handleDownloadCsv = () => {
     let csv = 'EdgeID,NodeFrom,NodeTo,LengthKm,Coordinates\n';
     edges.forEach((e) => {
-      csv += `${e.edgeId},${e.nodeFrom},${e.nodeTo},${e.lengthKm},"${JSON.stringify(e.coordinates)}"\n`;
+      csv += `${e.edgeId},${e.nodeFrom},${e.nodeTo},${
+        e.lengthKm
+      },"${JSON.stringify(e.coordinates)}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${fileName.replace(/\.[^/.]+$/, '') || 'road'}_network_edges.csv`;
+    a.download = `${
+      fileName.replace(/\.[^/.]+$/, '') || 'road'
+    }_network_edges.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -169,20 +198,34 @@ export default function ShapefileToRoadNetwork() {
         ...nodes.map((n) => ({
           type: 'Feature',
           geometry: { type: 'Point', coordinates: n.coordinates },
-          properties: { nodeType: 'JunctionNode', nodeId: n.nodeId, degree: n.degree }
+          properties: {
+            nodeType: 'JunctionNode',
+            nodeId: n.nodeId,
+            degree: n.degree
+          }
         })),
         ...edges.map((e) => ({
           type: 'Feature',
           geometry: { type: 'LineString', coordinates: e.coordinates },
-          properties: { edgeId: e.edgeId, nodeFrom: e.nodeFrom, nodeTo: e.nodeTo, lengthKm: e.lengthKm, ...e.attributes }
+          properties: {
+            edgeId: e.edgeId,
+            nodeFrom: e.nodeFrom,
+            nodeTo: e.nodeTo,
+            lengthKm: e.lengthKm,
+            ...e.attributes
+          }
         }))
       ]
     };
-    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], {
+      type: 'application/json'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${fileName.replace(/\.[^/.]+$/, '') || 'road'}_network_topology.geojson`;
+    a.download = `${
+      fileName.replace(/\.[^/.]+$/, '') || 'road'
+    }_network_topology.geojson`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -197,7 +240,8 @@ export default function ShapefileToRoadNetwork() {
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Extract topological node-link graph networks, junction nodes, and road edge segments from polyline Shapefiles.
+          Extract topological node-link graph networks, junction nodes, and road
+          edge segments from polyline Shapefiles.
         </Typography>
       </Stack>
 
@@ -208,7 +252,7 @@ export default function ShapefileToRoadNetwork() {
       )}
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={5}>
+        <Grid item xs={5}>
           <Stack spacing={2}>
             <Button
               variant="contained"
@@ -218,13 +262,31 @@ export default function ShapefileToRoadNetwork() {
               size="large"
             >
               Upload PolyLine Shapefile (.shp / .zip)
-              <input type="file" accept=".shp,.dbf,.zip" multiple hidden onChange={handleFileUpload} />
+              <input
+                type="file"
+                accept=".shp,.dbf,.zip"
+                multiple
+                hidden
+                onChange={handleFileUpload}
+              />
             </Button>
 
-            {fileName && <Chip label={`Selected: ${fileName}`} color="info" variant="outlined" />}
+            {fileName && (
+              <Chip
+                label={`Selected: ${fileName}`}
+                color="info"
+                variant="outlined"
+              />
+            )}
 
             {edges.length > 0 && (
-              <Box p={2} border="1px solid" borderColor="divider" borderRadius={1} bgcolor="action.hover">
+              <Box
+                p={2}
+                border="1px solid"
+                borderColor="divider"
+                borderRadius={1}
+                bgcolor="action.hover"
+              >
                 <Typography variant="subtitle2" gutterBottom color="primary">
                   Network Graph Topology Metrics
                 </Typography>
@@ -243,15 +305,30 @@ export default function ShapefileToRoadNetwork() {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} md={7}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Grid item xs={7}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             <Typography variant="subtitle2" gutterBottom>
               Road Edge Network Topology Table
             </Typography>
 
             {edges.length > 0 ? (
               <>
-                <TableContainer sx={{ maxHeight: 180, border: '1px solid', borderColor: 'divider', mb: 2 }}>
+                <TableContainer
+                  sx={{
+                    maxHeight: 180,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    mb: 2
+                  }}
+                >
                   <Table size="small" stickyHeader>
                     <TableHead>
                       <TableRow>
@@ -280,17 +357,33 @@ export default function ShapefileToRoadNetwork() {
                   fullWidth
                   InputProps={{ readOnly: true }}
                   value={outputJsonString}
-                  sx={{ fontFamily: 'monospace', fontSize: 11, bgcolor: 'action.hover' }}
+                  sx={{
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    bgcolor: 'action.hover'
+                  }}
                 />
 
                 <Stack direction="row" spacing={2} mt={2}>
-                  <Button variant="contained" startIcon={<ContentCopyIcon />} onClick={handleCopy}>
+                  <Button
+                    variant="contained"
+                    startIcon={<ContentCopyIcon />}
+                    onClick={handleCopy}
+                  >
                     Copy Network JSON
                   </Button>
-                  <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleDownloadCsv}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<DownloadIcon />}
+                    onClick={handleDownloadCsv}
+                  >
                     Download Edges CSV
                   </Button>
-                  <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleDownloadGeoJSON}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<DownloadIcon />}
+                    onClick={handleDownloadGeoJSON}
+                  >
                     Download Topology GeoJSON
                   </Button>
                 </Stack>
@@ -302,8 +395,15 @@ export default function ShapefileToRoadNetwork() {
                 )}
               </>
             ) : (
-              <Box display="flex" alignItems="center" justifyContent="center" height={300} color="text.secondary">
-                Upload polyline shapefile to extract node-link road network topology.
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                height={300}
+                color="text.secondary"
+              >
+                Upload polyline shapefile to extract node-link road network
+                topology.
               </Box>
             )}
           </Paper>

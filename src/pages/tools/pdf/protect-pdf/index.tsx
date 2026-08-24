@@ -14,11 +14,14 @@ const initialValues: InitialValuesType = {
   confirmPassword: ''
 };
 
+import { usePendingConversionFile } from '../../../../hooks';
+
 export default function ProtectPdf({
   title,
   longDescription
 }: ToolComponentProps) {
   const [input, setInput] = useState<File | null>(null);
+  usePendingConversionFile(input, setInput);
   const [result, setResult] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const { showSnackBar } = useContext(CustomSnackBarContext);

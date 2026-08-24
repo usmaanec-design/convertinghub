@@ -1,12 +1,24 @@
 import { useState } from 'react';
-import { Box, Button, MenuItem, Select, Typography, Stack, Paper, Alert, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  MenuItem,
+  Select,
+  Typography,
+  Stack,
+  Paper,
+  Alert,
+  CircularProgress
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import TranslateIcon from '@mui/icons-material/Translate';
 import { PDFDocument, rgb } from 'pdf-lib';
+import { usePendingConversionFile } from '../../../../hooks';
 
 export default function TranslatePdf() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [targetLang, setTargetLang] = useState<string>('es');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [convertedBlob, setConvertedBlob] = useState<Blob | null>(null);
@@ -42,7 +54,9 @@ export default function TranslatePdf() {
       });
 
       const pdfBytes = await pdfDoc.save();
-      setConvertedBlob(new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' }));
+      setConvertedBlob(
+        new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' })
+      );
     } catch (err: any) {
       setError(`Failed to translate PDF: ${err.message}`);
     } finally {
@@ -55,7 +69,10 @@ export default function TranslatePdf() {
     const url = URL.createObjectURL(convertedBlob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${file.name.replace(/\.pdf$/i, '')}_translated_${targetLang}.pdf`;
+    a.download = `${file.name.replace(
+      /\.pdf$/i,
+      ''
+    )}_translated_${targetLang}.pdf`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -71,10 +88,15 @@ export default function TranslatePdf() {
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          Translate PDF files while keeping layout, fonts, and page formatting intact.
+          Translate PDF files while keeping layout, fonts, and page formatting
+          intact.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -89,7 +111,13 @@ export default function TranslatePdf() {
           component="label"
         >
           <input type="file" accept=".pdf" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 48, color: file ? 'primary.main' : 'text.secondary', mb: 1 }} />
+          <UploadFileIcon
+            sx={{
+              fontSize: 48,
+              color: file ? 'primary.main' : 'text.secondary',
+              mb: 1
+            }}
+          />
           <Typography variant="subtitle1" fontWeight="bold">
             {file ? file.name : 'Click to select or drop a PDF file here'}
           </Typography>
@@ -122,7 +150,11 @@ export default function TranslatePdf() {
             size="large"
             onClick={handleTranslate}
             disabled={isProcessing}
-            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
+            startIcon={
+              isProcessing ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : null
+            }
             fullWidth
           >
             {isProcessing ? 'Translating PDF...' : 'Translate PDF Document'}

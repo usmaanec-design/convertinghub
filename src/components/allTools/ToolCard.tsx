@@ -25,34 +25,35 @@ export default function ToolCard({
       onClick={() => navigate(link)}
       raised
       sx={{
-        borderRadius: 2,
+        borderRadius: 3,
         bgcolor: 'background.darkSecondary',
         borderColor: 'background.darkSecondary',
         color: '#fff',
         boxShadow:
           theme.palette.mode === 'dark'
-            ? null
-            : '6px 6px 12px #b8b9be, -6px -6px 12px #fff',
+            ? '0 4px 12px rgba(0,0,0,0.5)'
+            : '6px 6px 14px #b8b9be, -6px -6px 14px #fff',
         cursor: 'pointer',
         height: '100%',
+        transition: 'all 0.25s ease-in-out',
         '&:hover': {
-          transform: 'scale(1.05)'
+          transform: 'translateY(-4px)'
         }
       }}
     >
-      <CardContent>
+      <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
         <Box
           display="flex"
           justifyContent="space-between"
+          alignItems="center"
           sx={{
-            paddingBottom: 1,
-            borderBottomWidth: 1,
-            borderColor: '#ffffff70'
+            pb: 1.5,
+            borderBottom: '1px solid #ffffff30'
           }}
         >
-          <Stack direction={'row'} spacing={2} alignItems={'center'}>
-            <Icon icon={icon} fontSize={25} />
-            <Typography variant="h5" component="h2">
+          <Stack direction={'row'} spacing={1.5} alignItems={'center'}>
+            <Icon icon={icon} fontSize={32} />
+            <Typography variant="h6" component="h2" fontWeight={800}>
               {title}
             </Typography>
           </Stack>
@@ -60,7 +61,7 @@ export default function ToolCard({
             <ChevronRightIcon />
           </Link>
         </Box>
-        <Typography variant="body2" mt={2} color="#fff">
+        <Typography variant="body2" mt={2} color="rgba(255,255,255,0.85)" lineHeight={1.6}>
           {description}
         </Typography>
       </CardContent>

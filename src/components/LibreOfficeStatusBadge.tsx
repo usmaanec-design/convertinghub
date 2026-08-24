@@ -25,7 +25,10 @@ export const LibreOfficeStatusBadge: React.FC = () => {
   const { status, refreshStatus, testEngine, isChecking } = useLibreOffice();
   const [open, setOpen] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [testResult, setTestResult] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
   const handleOpen = () => {
     setTestResult(null);
@@ -102,7 +105,8 @@ export const LibreOfficeStatusBadge: React.FC = () => {
                 <Typography variant="subtitle2" fontWeight="bold">
                   High-Speed Document Conversion Engine Active
                 </Typography>
-                High-fidelity document processing (PDF ↔ Word/Excel/PPTX) is active and running.
+                High-fidelity document processing (PDF ↔ Word/Excel/PPTX) is
+                active and running.
               </Alert>
             ) : status.status === 'not_installed' ? (
               <Alert severity="error">
@@ -121,18 +125,30 @@ export const LibreOfficeStatusBadge: React.FC = () => {
             )}
 
             <Box sx={{ bgcolor: 'action.hover', p: 2, borderRadius: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                gutterBottom
+              >
                 ENGINE METRICS & DETAILS
               </Typography>
               <Stack spacing={1}>
                 <Box display="flex" justifyContent="space-between">
-                  <Typography variant="body2" color="text.secondary">Status:</Typography>
-                  <Typography variant="body2" fontWeight="bold" color={`${color}.main`}>
+                  <Typography variant="body2" color="text.secondary">
+                    Status:
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    fontWeight="bold"
+                    color={`${color}.main`}
+                  >
                     {status.status.toUpperCase()}
                   </Typography>
                 </Box>
                 <Box display="flex" justifyContent="space-between">
-                  <Typography variant="body2" color="text.secondary">Mode:</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Mode:
+                  </Typography>
                   <Typography variant="body2" fontWeight="bold">
                     High-Fidelity Headless Pipeline
                   </Typography>
@@ -160,7 +176,9 @@ export const LibreOfficeStatusBadge: React.FC = () => {
               <Button
                 variant="outlined"
                 color="primary"
-                startIcon={testing ? <CircularProgress size={18} /> : <PlayArrowIcon />}
+                startIcon={
+                  testing ? <CircularProgress size={18} /> : <PlayArrowIcon />
+                }
                 onClick={handleTest}
                 disabled={testing}
               >

@@ -8,7 +8,7 @@ export const tool = defineTool('pdf', {
     shortDescription: 'translation:pdf.cropPdf.shortDescription'
   },
   path: 'crop-pdf',
-  icon: 'material-symbols:crop',
+  icon: 'flat-color-icons:crop',
   keywords: ['crop', 'trim', 'margins', 'pdf', 'bounding box', 'cut'],
   component: lazy(() => import('./index'))
 });

@@ -1,12 +1,23 @@
 import { useState } from 'react';
-import { Box, Button, Typography, Stack, Paper, Alert, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Stack,
+  Paper,
+  Alert,
+  CircularProgress
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import { PDFDocument, rgb } from 'pdf-lib';
 
+import { usePendingConversionFile } from '../../../../hooks';
+
 export default function PageNumbers() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [convertedBlob, setConvertedBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +54,9 @@ export default function PageNumbers() {
       });
 
       const pdfBytes = await pdfDoc.save();
-      setConvertedBlob(new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' }));
+      setConvertedBlob(
+        new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' })
+      );
     } catch (err: any) {
       setError(`Failed to add page numbers: ${err.message}`);
     } finally {
@@ -72,10 +85,15 @@ export default function PageNumbers() {
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          Add page numbers into PDFs with ease. Automatically stamps page positions and numbering.
+          Add page numbers into PDFs with ease. Automatically stamps page
+          positions and numbering.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -90,7 +108,13 @@ export default function PageNumbers() {
           component="label"
         >
           <input type="file" accept=".pdf" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 48, color: file ? 'primary.main' : 'text.secondary', mb: 1 }} />
+          <UploadFileIcon
+            sx={{
+              fontSize: 48,
+              color: file ? 'primary.main' : 'text.secondary',
+              mb: 1
+            }}
+          />
           <Typography variant="subtitle1" fontWeight="bold">
             {file ? file.name : 'Click to select or drop a PDF file here'}
           </Typography>
@@ -103,7 +127,11 @@ export default function PageNumbers() {
             size="large"
             onClick={handleAddPageNumbers}
             disabled={isProcessing}
-            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
+            startIcon={
+              isProcessing ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : null
+            }
             fullWidth
           >
             {isProcessing ? 'Adding Page Numbers...' : 'Add Page Numbers'}

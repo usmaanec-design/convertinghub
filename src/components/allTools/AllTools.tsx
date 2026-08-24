@@ -24,9 +24,9 @@ export default function AllTools({ title, toolCards }: AllToolsProps) {
         {title}
       </Typography>
       <Stack direction={'row'} alignItems={'center'} spacing={2}>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           {toolCards.map((card, index) => (
-            <Grid item xs={12} md={6} lg={4} key={index}>
+            <Grid item xs={12} sm={6} md={4} key={index}>
               <ToolCard
                 //@ts-ignore
                 title={t(card.title)}

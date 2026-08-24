@@ -51,12 +51,16 @@ export function getNeutralConversionMessage(target: string): string {
     pptx: 'Processing presentation...',
     pdf: 'Processing document...'
   };
-  return baseMessages[label as keyof typeof baseMessages] || 'Processing document...';
+  return (
+    baseMessages[label as keyof typeof baseMessages] || 'Processing document...'
+  );
 }
 
 export function isUserFacingProviderName(value: string): boolean {
   const normalized = (value || '').toLowerCase();
-  return /(adobe|libreoffice|fallback engine|provider|backend engine|adobe api|libreoffice headless)/.test(normalized);
+  return /(adobe|libreoffice|fallback engine|provider|backend engine|adobe api|libreoffice headless)/.test(
+    normalized
+  );
 }
 
 export function classifyAdobeError(message: string): ConversionStatusMessage {
@@ -66,11 +70,18 @@ export function classifyAdobeError(message: string): ConversionStatusMessage {
     return {
       userMessage: getNeutralConversionMessage('docx'),
       fallbackNeeded: true,
-      kind: normalized.includes('429') || normalized.includes('rate limit') ? 'rate_limited' : 'quota_exhausted'
+      kind:
+        normalized.includes('429') || normalized.includes('rate limit')
+          ? 'rate_limited'
+          : 'quota_exhausted'
     };
   }
 
-  if (normalized.includes('auth') || normalized.includes('unauthorized') || normalized.includes('invalid credentials')) {
+  if (
+    normalized.includes('auth') ||
+    normalized.includes('unauthorized') ||
+    normalized.includes('invalid credentials')
+  ) {
     return {
       userMessage: getNeutralConversionMessage('docx'),
       fallbackNeeded: true,
@@ -86,7 +97,12 @@ export function classifyAdobeError(message: string): ConversionStatusMessage {
     };
   }
 
-  if (normalized.includes('503') || normalized.includes('5xx') || normalized.includes('temporary') || normalized.includes('server failure')) {
+  if (
+    normalized.includes('503') ||
+    normalized.includes('5xx') ||
+    normalized.includes('temporary') ||
+    normalized.includes('server failure')
+  ) {
     return {
       userMessage: getNeutralConversionMessage('docx'),
       fallbackNeeded: true,
@@ -102,7 +118,10 @@ export function classifyAdobeError(message: string): ConversionStatusMessage {
     };
   }
 
-  if (normalized.includes('invalid response') || normalized.includes('unexpected')) {
+  if (
+    normalized.includes('invalid response') ||
+    normalized.includes('unexpected')
+  ) {
     return {
       userMessage: getNeutralConversionMessage('docx'),
       fallbackNeeded: true,

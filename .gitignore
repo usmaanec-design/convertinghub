@@ -28,9 +28,11 @@ yarn-error.log*
 
 # local env files
 .env
+.env*
 .env.local
 .env.development.local
 .env.test.local
+.env.production
 .env.production.local
 
 # vercel
@@ -46,3 +48,17 @@ dist.zip
 error.txt
 
 .idea/
+
+# Android Keystore
+*.keystore
+android-twa/keystore/
+
+# Scratch & Large Binaries
+scratch/
+*.zip
+*.appxbundle
+*.msixbundle
+*.msix
+*.exe
+
+

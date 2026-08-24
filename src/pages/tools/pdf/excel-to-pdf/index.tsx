@@ -1,16 +1,31 @@
 import { useState } from 'react';
-import { Box, Button, Typography, Stack, Paper, Alert, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Stack,
+  Paper,
+  Alert,
+  CircularProgress
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import { libreOfficeEngine, ConversionResult } from '@utils/libreofficeEngine';
 import { EngineResultBanner } from '../../../../components/EngineResultBanner';
+import { ConversionProgressBar } from '../../../../components/ConversionProgressBar';
+
+import { useAuth } from '../../../../contexts/AuthContext';
+import { executeProtectedDownload } from '../../../../utils/downloadInterceptor';
+import { usePendingConversionFile } from '../../../../hooks';
 
 export default function ExcelToPdf() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated, signInWithGoogle } = useAuth();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploaded = e.target.files?.[0];
@@ -28,7 +43,10 @@ export default function ExcelToPdf() {
       setError(null);
       const res = await libreOfficeEngine.convertDocument(file, 'pdf');
       if (!res.success || !res.blob) {
-        setError(res.error || 'Document conversion service is temporarily unavailable. Please try again.');
+        setError(
+          res.error ||
+            'Document conversion service is temporarily unavailable. Please try again.'
+        );
         setResult(null);
       } else {
         setResult(res);
@@ -43,12 +61,18 @@ export default function ExcelToPdf() {
 
   const handleDownload = () => {
     if (!result || !result.blob || !file) return;
-    const url = URL.createObjectURL(result.blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = result.filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    const blob = result.blob;
+    executeProtectedDownload(
+      () => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = result.filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      { isAuthenticated, signInWithGoogle }
+    );
   };
 
   return (
@@ -62,10 +86,15 @@ export default function ExcelToPdf() {
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          Make EXCEL spreadsheets easy to read by converting them to PDF documents cleanly and quickly.
+          Make EXCEL spreadsheets easy to read by converting them to PDF
+          documents cleanly and quickly.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -79,8 +108,19 @@ export default function ExcelToPdf() {
           }}
           component="label"
         >
-          <input type="file" accept=".xls,.xlsx,.csv" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 48, color: file ? 'primary.main' : 'text.secondary', mb: 1 }} />
+          <input
+            type="file"
+            accept=".xls,.xlsx,.csv"
+            hidden
+            onChange={handleFileUpload}
+          />
+          <UploadFileIcon
+            sx={{
+              fontSize: 48,
+              color: file ? 'primary.main' : 'text.secondary',
+              mb: 1
+            }}
+          />
           <Typography variant="subtitle1" fontWeight="bold">
             {file ? file.name : 'Click to select or drop an Excel file here'}
           </Typography>
@@ -90,22 +130,32 @@ export default function ExcelToPdf() {
         </Box>
 
         {file && !result && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={handleConvert}
-            disabled={isProcessing}
-            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
-            fullWidth
-          >
-            {isProcessing ? 'Converting Excel to PDF...' : 'Convert to PDF'}
-          </Button>
+          <Stack spacing={2} width="100%">
+            {isProcessing && (
+              <ConversionProgressBar
+                isProcessing={true}
+                title="Converting Excel to PDF..."
+              />
+            )}
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={handleConvert}
+              disabled={isProcessing}
+              fullWidth
+            >
+              {isProcessing ? 'Converting Excel to PDF...' : 'Convert to PDF'}
+            </Button>
+          </Stack>
         )}
 
         {result && (
           <Stack spacing={2} width="100%">
-            <EngineResultBanner engineUsed={result.engineUsed} filename={result.filename} />
+            <EngineResultBanner
+              engineUsed={result.engineUsed}
+              filename={result.filename}
+            />
             <Button
               variant="contained"
               color="primary"

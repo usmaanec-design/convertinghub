@@ -9,6 +9,15 @@ export const tool = defineTool('pdf', {
   },
   path: 'pdf-to-word',
   icon: 'vscode-icons:file-type-word',
-  keywords: ['pdf', 'word', 'doc', 'docx', 'convert', 'document', 'edit', 'text'],
+  keywords: [
+    'pdf',
+    'word',
+    'doc',
+    'docx',
+    'convert',
+    'document',
+    'edit',
+    'text'
+  ],
   component: lazy(() => import('./index'))
 });

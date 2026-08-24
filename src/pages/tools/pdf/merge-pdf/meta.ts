@@ -2,7 +2,7 @@ import { defineTool } from '@tools/defineTool';
 import { lazy } from 'react';
 
 export const meta = defineTool('pdf', {
-  icon: 'material-symbols-light:merge',
+  icon: 'flat-color-icons:flow-chart',
   component: lazy(() => import('./index')),
   keywords: ['pages', 'combine', 'document', 'join', 'append'],
   path: 'merge-pdf',

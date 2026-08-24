@@ -43,13 +43,21 @@ export default function CsvToShapefileConverter() {
     const lines = csvText.trim().split('\n');
     if (lines.length === 0) return { headers: [], rows: [] };
 
-    const delimiter = csvText.includes('\t') ? '\t' : csvText.includes(';') ? ';' : ',';
-    const hdrs = lines[0].split(delimiter).map((h) => h.trim().replace(/^["']|["']$/g, ''));
+    const delimiter = csvText.includes('\t')
+      ? '\t'
+      : csvText.includes(';')
+        ? ';'
+        : ',';
+    const hdrs = lines[0]
+      .split(delimiter)
+      .map((h) => h.trim().replace(/^["']|["']$/g, ''));
     const parsedRows: Record<string, string>[] = [];
 
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
-      const vals = lines[i].split(delimiter).map((v) => v.trim().replace(/^["']|["']$/g, ''));
+      const vals = lines[i]
+        .split(delimiter)
+        .map((v) => v.trim().replace(/^["']|["']$/g, ''));
       const rowObj: Record<string, string> = {};
       hdrs.forEach((h, idx) => {
         rowObj[h] = vals[idx] || '';
@@ -122,7 +130,10 @@ export default function CsvToShapefileConverter() {
     try {
       setIsProcessing(true);
       setError(null);
-      const blob = await createShapefileZip(features, layerName || 'csv_points');
+      const blob = await createShapefileZip(
+        features,
+        layerName || 'csv_points'
+      );
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -148,7 +159,9 @@ export default function CsvToShapefileConverter() {
         properties: f.properties
       }))
     };
-    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], {
+      type: 'application/json'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -167,7 +180,8 @@ export default function CsvToShapefileConverter() {
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Convert CSV coordinate tables into spatial point ESRI Shapefiles (.shp, .shx, .dbf, .prj) for ArcGIS 10.8 & ArcGIS Pro.
+          Convert CSV coordinate tables into spatial point ESRI Shapefiles
+          (.shp, .shx, .dbf, .prj) for ArcGIS 10.8 & ArcGIS Pro.
         </Typography>
       </Stack>
 
@@ -178,11 +192,21 @@ export default function CsvToShapefileConverter() {
       )}
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={6}>
           <Stack spacing={2}>
-            <Button variant="outlined" component="label" startIcon={<UploadFileIcon />} fullWidth>
+            <Button
+              variant="outlined"
+              component="label"
+              startIcon={<UploadFileIcon />}
+              fullWidth
+            >
               Upload CSV File
-              <input type="file" accept=".csv,.txt" hidden onChange={handleFileUpload} />
+              <input
+                type="file"
+                accept=".csv,.txt"
+                hidden
+                onChange={handleFileUpload}
+              />
             </Button>
 
             <Typography variant="subtitle2">Or Paste CSV Data:</Typography>
@@ -237,18 +261,40 @@ export default function CsvToShapefileConverter() {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Grid item xs={6}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             <Typography variant="subtitle2" gutterBottom>
               Spatial Point Preview
             </Typography>
 
             <Stack direction="row" spacing={1} my={1}>
-              <Chip label={`Valid Point Records: ${features.length}`} color="primary" />
-              <Chip label={`Total CSV Rows: ${rows.length}`} color="default" variant="outlined" />
+              <Chip
+                label={`Valid Point Records: ${features.length}`}
+                color="primary"
+              />
+              <Chip
+                label={`Total CSV Rows: ${rows.length}`}
+                color="default"
+                variant="outlined"
+              />
             </Stack>
 
-            <TableContainer sx={{ maxHeight: 250, border: '1px solid', borderColor: 'divider', my: 2 }}>
+            <TableContainer
+              sx={{
+                maxHeight: 250,
+                border: '1px solid',
+                borderColor: 'divider',
+                my: 2
+              }}
+            >
               <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
@@ -272,7 +318,8 @@ export default function CsvToShapefileConverter() {
                   {features.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={3} align="center">
-                        Select valid Latitude & Longitude columns to preview points.
+                        Select valid Latitude & Longitude columns to preview
+                        points.
                       </TableCell>
                     </TableRow>
                   )}
@@ -290,7 +337,9 @@ export default function CsvToShapefileConverter() {
                   onClick={handleDownloadShapefile}
                   disabled={features.length === 0 || isProcessing}
                 >
-                  {isProcessing ? 'Generating Zip...' : 'Download Shapefile (.zip)'}
+                  {isProcessing
+                    ? 'Generating Zip...'
+                    : 'Download Shapefile (.zip)'}
                 </Button>
                 <Button
                   variant="outlined"

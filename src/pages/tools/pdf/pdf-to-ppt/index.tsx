@@ -1,12 +1,5 @@
 import { useState } from 'react';
-import {
-  Box,
-  Button,
-  Typography,
-  Stack,
-  Paper,
-  Alert
-} from '@mui/material';
+import { Box, Button, Typography, Stack, Paper, Alert } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
@@ -16,11 +9,17 @@ import { ConversionProgressBar } from '../../../../components/ConversionProgress
 import { PdfUploadPreview } from '../../../../components/PdfUploadPreview';
 import { ConversionResult } from '@utils/libreofficeEngine';
 
+import { useAuth } from '../../../../contexts/AuthContext';
+import { executeProtectedDownload } from '../../../../utils/downloadInterceptor';
+import { usePendingConversionFile } from '../../../../hooks';
+
 export default function PdfToPpt() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated, signInWithGoogle } = useAuth();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploaded = e.target.files?.[0];
@@ -38,7 +37,10 @@ export default function PdfToPpt() {
       setError(null);
       const res = await convertPdfToPpt(file);
       if (!res.success || !res.blob) {
-        setError(res.error || 'Document conversion service is temporarily unavailable. Please try again.');
+        setError(
+          res.error ||
+            'Document conversion service is temporarily unavailable. Please try again.'
+        );
         setResult(null);
       } else {
         setResult(res);
@@ -53,12 +55,18 @@ export default function PdfToPpt() {
 
   const handleDownload = () => {
     if (!result || !result.blob || !file) return;
-    const url = URL.createObjectURL(result.blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = result.filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    const blob = result.blob;
+    executeProtectedDownload(
+      () => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = result.filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      { isAuthenticated, signInWithGoogle }
+    );
   };
 
   return (
@@ -72,10 +80,15 @@ export default function PdfToPpt() {
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          Convert PDF presentations into editable Microsoft PowerPoint (.pptx) slides cleanly and quickly.
+          Convert PDF presentations into editable Microsoft PowerPoint (.pptx)
+          slides cleanly and quickly.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         {!file ? (
           <Box
@@ -90,8 +103,15 @@ export default function PdfToPpt() {
             }}
             component="label"
           >
-            <input type="file" accept=".pdf" hidden onChange={handleFileUpload} />
-            <UploadFileIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
+            <input
+              type="file"
+              accept=".pdf"
+              hidden
+              onChange={handleFileUpload}
+            />
+            <UploadFileIcon
+              sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }}
+            />
             <Typography variant="subtitle1" fontWeight="bold">
               Click to select or drop a PDF file here
             </Typography>
@@ -100,10 +120,19 @@ export default function PdfToPpt() {
             </Typography>
           </Box>
         ) : (
-          <PdfUploadPreview file={file} onRemove={() => { setFile(null); setResult(null); }} />
+          <PdfUploadPreview
+            file={file}
+            onRemove={() => {
+              setFile(null);
+              setResult(null);
+            }}
+          />
         )}
 
-        <ConversionProgressBar isProcessing={isProcessing} title="Converting PDF to PowerPoint presentation..." />
+        <ConversionProgressBar
+          isProcessing={isProcessing}
+          title="Converting PDF to PowerPoint presentation..."
+        />
 
         {file && !result && !isProcessing && (
           <Button
@@ -119,7 +148,11 @@ export default function PdfToPpt() {
 
         {result && (
           <Stack spacing={2} width="100%">
-            <EngineResultBanner engineUsed={result.engineUsed} filename={result.filename} durationMs={result.durationMs} />
+            <EngineResultBanner
+              engineUsed={result.engineUsed}
+              filename={result.filename}
+              durationMs={result.durationMs}
+            />
             <Button
               variant="contained"
               color="primary"

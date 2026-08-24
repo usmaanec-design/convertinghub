@@ -9,6 +9,15 @@ export const tool = defineTool('pdf', {
   },
   path: 'pdf-to-excel',
   icon: 'vscode-icons:file-type-excel',
-  keywords: ['pdf', 'excel', 'xls', 'xlsx', 'csv', 'spreadsheet', 'tables', 'convert'],
+  keywords: [
+    'pdf',
+    'excel',
+    'xls',
+    'xlsx',
+    'csv',
+    'spreadsheet',
+    'tables',
+    'convert'
+  ],
   component: lazy(() => import('./index'))
 });

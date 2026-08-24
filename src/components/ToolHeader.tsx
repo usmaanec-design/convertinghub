@@ -1,7 +1,6 @@
 import { Box, Button, Stack, styled, useTheme } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import ToolBreadcrumb from './ToolBreadcrumb';
-import { capitalizeFirstLetter } from '../utils/string';
 import Grid from '@mui/material/Grid';
 import { Icon, IconifyIcon } from '@iconify/react';
 import { categoriesColors } from '../config/uiConfig';
@@ -10,7 +9,6 @@ import { useEffect, useState } from 'react';
 import { isBookmarked, toggleBookmarked } from '@utils/bookmark';
 import IconButton from '@mui/material/IconButton';
 import { useTranslation } from 'react-i18next';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { validNamespaces } from '../i18n';
 
 const StyledButton = styled(Button)(({ theme }) => ({
@@ -33,7 +31,6 @@ function ToolLinks() {
   const { t } = useTranslation();
   const [examplesVisible, setExamplesVisible] = useState(false);
   const theme = useTheme();
-  const isMd = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -54,18 +51,6 @@ function ToolLinks() {
   }
   return (
     <Grid container spacing={2} mt={1}>
-      {isMd && (
-        <Grid item md={12} lg={6}>
-          <StyledButton
-            sx={{ backgroundColor: 'background.paper' }}
-            fullWidth
-            variant="outlined"
-            onClick={() => scrollToElement('tool')}
-          >
-            Use This Tool
-          </StyledButton>
-        </Grid>
-      )}
       {examplesVisible && (
         <Grid item md={12} lg={6}>
           <StyledButton
@@ -114,32 +99,46 @@ export default function ToolHeader({
       <Grid mt={0.5} container spacing={2} alignItems="center">
         <Grid item xs={12} md={8}>
           <Stack direction={'row'} spacing={2} alignItems={'center'}>
-            <Typography mb={1} fontSize={26} fontWeight="bold" color={'primary'}>
+            <Typography
+              mb={1}
+              fontSize={{ xs: 20, md: 26 }}
+              fontWeight="bold"
+              color={'primary'}
+            >
               {title}
             </Typography>
             <IconButton
-              onClick={(e) => {
+              aria-label="bookmark"
+              onClick={() => {
                 toggleBookmarked(path);
                 setBookmarked(!bookmarked);
               }}
+              size="large"
             >
               <Icon
-                fontSize={24}
-                color={
+                icon={
                   bookmarked
-                    ? theme.palette.primary.main
-                    : theme.palette.grey[500]
+                    ? 'material-symbols:bookmark-sharp'
+                    : 'material-symbols:bookmark-outline-sharp'
                 }
-                icon={bookmarked ? 'mdi:bookmark' : 'mdi:bookmark-plus-outline'}
+                fontSize={24}
               />
             </IconButton>
           </Stack>
-          <Typography fontSize={15} color="text.secondary">{description}</Typography>
+          <Typography fontSize={{ xs: 13, md: 15 }} color="text.secondary">
+            {description}
+          </Typography>
         </Grid>
 
         {icon && (
           <Grid item xs={12} md={4}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', opacity: 0.85 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                opacity: 0.85
+              }}
+            >
               <Icon
                 icon={icon}
                 fontSize={'110'}

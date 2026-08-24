@@ -1,0 +1,1068 @@
+{
+  "systemConfig": {
+    "adobeMonthlyLimit": 500,
+    "adobeMonthlyUsage": 85,
+    "quotaMonth": "2026-08"
+  },
+  "userWallets": {
+    "test_user_free_1787237564690": {
+      "userId": "test_user_free_1787237564690",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": true,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 0,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237564740
+    },
+    "test_user_pro_1787237564690": {
+      "userId": "test_user_pro_1787237564690",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": false,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 10,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237564801
+    },
+    "test_user_free_1787237618861": {
+      "userId": "test_user_free_1787237618861",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": true,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 0,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237618886
+    },
+    "test_user_pro_1787237618861": {
+      "userId": "test_user_pro_1787237618861",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": false,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 10,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237618921
+    },
+    "test_user_free_1787237667366": {
+      "userId": "test_user_free_1787237667366",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": true,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 0,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237667390
+    },
+    "test_user_pro_1787237667366": {
+      "userId": "test_user_pro_1787237667366",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": false,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 10,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237667425
+    },
+    "test_user_free_1787237671450": {
+      "userId": "test_user_free_1787237671450",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": true,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 0,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237671473
+    },
+    "test_user_pro_1787237671450": {
+      "userId": "test_user_pro_1787237671450",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": false,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 10,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237671507
+    },
+    "test_user_free_1787237676624": {
+      "userId": "test_user_free_1787237676624",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": true,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 0,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237676646
+    },
+    "test_user_pro_1787237676624": {
+      "userId": "test_user_pro_1787237676624",
+      "plan": "pro",
+      "trial": {
+        "authenticatedBonusUsed": false,
+        "authenticatedBonusGranted": true
+      },
+      "dailyLimit": 10,
+      "dailyUsed": 10,
+      "bonusTokens": 0,
+      "lastResetDate": "2026-08-20",
+      "lastResetAt": 1787237676684
+    }
+  },
+  "anonymousTrials": {
+    "test_trial_A_1787237564690": {
+      "clientTrialId": "test_trial_A_1787237564690",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_trial_B_1787237564690": {
+      "clientTrialId": "test_trial_B_1787237564690",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_fail_1787237564788": {
+      "clientTrialId": "test_fail_1787237564788",
+      "usedToday": 0,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_trial_A_1787237618861": {
+      "clientTrialId": "test_trial_A_1787237618861",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_trial_B_1787237618861": {
+      "clientTrialId": "test_trial_B_1787237618861",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_fail_1787237618914": {
+      "clientTrialId": "test_fail_1787237618914",
+      "usedToday": 0,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_trial_A_1787237667366": {
+      "clientTrialId": "test_trial_A_1787237667366",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_trial_B_1787237667366": {
+      "clientTrialId": "test_trial_B_1787237667366",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_fail_1787237667416": {
+      "clientTrialId": "test_fail_1787237667416",
+      "usedToday": 0,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_trial_A_1787237671450": {
+      "clientTrialId": "test_trial_A_1787237671450",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_trial_B_1787237671450": {
+      "clientTrialId": "test_trial_B_1787237671450",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_fail_1787237671499": {
+      "clientTrialId": "test_fail_1787237671499",
+      "usedToday": 0,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_trial_A_1787237676624": {
+      "clientTrialId": "test_trial_A_1787237676624",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_trial_B_1787237676624": {
+      "clientTrialId": "test_trial_B_1787237676624",
+      "usedToday": 3,
+      "lastResetDate": "2026-08-20"
+    },
+    "test_fail_1787237676674": {
+      "clientTrialId": "test_fail_1787237676674",
+      "usedToday": 0,
+      "lastResetDate": "2026-08-20"
+    }
+  },
+  "transactions": [
+    {
+      "transactionId": "tx_1787237564714_71wdh2",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237564690",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.714Z"
+    },
+    {
+      "transactionId": "tx_1787237564721_4ujx8c",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237564690",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.721Z"
+    },
+    {
+      "transactionId": "tx_1787237564731_lw8cw2",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237564690",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.731Z"
+    },
+    {
+      "transactionId": "tx_1787237564751_vwowqv",
+      "userId": "test_user_free_1787237564690",
+      "clientTrialId": "test_trial_A_1787237564690",
+      "tool": "pdf-to-word",
+      "accessType": "authenticated_bonus",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.751Z"
+    },
+    {
+      "transactionId": "tx_1787237564768_21cegz",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237564690",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.769Z"
+    },
+    {
+      "transactionId": "tx_1787237564774_b2qkrj",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237564690",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.774Z"
+    },
+    {
+      "transactionId": "tx_1787237564782_pz6bd6",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237564690",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.782Z"
+    },
+    {
+      "transactionId": "tx_1787237564812_0mo3bp",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.812Z"
+    },
+    {
+      "transactionId": "tx_1787237564819_c0p5gx",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.819Z"
+    },
+    {
+      "transactionId": "tx_1787237564828_77lgxp",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.828Z"
+    },
+    {
+      "transactionId": "tx_1787237564834_yvc69z",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.834Z"
+    },
+    {
+      "transactionId": "tx_1787237564840_vzy9gy",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.841Z"
+    },
+    {
+      "transactionId": "tx_1787237564850_6y2bye",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.850Z"
+    },
+    {
+      "transactionId": "tx_1787237564856_y4rbc4",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.856Z"
+    },
+    {
+      "transactionId": "tx_1787237564866_sse8xv",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.866Z"
+    },
+    {
+      "transactionId": "tx_1787237564871_e5dp8v",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.871Z"
+    },
+    {
+      "transactionId": "tx_1787237564880_4wevdk",
+      "userId": "test_user_pro_1787237564690",
+      "clientTrialId": "none",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:52:44.880Z"
+    },
+    {
+      "transactionId": "tx_1787237618869_fmi99k",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237618861",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.869Z"
+    },
+    {
+      "transactionId": "tx_1787237618874_icwj3q",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237618861",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.874Z"
+    },
+    {
+      "transactionId": "tx_1787237618879_rrjywq",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237618861",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.879Z"
+    },
+    {
+      "transactionId": "tx_1787237618891_8itz7a",
+      "userId": "test_user_free_1787237618861",
+      "clientTrialId": "test_trial_A_1787237618861",
+      "tool": "pdf-to-word",
+      "accessType": "authenticated_bonus",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.891Z"
+    },
+    {
+      "transactionId": "tx_1787237618900_7engyc",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237618861",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.900Z"
+    },
+    {
+      "transactionId": "tx_1787237618905_n3tcl4",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237618861",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.905Z"
+    },
+    {
+      "transactionId": "tx_1787237618909_soglg5",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237618861",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.909Z"
+    },
+    {
+      "transactionId": "tx_1787237618925_gr3zei",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.926Z"
+    },
+    {
+      "transactionId": "tx_1787237618930_5wwzcd",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.930Z"
+    },
+    {
+      "transactionId": "tx_1787237618935_4ugxxe",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.935Z"
+    },
+    {
+      "transactionId": "tx_1787237618939_ktsy4r",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.939Z"
+    },
+    {
+      "transactionId": "tx_1787237618944_m560ob",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.944Z"
+    },
+    {
+      "transactionId": "tx_1787237618949_h28qxz",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.949Z"
+    },
+    {
+      "transactionId": "tx_1787237618964_vzhqkp",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.964Z"
+    },
+    {
+      "transactionId": "tx_1787237618969_b6sjxv",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.969Z"
+    },
+    {
+      "transactionId": "tx_1787237618973_u3grff",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.973Z"
+    },
+    {
+      "transactionId": "tx_1787237618977_j3ol89",
+      "userId": "test_user_pro_1787237618861",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:53:38.977Z"
+    },
+    {
+      "transactionId": "tx_1787237667374_f8ey9g",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237667366",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.374Z"
+    },
+    {
+      "transactionId": "tx_1787237667378_ludozg",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237667366",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.378Z"
+    },
+    {
+      "transactionId": "tx_1787237667382_fri7uf",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237667366",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.382Z"
+    },
+    {
+      "transactionId": "tx_1787237667394_jlx6xw",
+      "userId": "test_user_free_1787237667366",
+      "clientTrialId": "test_trial_A_1787237667366",
+      "tool": "pdf-to-word",
+      "accessType": "authenticated_bonus",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.394Z"
+    },
+    {
+      "transactionId": "tx_1787237667402_ytsle3",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237667366",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.402Z"
+    },
+    {
+      "transactionId": "tx_1787237667408_mhwwlt",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237667366",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.408Z"
+    },
+    {
+      "transactionId": "tx_1787237667412_0prjch",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237667366",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.412Z"
+    },
+    {
+      "transactionId": "tx_1787237667429_73idth",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.429Z"
+    },
+    {
+      "transactionId": "tx_1787237667437_dlvtcf",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.437Z"
+    },
+    {
+      "transactionId": "tx_1787237667444_uoj515",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.444Z"
+    },
+    {
+      "transactionId": "tx_1787237667450_b66i9r",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.450Z"
+    },
+    {
+      "transactionId": "tx_1787237667457_vn6i2a",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.457Z"
+    },
+    {
+      "transactionId": "tx_1787237667461_s6ylod",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.461Z"
+    },
+    {
+      "transactionId": "tx_1787237667465_b8bh31",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.465Z"
+    },
+    {
+      "transactionId": "tx_1787237667469_oyarpn",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.469Z"
+    },
+    {
+      "transactionId": "tx_1787237667476_1bd8mr",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.476Z"
+    },
+    {
+      "transactionId": "tx_1787237667481_ie1grp",
+      "userId": "test_user_pro_1787237667366",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:27.481Z"
+    },
+    {
+      "transactionId": "tx_1787237671458_1ut2zg",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237671450",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.458Z"
+    },
+    {
+      "transactionId": "tx_1787237671462_252gch",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237671450",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.462Z"
+    },
+    {
+      "transactionId": "tx_1787237671466_atojo5",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237671450",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.466Z"
+    },
+    {
+      "transactionId": "tx_1787237671476_btwh66",
+      "userId": "test_user_free_1787237671450",
+      "clientTrialId": "test_trial_A_1787237671450",
+      "tool": "pdf-to-word",
+      "accessType": "authenticated_bonus",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.476Z"
+    },
+    {
+      "transactionId": "tx_1787237671488_ivss68",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237671450",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.488Z"
+    },
+    {
+      "transactionId": "tx_1787237671492_vkhsu7",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237671450",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.492Z"
+    },
+    {
+      "transactionId": "tx_1787237671496_n3vd4d",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237671450",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.496Z"
+    },
+    {
+      "transactionId": "tx_1787237671510_29xyn7",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.510Z"
+    },
+    {
+      "transactionId": "tx_1787237671514_4t9tlf",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.514Z"
+    },
+    {
+      "transactionId": "tx_1787237671518_h8us6f",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.518Z"
+    },
+    {
+      "transactionId": "tx_1787237671523_6kgxjp",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.523Z"
+    },
+    {
+      "transactionId": "tx_1787237671527_pm2hsh",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.527Z"
+    },
+    {
+      "transactionId": "tx_1787237671531_01x8bw",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.531Z"
+    },
+    {
+      "transactionId": "tx_1787237671535_ue76wq",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.535Z"
+    },
+    {
+      "transactionId": "tx_1787237671540_ydwtix",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.540Z"
+    },
+    {
+      "transactionId": "tx_1787237671544_unwym8",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.544Z"
+    },
+    {
+      "transactionId": "tx_1787237671548_sac543",
+      "userId": "test_user_pro_1787237671450",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:31.548Z"
+    },
+    {
+      "transactionId": "tx_1787237676630_4c7qre",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237676624",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.630Z"
+    },
+    {
+      "transactionId": "tx_1787237676636_44no1h",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237676624",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.636Z"
+    },
+    {
+      "transactionId": "tx_1787237676640_7w6kfz",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_A_1787237676624",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.640Z"
+    },
+    {
+      "transactionId": "tx_1787237676652_2uh7mt",
+      "userId": "test_user_free_1787237676624",
+      "clientTrialId": "test_trial_A_1787237676624",
+      "tool": "pdf-to-word",
+      "accessType": "authenticated_bonus",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.652Z"
+    },
+    {
+      "transactionId": "tx_1787237676661_0643nc",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237676624",
+      "tool": "pdf-to-word",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.661Z"
+    },
+    {
+      "transactionId": "tx_1787237676666_sobn1k",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237676624",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.666Z"
+    },
+    {
+      "transactionId": "tx_1787237676671_gobp24",
+      "userId": "anonymous",
+      "clientTrialId": "test_trial_B_1787237676624",
+      "tool": "pdf-to-excel",
+      "accessType": "anonymous_trial",
+      "tokensUsed": 0,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.671Z"
+    },
+    {
+      "transactionId": "tx_1787237676689_69msq8",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.689Z"
+    },
+    {
+      "transactionId": "tx_1787237676693_i03wj1",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.693Z"
+    },
+    {
+      "transactionId": "tx_1787237676698_iywxva",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.698Z"
+    },
+    {
+      "transactionId": "tx_1787237676703_3k2i87",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.703Z"
+    },
+    {
+      "transactionId": "tx_1787237676707_2c5o4k",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.707Z"
+    },
+    {
+      "transactionId": "tx_1787237676711_tensn6",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-word",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.711Z"
+    },
+    {
+      "transactionId": "tx_1787237676717_twlcaw",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.717Z"
+    },
+    {
+      "transactionId": "tx_1787237676721_p70lr6",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.721Z"
+    },
+    {
+      "transactionId": "tx_1787237676724_jd6n2w",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.724Z"
+    },
+    {
+      "transactionId": "tx_1787237676728_ku5sv9",
+      "userId": "test_user_pro_1787237676624",
+      "clientTrialId": "pro_test",
+      "tool": "pdf-to-excel",
+      "accessType": "pro_token",
+      "tokensUsed": 1,
+      "status": "success",
+      "createdAt": "2026-08-20T14:54:36.728Z"
+    }
+  ]
+}

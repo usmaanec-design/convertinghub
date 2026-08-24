@@ -1,9 +1,6 @@
 import { Box } from '@mui/material';
 import React, { ReactNode } from 'react';
-import { Helmet } from 'react-helmet';
 import ToolHeader from './ToolHeader';
-import Separator from './Separator';
-import AllTools from './allTools/AllTools';
 import { getToolsByCategory } from '@tools/index';
 import {
   capitalizeFirstLetter,
@@ -13,6 +10,9 @@ import { IconifyIcon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
 import { ToolCategory } from '@tools/defineTool';
 import { FullI18nKey } from '../i18n';
+import SEOHead from './SEOHead';
+import ToolSeoContent from './ToolSeoContent';
+import { getToolSeoData } from '../seo/seoConfig';
 
 export default function ToolLayout({
   children,
@@ -36,22 +36,45 @@ export default function ToolLayout({
     getI18nNamespaceFromToolCategory(type)
   ]);
 
-  // Use i18n keys if available, otherwise fall back to provided strings
   //@ts-ignore
-  const toolTitle: string = t(i18n.name);
+  const rawTitle: string = i18n?.name ? t(i18n.name) : 'Tool';
   //@ts-ignore
-  const toolDescription: string = t(i18n.description);
+  const rawDescription: string = i18n?.description ? t(i18n.description) : '';
+
+  const seoData = getToolSeoData(fullPath, rawTitle, rawDescription, type);
+
+  const categoryConfig = getToolsByCategory([], t).find(
+    (category) => category.type === type
+  );
+
+  const categoryTitle = categoryConfig?.rawTitle || capitalizeFirstLetter(type);
 
   const otherCategoryTools =
-    getToolsByCategory([], t)
-      .find((category) => category.type === type)
-      ?.tools.filter((tool) => t(tool.name) !== toolTitle)
+    categoryConfig?.tools
+      .filter((tool) => t(tool.name) !== rawTitle)
       .map((tool) => ({
-        title: tool.name,
-        description: tool.shortDescription,
+        title: t(tool.name),
+        description: t(tool.shortDescription),
         link: '/' + tool.path,
         icon: tool.icon
       })) ?? [];
+
+  const breadcrumbs = [
+    {
+      name: 'Home',
+      item:
+        seoData.canonicalUrl.split('/')[0] +
+        '//' +
+        seoData.canonicalUrl.split('/')[2]
+    },
+    {
+      name: categoryTitle,
+      item: `${seoData.canonicalUrl.split('/')[0]}//${
+        seoData.canonicalUrl.split('/')[2]
+      }/categories/${type}`
+    },
+    { name: rawTitle, item: seoData.canonicalUrl }
+  ];
 
   return (
     <Box
@@ -61,18 +84,37 @@ export default function ToolLayout({
       alignItems={'center'}
       sx={{ backgroundColor: 'background.default' }}
     >
-      <Helmet>
-        <title>{`${toolTitle} - ConvertingHub`}</title>
-      </Helmet>
+      <SEOHead
+        title={seoData.title}
+        description={seoData.description}
+        canonicalUrl={seoData.canonicalUrl}
+        keywords={seoData.keywords}
+        breadcrumbs={breadcrumbs}
+        faqs={seoData.faqs}
+      />
       <Box width={{ xs: '95%', md: '92%', lg: '90%' }}>
         <ToolHeader
-          title={toolTitle}
-          description={toolDescription}
+          title={rawTitle}
+          description={rawDescription}
           icon={icon}
           type={type}
           path={fullPath}
         />
         {children}
+
+        {/* Crawlable SEO Content Section */}
+        <ToolSeoContent
+          categoryName={type}
+          categoryTitle={categoryTitle}
+          toolName={rawTitle}
+          toolPath={fullPath}
+          h1={seoData.h1}
+          intro={seoData.intro}
+          howTo={seoData.howTo}
+          features={seoData.features}
+          faqs={seoData.faqs}
+          relatedTools={otherCategoryTools}
+        />
       </Box>
     </Box>
   );

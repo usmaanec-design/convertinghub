@@ -1,3 +1,27 @@
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  html, body {
+    min-width: 1200px !important;
+    overflow-x: auto !important;
+  }
+  #root {
+    min-width: 1200px !important;
+  }
+}
+
 a {
   color: #1c76ce;
 }
@@ -7,5 +31,9 @@ a:hover {
 }
 
 * {
-  font-family: Quicksand,sans-serif!important;
+  font-family: Quicksand, 'Cairo', 'Noto Sans Arabic', 'Noto Nastaliq Urdu', 'Segoe UI', Tahoma, sans-serif !important;
+}
+
+[dir="rtl"] * {
+  font-family: 'Cairo', 'Noto Sans Arabic', 'Noto Nastaliq Urdu', Quicksand, 'Segoe UI', Tahoma, sans-serif !important;
 }

@@ -42,11 +42,15 @@ export default function GeodatabaseToShapefile() {
         const zip = await JSZip.loadAsync(file);
         let jsonStr = '';
 
-        const jsonFile = Object.keys(zip.files).find((f) => f.endsWith('.json') || f.endsWith('.geojson'));
+        const jsonFile = Object.keys(zip.files).find(
+          (f) => f.endsWith('.json') || f.endsWith('.geojson')
+        );
         if (jsonFile) {
           jsonStr = await zip.files[jsonFile].async('text');
         } else {
-          throw new Error('No readable feature class JSON found inside the Geodatabase package.');
+          throw new Error(
+            'No readable feature class JSON found inside the Geodatabase package.'
+          );
         }
 
         parseFeatureClassString(jsonStr);
@@ -68,15 +72,18 @@ export default function GeodatabaseToShapefile() {
       const parsed = JSON.parse(jsonStr);
       const featureList: SpatialFeature[] = [];
 
-      const rawFeatures = parsed.features || (Array.isArray(parsed) ? parsed : [parsed]);
+      const rawFeatures =
+        parsed.features || (Array.isArray(parsed) ? parsed : [parsed]);
 
       rawFeatures.forEach((f: any) => {
         const geom = f.geometry || f;
         const props = f.properties || f.attributes || {};
 
         let gType: 'Point' | 'PolyLine' | 'Polygon' = 'Point';
-        if (geom.type === 'LineString' || geom.type === 'MultiLineString') gType = 'PolyLine';
-        else if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') gType = 'Polygon';
+        if (geom.type === 'LineString' || geom.type === 'MultiLineString')
+          gType = 'PolyLine';
+        else if (geom.type === 'Polygon' || geom.type === 'MultiPolygon')
+          gType = 'Polygon';
 
         featureList.push({
           geometryType: gType,
@@ -95,7 +102,10 @@ export default function GeodatabaseToShapefile() {
     if (features.length === 0) return;
     try {
       setIsProcessing(true);
-      const blob = await createShapefileZip(features, layerName || 'extracted_shapefile');
+      const blob = await createShapefileZip(
+        features,
+        layerName || 'extracted_shapefile'
+      );
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -119,7 +129,9 @@ export default function GeodatabaseToShapefile() {
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Extract spatial feature classes from File Geodatabase (.gdb.zip, GeoPackage, or Spatial Database JSON) into ESRI Shapefiles (.shp, .shx, .dbf, .prj).
+          Extract spatial feature classes from File Geodatabase (.gdb.zip,
+          GeoPackage, or Spatial Database JSON) into ESRI Shapefiles (.shp,
+          .shx, .dbf, .prj).
         </Typography>
       </Stack>
 
@@ -130,7 +142,7 @@ export default function GeodatabaseToShapefile() {
       )}
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={5}>
+        <Grid item xs={5}>
           <Stack spacing={2}>
             <Button
               variant="contained"
@@ -140,10 +152,21 @@ export default function GeodatabaseToShapefile() {
               size="large"
             >
               Upload Geodatabase Package (.zip / .json)
-              <input type="file" accept=".zip,.json,.geojson" hidden onChange={handleFileUpload} />
+              <input
+                type="file"
+                accept=".zip,.json,.geojson"
+                hidden
+                onChange={handleFileUpload}
+              />
             </Button>
 
-            {fileName && <Chip label={`Package: ${fileName}`} color="info" variant="outlined" />}
+            {fileName && (
+              <Chip
+                label={`Package: ${fileName}`}
+                color="info"
+                variant="outlined"
+              />
+            )}
 
             <TextField
               label="Output Shapefile Layer Name"
@@ -153,7 +176,13 @@ export default function GeodatabaseToShapefile() {
             />
 
             {features.length > 0 && (
-              <Box p={2} border="1px solid" borderColor="divider" borderRadius={1} bgcolor="action.hover">
+              <Box
+                p={2}
+                border="1px solid"
+                borderColor="divider"
+                borderRadius={1}
+                bgcolor="action.hover"
+              >
                 <Typography variant="subtitle2" gutterBottom color="primary">
                   Extracted Layer Metadata
                 </Typography>
@@ -168,15 +197,30 @@ export default function GeodatabaseToShapefile() {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} md={7}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Grid item xs={7}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             <Typography variant="subtitle2" gutterBottom>
               Extracted Feature Class Records
             </Typography>
 
             {features.length > 0 ? (
               <>
-                <TableContainer sx={{ maxHeight: 220, border: '1px solid', borderColor: 'divider', mb: 2 }}>
+                <TableContainer
+                  sx={{
+                    maxHeight: 220,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    mb: 2
+                  }}
+                >
                   <Table size="small" stickyHeader>
                     <TableHead>
                       <TableRow>
@@ -190,7 +234,9 @@ export default function GeodatabaseToShapefile() {
                         <TableRow key={i}>
                           <TableCell>{i + 1}</TableCell>
                           <TableCell>{f.geometryType}</TableCell>
-                          <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>
+                          <TableCell
+                            sx={{ fontFamily: 'monospace', fontSize: 11 }}
+                          >
                             {JSON.stringify(f.properties)}
                           </TableCell>
                         </TableRow>
@@ -209,13 +255,22 @@ export default function GeodatabaseToShapefile() {
                     onClick={handleDownloadShapefile}
                     disabled={isProcessing}
                   >
-                    {isProcessing ? 'Generating Shapefile...' : 'Download Shapefile (.zip)'}
+                    {isProcessing
+                      ? 'Generating Shapefile...'
+                      : 'Download Shapefile (.zip)'}
                   </Button>
                 </Box>
               </>
             ) : (
-              <Box display="flex" alignItems="center" justifyContent="center" height={300} color="text.secondary">
-                Upload Geodatabase Package (.zip / .json) to extract Shapefile vector layer.
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                height={300}
+                color="text.secondary"
+              >
+                Upload Geodatabase Package (.zip / .json) to extract Shapefile
+                vector layer.
               </Box>
             )}
           </Paper>

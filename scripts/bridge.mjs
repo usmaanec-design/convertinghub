@@ -39,6 +39,8 @@ const HOST = process.env.HOST || '0.0.0.0';
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
   : [
+      'https://convertinghub.app',
+      'https://www.convertinghub.app',
       'https://convertinghub.web.app',
       'https://convertinghub-official.web.app',
       'https://convertinghub.firebaseapp.com',
@@ -340,7 +342,7 @@ function setCorsHeaders(req, res) {
   let allowedOrigin = '*';
 
   if (requestOrigin) {
-    if (ALLOWED_ORIGINS.includes('*') || ALLOWED_ORIGINS.includes(requestOrigin) || requestOrigin.endsWith('.web.app') || requestOrigin.endsWith('.firebaseapp.com')) {
+    if (ALLOWED_ORIGINS.includes('*') || ALLOWED_ORIGINS.includes(requestOrigin) || requestOrigin.endsWith('.web.app') || requestOrigin.endsWith('.firebaseapp.com') || requestOrigin.endsWith('convertinghub.app')) {
       allowedOrigin = requestOrigin;
     } else if (ALLOWED_ORIGINS.length > 0) {
       allowedOrigin = ALLOWED_ORIGINS[0];
@@ -351,10 +353,12 @@ function setCorsHeaders(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
 
   const reqRequestedHeaders = req.headers['access-control-request-headers'];
+  const explicitAllowedHeaders = 'Content-Type, Authorization, x-target-format, x-input-name, x-user-id, x-client-trial-id, x-trial-id, x-requested-with, Accept, Origin, *';
+
   if (reqRequestedHeaders) {
-    res.setHeader('Access-Control-Allow-Headers', reqRequestedHeaders);
+    res.setHeader('Access-Control-Allow-Headers', `${explicitAllowedHeaders}, ${reqRequestedHeaders}`);
   } else {
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-target-format, x-input-name, x-user-id, x-client-trial-id, x-trial-id, x-requested-with, Accept, Origin, *');
+    res.setHeader('Access-Control-Allow-Headers', explicitAllowedHeaders);
   }
 
   res.setHeader('Access-Control-Expose-Headers', 'x-engine-used, x-conversion-status, content-disposition, x-tokens-remaining');

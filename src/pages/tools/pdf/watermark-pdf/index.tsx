@@ -1,12 +1,23 @@
 import { useState } from 'react';
-import { Box, Button, TextField, Typography, Stack, Paper, Alert, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Stack,
+  Paper,
+  Alert,
+  CircularProgress
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import { PDFDocument, rgb, degrees } from 'pdf-lib';
+import { usePendingConversionFile } from '../../../../hooks';
 
 export default function WatermarkPdf() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [watermarkText, setWatermarkText] = useState<string>('CONFIDENTIAL');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [convertedBlob, setConvertedBlob] = useState<Blob | null>(null);
@@ -44,7 +55,9 @@ export default function WatermarkPdf() {
       });
 
       const pdfBytes = await pdfDoc.save();
-      setConvertedBlob(new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' }));
+      setConvertedBlob(
+        new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' })
+      );
     } catch (err: any) {
       setError(`Failed to apply watermark: ${err.message}`);
     } finally {
@@ -73,10 +86,15 @@ export default function WatermarkPdf() {
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          Stamp text watermarks over your PDF pages with custom transparency and rotation.
+          Stamp text watermarks over your PDF pages with custom transparency and
+          rotation.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -91,7 +109,13 @@ export default function WatermarkPdf() {
           component="label"
         >
           <input type="file" accept=".pdf" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 48, color: file ? 'primary.main' : 'text.secondary', mb: 1 }} />
+          <UploadFileIcon
+            sx={{
+              fontSize: 48,
+              color: file ? 'primary.main' : 'text.secondary',
+              mb: 1
+            }}
+          />
           <Typography variant="subtitle1" fontWeight="bold">
             {file ? file.name : 'Click to select or drop a PDF file here'}
           </Typography>
@@ -111,7 +135,11 @@ export default function WatermarkPdf() {
             size="large"
             onClick={handleApplyWatermark}
             disabled={isProcessing}
-            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
+            startIcon={
+              isProcessing ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : null
+            }
             fullWidth
           >
             {isProcessing ? 'Applying Watermark...' : 'Apply Watermark'}

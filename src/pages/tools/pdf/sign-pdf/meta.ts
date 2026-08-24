@@ -8,7 +8,7 @@ export const tool = defineTool('pdf', {
     shortDescription: 'translation:pdf.signPdf.shortDescription'
   },
   path: 'sign-pdf',
-  icon: 'material-symbols:signature',
+  icon: 'flat-color-icons:signature',
   keywords: ['sign', 'signature', 'draw', 'e-sign', 'pdf', 'document'],
   component: lazy(() => import('./index'))
 });

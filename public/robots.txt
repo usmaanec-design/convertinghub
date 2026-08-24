@@ -1,3 +1,7 @@
-
-User-Agent: *
+User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/
+
+Sitemap: https://convertinghub-official.web.app/sitemap.xml

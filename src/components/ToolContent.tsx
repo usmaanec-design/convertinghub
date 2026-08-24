@@ -90,7 +90,9 @@ export default function ToolContent<T extends FormikValues, I>({
       >
         {({ values, setFieldValue }) => {
           const customInput = renderCustomInput?.(values, setFieldValue);
-          const hasInputOrResult = Boolean(inputComponent || resultComponent || customInput);
+          const hasInputOrResult = Boolean(
+            inputComponent || resultComponent || customInput
+          );
 
           return (
             <>
@@ -101,7 +103,7 @@ export default function ToolContent<T extends FormikValues, I>({
               />
               <Grid container spacing={3} alignItems="flex-start">
                 {hasInputOrResult && (
-                  <Grid item xs={12} lg={hasOptions ? 7.5 : 12}>
+                  <Grid item xs={12} md={hasOptions ? 7.5 : 12}>
                     <ToolInputAndResult
                       input={inputComponent ?? customInput}
                       result={resultComponent}
@@ -109,8 +111,11 @@ export default function ToolContent<T extends FormikValues, I>({
                   </Grid>
                 )}
                 {hasOptions && (
-                  <Grid item xs={12} lg={hasInputOrResult ? 4.5 : 12}>
-                    <ToolOptions getGroups={getGroups} vertical={hasInputOrResult} />
+                  <Grid item xs={12} md={hasInputOrResult ? 4.5 : 12}>
+                    <ToolOptions
+                      getGroups={getGroups}
+                      vertical={hasInputOrResult}
+                    />
                   </Grid>
                 )}
               </Grid>

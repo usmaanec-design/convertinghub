@@ -8,7 +8,7 @@ export const tool = defineTool('png', {
     shortDescription: 'image:convertJgpToPng.shortDescription'
   },
 
-  path: 'convert-jgp-to-png',
+  path: 'convert-jpg-to-png',
   icon: 'ph:file-jpg-thin',
 
   keywords: ['convert', 'jgp', 'png'],

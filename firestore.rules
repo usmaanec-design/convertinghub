@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection: Users can read their own profile, but cannot mutate sensitive subscription/token fields directly
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId &&
+        !request.resource.data.keys().hasAny(['plan', 'tokenWallet', 'subscription']);
+      allow update: if request.auth != null && request.auth.uid == userId &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['plan', 'tokenWallet', 'subscription']);
+    }
+
+    // System config & transactions read-only or server-only
+    match /system/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /tokenTransactions/{transactionId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Default deny all unhandled collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

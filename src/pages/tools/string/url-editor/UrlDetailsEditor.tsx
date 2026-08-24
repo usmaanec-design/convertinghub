@@ -60,7 +60,7 @@ export default function UrlDetailsEditor({
       }}
     >
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={4} md={3}>
+        <Grid item xs={3}>
           <FormControl fullWidth size="small">
             <InputLabel id={protocolLabelId}>{labels.protocol}</InputLabel>
             <Select
@@ -78,7 +78,7 @@ export default function UrlDetailsEditor({
           </FormControl>
         </Grid>
 
-        <Grid item xs={12} sm={8} md={9}>
+        <Grid item xs={9}>
           <TextField
             size="small"
             fullWidth

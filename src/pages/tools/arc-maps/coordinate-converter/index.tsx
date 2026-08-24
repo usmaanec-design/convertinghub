@@ -23,7 +23,12 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
-import { convertCoordinateValue, dmsToDecimal, decimalToDms, decimalToUtm } from './service';
+import {
+  convertCoordinateValue,
+  dmsToDecimal,
+  decimalToDms,
+  decimalToUtm
+} from './service';
 
 const SAMPLE_CSV = `Name,Latitude,Longitude
 Cairo Tower,30.0444,31.2357
@@ -67,13 +72,21 @@ export default function ArcMapsCoordinateConverter() {
     const lines = csvText.trim().split('\n');
     if (lines.length === 0) return { headers: [], rows: [] };
 
-    const delimiter = csvText.includes('\t') ? '\t' : csvText.includes(';') ? ';' : ',';
-    const hdrs = lines[0].split(delimiter).map((h) => h.trim().replace(/^["']|["']$/g, ''));
+    const delimiter = csvText.includes('\t')
+      ? '\t'
+      : csvText.includes(';')
+        ? ';'
+        : ',';
+    const hdrs = lines[0]
+      .split(delimiter)
+      .map((h) => h.trim().replace(/^["']|["']$/g, ''));
     const parsedRows: Record<string, string>[] = [];
 
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
-      const vals = lines[i].split(delimiter).map((v) => v.trim().replace(/^["']|["']$/g, ''));
+      const vals = lines[i]
+        .split(delimiter)
+        .map((v) => v.trim().replace(/^["']|["']$/g, ''));
       const rowObj: Record<string, string> = {};
       hdrs.forEach((h, idx) => {
         rowObj[h] = vals[idx] || '';
@@ -88,8 +101,12 @@ export default function ArcMapsCoordinateConverter() {
   useEffect(() => {
     if (headers.length > 0) {
       const lower = headers.map((h) => h.toLowerCase());
-      const latIdx = lower.findIndex((h) => ['lat', 'latitude', 'y', 'lat_dd', 'north'].includes(h));
-      const lonIdx = lower.findIndex((h) => ['lon', 'lng', 'longitude', 'x', 'lon_dd', 'east'].includes(h));
+      const latIdx = lower.findIndex((h) =>
+        ['lat', 'latitude', 'y', 'lat_dd', 'north'].includes(h)
+      );
+      const lonIdx = lower.findIndex((h) =>
+        ['lon', 'lng', 'longitude', 'x', 'lon_dd', 'east'].includes(h)
+      );
 
       if (latIdx !== -1 && !latCol) setLatCol(headers[latIdx]);
       if (lonIdx !== -1 && !lonCol) setLonCol(headers[lonIdx]);
@@ -144,7 +161,11 @@ export default function ArcMapsCoordinateConverter() {
 
   const handleDownloadCsv = () => {
     if (convertedRows.length === 0) return;
-    const allHeaders = [...headers, 'Converted_Latitude', 'Converted_Longitude'];
+    const allHeaders = [
+      ...headers,
+      'Converted_Latitude',
+      'Converted_Longitude'
+    ];
     let csv = allHeaders.join(',') + '\n';
 
     convertedRows.forEach((r) => {
@@ -157,7 +178,9 @@ export default function ArcMapsCoordinateConverter() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `converted_${batchFormat}_${fileName.replace(/\.[^/.]+$/, '') || 'coordinates'}.csv`;
+    a.download = `converted_${batchFormat}_${
+      fileName.replace(/\.[^/.]+$/, '') || 'coordinates'
+    }.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -178,11 +201,17 @@ export default function ArcMapsCoordinateConverter() {
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Convert single coordinates or upload CSV / Excel spreadsheets to convert between Decimal Degrees (DD), Degrees Minutes Seconds (DMS), and UTM projections.
+          Convert single coordinates or upload CSV / Excel spreadsheets to
+          convert between Decimal Degrees (DD), Degrees Minutes Seconds (DMS),
+          and UTM projections.
         </Typography>
       </Stack>
 
-      <Tabs value={tabIndex} onChange={(_, val) => setTabIndex(val)} sx={{ mb: 3 }}>
+      <Tabs
+        value={tabIndex}
+        onChange={(_, val) => setTabIndex(val)}
+        sx={{ mb: 3 }}
+      >
         <Tab label="Batch Spreadsheet Import (CSV/Excel)" />
         <Tab label="Single Coordinate Converter" />
       </Tabs>
@@ -190,14 +219,31 @@ export default function ArcMapsCoordinateConverter() {
       {/* TAB 0: BATCH SPREADSHEET CONVERTER */}
       {tabIndex === 0 && (
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={6}>
             <Stack spacing={2}>
-              <Button variant="contained" component="label" startIcon={<UploadFileIcon />} fullWidth size="large">
+              <Button
+                variant="contained"
+                component="label"
+                startIcon={<UploadFileIcon />}
+                fullWidth
+                size="large"
+              >
                 Upload CSV / Excel Sheet
-                <input type="file" accept=".csv,.txt,.json" hidden onChange={handleFileUpload} />
+                <input
+                  type="file"
+                  accept=".csv,.txt,.json"
+                  hidden
+                  onChange={handleFileUpload}
+                />
               </Button>
 
-              {fileName && <Chip label={`Loaded File: ${fileName}`} color="info" variant="outlined" />}
+              {fileName && (
+                <Chip
+                  label={`Loaded File: ${fileName}`}
+                  color="info"
+                  variant="outlined"
+                />
+              )}
 
               {headers.length > 0 && (
                 <Grid container spacing={2}>
@@ -244,11 +290,15 @@ export default function ArcMapsCoordinateConverter() {
                 fullWidth
               >
                 <MenuItem value="dms">Degrees Minutes Seconds (DMS)</MenuItem>
-                <MenuItem value="dd">Decimal Degrees (DD / Normal Coordinates)</MenuItem>
+                <MenuItem value="dd">
+                  Decimal Degrees (DD / Normal Coordinates)
+                </MenuItem>
                 <MenuItem value="utm">UTM Projection Zone</MenuItem>
               </TextField>
 
-              <Typography variant="subtitle2">Sheet Coordinates Input:</Typography>
+              <Typography variant="subtitle2">
+                Sheet Coordinates Input:
+              </Typography>
               <TextField
                 multiline
                 rows={8}
@@ -260,34 +310,69 @@ export default function ArcMapsCoordinateConverter() {
             </Stack>
           </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="subtitle2" gutterBottom color="primary" fontWeight="bold">
+          <Grid item xs={6}>
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                color="primary"
+                fontWeight="bold"
+              >
                 Converted Coordinates Preview
               </Typography>
 
               <Stack direction="row" spacing={1} my={1}>
                 <Chip label={`Total Rows: ${rows.length}`} color="primary" />
-                <Chip label={`Target: ${batchFormat.toUpperCase()}`} color="secondary" />
+                <Chip
+                  label={`Target: ${batchFormat.toUpperCase()}`}
+                  color="secondary"
+                />
               </Stack>
 
-              <TableContainer sx={{ maxHeight: 280, border: '1px solid', borderColor: 'divider', my: 2 }}>
+              <TableContainer
+                sx={{
+                  maxHeight: 280,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  my: 2
+                }}
+              >
                 <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
                       <TableCell>#</TableCell>
                       <TableCell>Original Lat/Lon</TableCell>
-                      <TableCell>Converted Result ({batchFormat.toUpperCase()})</TableCell>
+                      <TableCell>
+                        Converted Result ({batchFormat.toUpperCase()})
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {convertedRows.map((r, i) => (
                       <TableRow key={i}>
                         <TableCell>{i + 1}</TableCell>
-                        <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>
-                          {(r as Record<string, any>)[latCol]}, {(r as Record<string, any>)[lonCol]}
+                        <TableCell
+                          sx={{ fontFamily: 'monospace', fontSize: 11 }}
+                        >
+                          {(r as Record<string, any>)[latCol]},{' '}
+                          {(r as Record<string, any>)[lonCol]}
                         </TableCell>
-                        <TableCell sx={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 'bold', color: 'primary.main' }}>
+                        <TableCell
+                          sx={{
+                            fontFamily: 'monospace',
+                            fontSize: 11,
+                            fontWeight: 'bold',
+                            color: 'primary.main'
+                          }}
+                        >
                           {batchFormat === 'utm'
                             ? r.Converted_Latitude
                             : `${r.Converted_Latitude}, ${r.Converted_Longitude}`}
@@ -297,7 +382,8 @@ export default function ArcMapsCoordinateConverter() {
                     {convertedRows.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={3} align="center">
-                          Upload a spreadsheet or select valid coordinate columns.
+                          Upload a spreadsheet or select valid coordinate
+                          columns.
                         </TableCell>
                       </TableRow>
                     )}
@@ -331,14 +417,14 @@ export default function ArcMapsCoordinateConverter() {
             value={lat}
             onChange={(e) => setLat(e.target.value)}
             fullWidth
-            helperText='Supports DD (e.g. 30.0444) or DMS (e.g. 30° 02&apos; 39.84" N)'
+            helperText="Supports DD (e.g. 30.0444) or DMS (e.g. 30° 02' 39.84&quot; N)"
           />
           <TextField
             label="Longitude (DD or DMS format)"
             value={lon}
             onChange={(e) => setLon(e.target.value)}
             fullWidth
-            helperText='Supports DD (e.g. 31.2357) or DMS (e.g. 31° 14&apos; 08.52" E)'
+            helperText="Supports DD (e.g. 31.2357) or DMS (e.g. 31° 14' 08.52&quot; E)"
           />
           <TextField
             select
@@ -351,19 +437,34 @@ export default function ArcMapsCoordinateConverter() {
             <MenuItem value="dd">Decimal Degrees (DD / Normal)</MenuItem>
             <MenuItem value="utm">UTM Projection Zone</MenuItem>
           </TextField>
-          <Button variant="contained" onClick={handleConvertSingle} size="large">
+          <Button
+            variant="contained"
+            onClick={handleConvertSingle}
+            size="large"
+          >
             Convert Coordinate
           </Button>
 
           {singleResult && (
-            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'action.hover', mt: 2 }}>
+            <Paper
+              variant="outlined"
+              sx={{ p: 2, bgcolor: 'action.hover', mt: 2 }}
+            >
               <Typography variant="subtitle2" color="primary">
                 Converted Result ({format.toUpperCase()}):
               </Typography>
-              <Typography variant="body1" fontWeight="bold" sx={{ fontFamily: 'monospace', my: 1 }}>
+              <Typography
+                variant="body1"
+                fontWeight="bold"
+                sx={{ fontFamily: 'monospace', my: 1 }}
+              >
                 {singleResult}
               </Typography>
-              <Button startIcon={<ContentCopyIcon />} onClick={handleCopySingle} size="small">
+              <Button
+                startIcon={<ContentCopyIcon />}
+                onClick={handleCopySingle}
+                size="small"
+              >
                 Copy Result
               </Button>
               {copySuccess && (

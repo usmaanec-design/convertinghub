@@ -1,12 +1,23 @@
 import { useState, useRef } from 'react';
-import { Box, Button, TextField, Typography, Stack, Paper, Alert, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Stack,
+  Paper,
+  Alert,
+  CircularProgress
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import EditIcon from '@mui/icons-material/Edit';
 import { PDFDocument, rgb } from 'pdf-lib';
+import { usePendingConversionFile } from '../../../../hooks';
 
 export default function SignPdf() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [signerName, setSignerName] = useState<string>('John Doe');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [convertedBlob, setConvertedBlob] = useState<Blob | null>(null);
@@ -33,15 +44,20 @@ export default function SignPdf() {
       const lastPage = pages[pages.length - 1];
 
       const dateStr = new Date().toLocaleDateString();
-      lastPage.drawText(`Signed by: ${signerName || 'Signature'}\nDate: ${dateStr}`, {
-        x: 50,
-        y: 60,
-        size: 12,
-        color: rgb(0, 0.2, 0.6)
-      });
+      lastPage.drawText(
+        `Signed by: ${signerName || 'Signature'}\nDate: ${dateStr}`,
+        {
+          x: 50,
+          y: 60,
+          size: 12,
+          color: rgb(0, 0.2, 0.6)
+        }
+      );
 
       const pdfBytes = await pdfDoc.save();
-      setConvertedBlob(new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' }));
+      setConvertedBlob(
+        new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' })
+      );
     } catch (err: any) {
       setError(`Failed to sign PDF: ${err.message}`);
     } finally {
@@ -70,10 +86,15 @@ export default function SignPdf() {
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          Sign yourself or add electronic signatures & digital stamps to your PDF documents.
+          Sign yourself or add electronic signatures & digital stamps to your
+          PDF documents.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -88,7 +109,13 @@ export default function SignPdf() {
           component="label"
         >
           <input type="file" accept=".pdf" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 48, color: file ? 'primary.main' : 'text.secondary', mb: 1 }} />
+          <UploadFileIcon
+            sx={{
+              fontSize: 48,
+              color: file ? 'primary.main' : 'text.secondary',
+              mb: 1
+            }}
+          />
           <Typography variant="subtitle1" fontWeight="bold">
             {file ? file.name : 'Click to select or drop a PDF file here'}
           </Typography>
@@ -110,7 +137,11 @@ export default function SignPdf() {
             size="large"
             onClick={handleSign}
             disabled={isProcessing}
-            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
+            startIcon={
+              isProcessing ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : null
+            }
             fullWidth
           >
             {isProcessing ? 'Signing PDF...' : 'Sign Document'}

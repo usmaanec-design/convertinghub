@@ -8,7 +8,14 @@ export const tool = defineTool('pdf', {
     shortDescription: 'translation:pdf.translatePdf.shortDescription'
   },
   path: 'translate-pdf',
-  icon: 'material-symbols:translate',
-  keywords: ['translate', 'languages', 'pdf', 'conversion', 'ai', 'multilingual'],
+  icon: 'flat-color-icons:globe',
+  keywords: [
+    'translate',
+    'languages',
+    'pdf',
+    'conversion',
+    'ai',
+    'multilingual'
+  ],
   component: lazy(() => import('./index'))
 });

@@ -8,7 +8,7 @@ export const tool = defineTool('pdf', {
     shortDescription: 'translation:pdf.organizePdf.shortDescription'
   },
   path: 'organize-pdf',
-  icon: 'material-symbols:grid-view-outline',
+  icon: 'flat-color-icons:grid',
   keywords: ['organize', 'reorder', 'delete', 'sort', 'pages', 'pdf'],
   component: lazy(() => import('./index'))
 });

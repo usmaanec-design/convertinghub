@@ -6,6 +6,9 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import GoogleIcon from '@mui/icons-material/Google';
 import LogoutIcon from '@mui/icons-material/Logout';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import SettingsIcon from '@mui/icons-material/Settings';
+import StarIcon from '@mui/icons-material/Star';
 import { Link, useNavigate } from 'react-router-dom';
 
 import {
@@ -23,37 +26,40 @@ import {
   Tooltip,
   Box,
   Divider,
-  ListItemIcon
+  ListItemIcon,
+  CircularProgress,
+  Chip,
+  alpha
 } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { Icon } from '@iconify/react';
-import { Mode } from 'components/App';
+import { Mode } from '../App';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-
-interface NavbarProps {
-  mode: Mode;
-  onChangeMode: () => void;
-}
+import { usePreferences } from '../../contexts/PreferencesContext';
+import { useTabs } from '../../contexts/TabContext';
+import { tools } from '../../tools';
+import ContactModal from '../ContactModal';
+import { TokenWallet } from '../TokenWallet';
 
 const languages = [
   { code: 'en', label: 'English' },
   { code: 'ar', label: 'العربية' },
-  { code: 'ur', label: 'اردو (پاکستان)' },
+  { code: 'ur', label: 'اردو' },
   { code: 'de', label: 'Deutsch' },
   { code: 'es', label: 'Español' },
   { code: 'fr', label: 'Français' },
   { code: 'pt', label: 'Português' },
   { code: 'ja', label: '日本語' },
-  { code: 'hi', label: 'हिंदी' },
+  { code: 'hi', label: 'हिन्दी' },
   { code: 'nl', label: 'Nederlands' },
   { code: 'ru', label: 'Русский' },
   { code: 'zh', label: '中文' }
 ];
 
 const UserNavAuth: React.FC = () => {
-  const { user, signInWithGoogle, logout } = useAuth();
+  const { user, signInWithGoogle, logout, isSigningIn } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -67,10 +73,17 @@ const UserNavAuth: React.FC = () => {
     return (
       <Button
         onClick={signInWithGoogle}
+        disabled={isSigningIn}
         variant="outlined"
         color="primary"
         size="small"
-        startIcon={<GoogleIcon fontSize="small" />}
+        startIcon={
+          isSigningIn ? (
+            <CircularProgress size={14} color="inherit" />
+          ) : (
+            <GoogleIcon fontSize="small" />
+          )
+        }
         sx={{
           borderRadius: '100px',
           fontWeight: 700,
@@ -80,7 +93,7 @@ const UserNavAuth: React.FC = () => {
           '&:hover': { borderWidth: '1.5px' }
         }}
       >
-        Login with Google
+        {isSigningIn ? 'Connecting...' : 'Continue with Google'}
       </Button>
     );
   }
@@ -92,7 +105,12 @@ const UserNavAuth: React.FC = () => {
           <Avatar
             alt={user.displayName || 'User'}
             src={user.photoURL || undefined}
-            sx={{ width: 36, height: 36, border: '2px solid', borderColor: 'primary.main' }}
+            sx={{
+              width: 36,
+              height: 36,
+              border: '2px solid',
+              borderColor: 'primary.main'
+            }}
           >
             {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
           </Avatar>
@@ -111,13 +129,45 @@ const UserNavAuth: React.FC = () => {
           <Typography variant="subtitle2" fontWeight="bold" noWrap>
             {user.displayName || 'Google User'}
           </Typography>
-          <Typography variant="caption" color="text.secondary" noWrap display="block">
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            noWrap
+            display="block"
+          >
             {user.email}
           </Typography>
         </Box>
         <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={() => { handleCloseMenu(); logout(); }}>
-          <ListItemIcon><LogoutIcon fontSize="small" color="error" /></ListItemIcon>
+        <MenuItem
+          component={Link}
+          to="/settings"
+          onClick={handleCloseMenu}
+        >
+          <ListItemIcon>
+            <SettingsIcon fontSize="small" color="primary" />
+          </ListItemIcon>
+          Settings
+        </MenuItem>
+        <MenuItem
+          component={Link}
+          to="/account"
+          onClick={handleCloseMenu}
+        >
+          <ListItemIcon>
+            <AccountCircleIcon fontSize="small" color="primary" />
+          </ListItemIcon>
+          Account & Billing
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleCloseMenu();
+            logout();
+          }}
+        >
+          <ListItemIcon>
+            <LogoutIcon fontSize="small" color="error" />
+          </ListItemIcon>
           Logout
         </MenuItem>
       </Menu>
@@ -125,18 +175,20 @@ const UserNavAuth: React.FC = () => {
   );
 };
 
-const Navbar: React.FC<NavbarProps> = ({
-  mode,
-  onChangeMode
-}) => {
+export default function Navbar({
+  onChangeMode,
+  mode
+}: {
+  mode: Mode;
+  onChangeMode: () => void;
+}) {
+  const [contactModalOpen, setContactModalOpen] = useState(false);
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const theme = useTheme();
+  const { favoriteTools } = usePreferences();
+  const { openTab } = useTabs();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const toggleDrawer = (open: boolean) => () => {
-    setDrawerOpen(open);
-  };
 
   const handleLanguageChange = (event: any) => {
     const newLanguage = event.target.value;
@@ -144,10 +196,8 @@ const Navbar: React.FC<NavbarProps> = ({
     localStorage.setItem('lang', newLanguage);
   };
 
-  const navItems: { label: string; path: string }[] = [];
-
   const languageSelector = (
-    <FormControl size="small" sx={{ minWidth: 110 }}>
+    <FormControl size="small" sx={{ minWidth: 100 }}>
       <Select
         value={i18n.language}
         onChange={handleLanguageChange}
@@ -178,13 +228,32 @@ const Navbar: React.FC<NavbarProps> = ({
   );
 
   const buttons: ReactNode[] = [
+    <TokenWallet key="token-wallet" />,
+    <Button
+      key="pricing"
+      component={Link}
+      to="/pricing"
+      variant="text"
+      color="inherit"
+      sx={{ fontWeight: 700, borderRadius: '100px', textTransform: 'none' }}
+    >
+      Pricing
+    </Button>,
+    <Tooltip key="settings-btn" title="Settings">
+      <IconButton
+        onClick={() => navigate('/settings')}
+        sx={{ p: 1, color: 'inherit' }}
+      >
+        <SettingsIcon />
+      </IconButton>
+    </Tooltip>,
     <UserNavAuth key="user-nav-auth" />,
     languageSelector,
     <Icon
       key={mode}
       onClick={onChangeMode}
       style={{ cursor: 'pointer' }}
-      fontSize={30}
+      fontSize={28}
       icon={
         mode === 'dark'
           ? 'ic:round-dark-mode'
@@ -195,118 +264,125 @@ const Navbar: React.FC<NavbarProps> = ({
     />,
     <Button
       key="hire-me"
-      onClick={() => {
-        const link = document.createElement('a');
-        link.href = '/cv.pdf';
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.click();
-      }}
+      onClick={() => setContactModalOpen(true)}
       sx={{ borderRadius: '100px' }}
       variant={'contained'}
+      size="small"
       startIcon={
         <Icon
           style={{ cursor: 'pointer' }}
-          fontSize={25}
+          fontSize={20}
           icon={'hugeicons:job-search'}
         />
       }
     >
-      {t('navbar.hireMe', 'Contact with me')}
+      {t('navbar.hireMe', 'Contact')}
     </Button>
   ];
 
-  const drawerList = (
-    <List>
-      {navItems.map((navItem) => (
-        <ListItemButton
-          key={navItem.path}
-          onClick={() => navigate(navItem.path)}
-        >
-          <ListItemText primary={navItem.label} />
-        </ListItemButton>
-      ))}
-    </List>
-  );
-
   return (
-    <AppBar
-      position="static"
-      color="default"
-      elevation={0}
-      sx={{
-        backgroundColor: 'background.default',
-        py: 1
-      }}
-    >
-      <Toolbar
+    <>
+      <AppBar
+        position="static"
+        color="default"
+        elevation={0}
         sx={{
-          justify: 'space-between',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mx: { md: '30px', lg: '80px' }
+          backgroundColor: 'background.default',
+          py: 0.5
         }}
       >
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <img
-              src="/Logos/OmniTools-Logo-High-Resolution.png"
-              alt="ConvertingHub"
+        <Toolbar
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            px: { xs: 2, md: 5 }
+          }}
+        >
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Link
+              to="/"
               style={{
-                height: isMobile ? '48px' : '60px',
-                width: 'auto',
-                objectFit: 'contain'
-              }}
-            />
-            <Typography
-              component="span"
-              sx={{
-                ml: 1.5,
-                fontWeight: 800,
-                fontSize: isMobile ? '1.25rem' : '1.65rem',
-                color: 'primary.main',
-                letterSpacing: '-0.5px',
-                lineHeight: 1
+                display: 'flex',
+                alignItems: 'center',
+                textDecoration: 'none'
               }}
             >
-              ConvertingHub
-            </Typography>
-          </Link>
-        </Stack>
-        {isMobile ? (
-          <>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <UserNavAuth />
-              <IconButton
-                color="inherit"
-                onClick={toggleDrawer(true)}
+              <img
+                src="/Logos/OmniTools-Logo-High-Resolution.png"
+                alt="ConvertingHub"
+                style={{
+                  height: '44px',
+                  width: 'auto',
+                  objectFit: 'contain'
+                }}
+              />
+              <Typography
+                component="span"
                 sx={{
-                  '&:hover': {
-                    backgroundColor: theme.palette.primary.main
-                  }
+                  ml: 1.25,
+                  fontWeight: 800,
+                  fontSize: '1.5rem',
+                  color: 'primary.main',
+                  letterSpacing: '-0.5px',
+                  lineHeight: 1
                 }}
               >
-                <MenuIcon />
-              </IconButton>
-            </Stack>
-            <Drawer
-              anchor="right"
-              open={drawerOpen}
-              onClose={toggleDrawer(false)}
-            >
-              {drawerList}
-            </Drawer>
-          </>
-        ) : (
-          <Stack direction="row" spacing={2} alignItems="center">
+                ConvertingHub
+              </Typography>
+            </Link>
+
+            {/* QUICK FAVORITE TOOLS BAR */}
+            {!isMobile && favoriteTools.length > 0 && (
+              <Stack direction="row" spacing={0.75} alignItems="center" sx={{ ml: 2 }}>
+                {favoriteTools.slice(0, 4).map((favId) => {
+                  const matchedTool = tools.find(
+                    (t) => t.path.replace(/^\//, '') === favId || t.path === favId
+                  );
+                  if (!matchedTool) return null;
+
+                  return (
+                    <Chip
+                      key={favId}
+                      icon={<StarIcon sx={{ fontSize: '13px !important', color: 'warning.main' }} />}
+                      label={matchedTool.name}
+                      onClick={() => {
+                        const path = matchedTool.path.startsWith('/') ? matchedTool.path : `/${matchedTool.path}`;
+                        openTab({ path, title: matchedTool.name, icon: matchedTool.icon });
+                      }}
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        borderRadius: '100px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        borderColor: alpha(theme.palette.divider, 0.8),
+                        backgroundColor: alpha(theme.palette.background.paper, 0.6),
+                        '&:hover': {
+                          borderColor: 'primary.main',
+                          backgroundColor: alpha(theme.palette.primary.main, 0.08)
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </Stack>
+            )}
+          </Stack>
+
+          <Stack direction="row" spacing={1.5} alignItems="center">
             {buttons.map((button, index) => (
               <React.Fragment key={index}>{button}</React.Fragment>
             ))}
           </Stack>
-        )}
-      </Toolbar>
-    </AppBar>
-  );
-};
+        </Toolbar>
+      </AppBar>
 
-export default Navbar;
+      {/* Contact Modal */}
+      <ContactModal
+        open={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+      />
+    </>
+  );
+}

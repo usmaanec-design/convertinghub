@@ -65,7 +65,6 @@ export default async function makeTool(
     const { showSnackBar } = useContext(CustomSnackBarContext);
     const { t } = useTranslation(validNamespaces);
     const theme = useTheme();
-    const lessThanSmall = useMediaQuery(theme.breakpoints.down('sm'));
 
     // For UX purposes we need to track what vars are
     const [valsBoundToPreset, setValsBoundToPreset] = useState<{
@@ -256,7 +255,7 @@ export default async function makeTool(
                       {calcData.presets?.map((preset) => (
                         <Grid item xs={12} key={preset.title}>
                           <Stack
-                            direction={{ xs: 'column', md: 'row' }}
+                            direction="row"
                             spacing={2}
                             alignItems={'center'}
                             justifyContent={'space-between'}
@@ -295,49 +294,14 @@ export default async function makeTool(
             title: 'Variables',
             component: (
               <Box>
-                {lessThanSmall ? (
-                  <Stack
-                    direction={'column'}
-                    spacing={2}
-                    alignItems={'center'}
-                    justifyContent={'space-between'}
-                  >
-                    <Typography>Solve for</Typography>
-                    <Select
-                      sx={{ width: '80%' }}
-                      fullWidth
-                      value={values.outputVariable}
-                      onChange={(event) =>
-                        handleSelectedTargetChange(
-                          event.target.value,
-                          updateField
-                        )
-                      }
-                    >
-                      {calcData.variables.map((variable) => (
-                        <MenuItem
-                          disabled={
-                            valsBoundToPreset[variable.name] !== undefined ||
-                            variable.solvable === false
-                          }
-                          key={variable.name}
-                          value={variable.name}
-                        >
-                          {variable.title}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </Stack>
-                ) : (
-                  <Grid container spacing={2} sx={{ mb: 2 }}>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}>
-                      <Typography fontWeight="bold" align="center">
-                        Solve For
-                      </Typography>
-                    </Grid>
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  <Grid item xs={10}></Grid>
+                  <Grid item xs={2}>
+                    <Typography fontWeight="bold" align="center">
+                      Solve For
+                    </Typography>
                   </Grid>
-                )}
+                </Grid>
                 {calcData.variables.map((variable) => (
                   <Box
                     key={variable.name}
@@ -348,11 +312,11 @@ export default async function makeTool(
                     }}
                   >
                     <Grid container spacing={2} alignItems="center">
-                      <Grid item xs={lessThanSmall ? 12 : 10}>
+                      <Grid item xs={10}>
                         <Box>
                           <Stack spacing={2}>
                             <Stack
-                              direction={{ xs: 'column', md: 'row' }}
+                              direction="row"
                               spacing={2}
                               alignItems="center"
                             >
@@ -436,28 +400,26 @@ export default async function makeTool(
                         </Box>
                       </Grid>
 
-                      {!lessThanSmall && (
-                        <Grid
-                          item
-                          xs={2}
-                          sx={{ display: 'flex', justifyContent: 'center' }}
-                        >
-                          <Radio
-                            value={variable.name}
-                            checked={values.outputVariable === variable.name}
-                            disabled={
-                              valsBoundToPreset[variable.name] !== undefined ||
-                              variable.solvable === false
-                            }
-                            onClick={() =>
-                              handleSelectedTargetChange(
-                                variable.name,
-                                updateField
-                              )
-                            }
-                          />
-                        </Grid>
-                      )}
+                      <Grid
+                        item
+                        xs={2}
+                        sx={{ display: 'flex', justifyContent: 'center' }}
+                      >
+                        <Radio
+                          value={variable.name}
+                          checked={values.outputVariable === variable.name}
+                          disabled={
+                            valsBoundToPreset[variable.name] !== undefined ||
+                            variable.solvable === false
+                          }
+                          onClick={() =>
+                            handleSelectedTargetChange(
+                              variable.name,
+                              updateField
+                            )
+                          }
+                        />
+                      </Grid>
                     </Grid>
                   </Box>
                 ))}

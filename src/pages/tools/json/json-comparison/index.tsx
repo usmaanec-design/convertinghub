@@ -59,7 +59,7 @@ export default function JsonComparison({ title }: ToolComponentProps) {
       compute={() => {}}
       inputComponent={
         <Grid container spacing={2}>
-          <Grid item xs={12} md={6} lg={4}>
+          <Grid item xs={4}>
             <ToolCodeInput
               title="First JSON"
               value={input1}
@@ -67,7 +67,7 @@ export default function JsonComparison({ title }: ToolComponentProps) {
               language={'json'}
             />
           </Grid>
-          <Grid item xs={12} md={6} lg={4}>
+          <Grid item xs={4}>
             <ToolCodeInput
               title="Second JSON"
               language={'json'}
@@ -75,7 +75,7 @@ export default function JsonComparison({ title }: ToolComponentProps) {
               onChange={handleInput2Change}
             />
           </Grid>
-          <Grid item xs={12} md={12} lg={4}>
+          <Grid item xs={4}>
             <ToolTextResult
               title="Differences"
               value={result}

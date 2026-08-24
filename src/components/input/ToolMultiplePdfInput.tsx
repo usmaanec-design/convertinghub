@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Box, IconButton, Tooltip, useTheme } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import InputHeader from '../InputHeader';
@@ -30,6 +30,16 @@ export default function ToolMultiFileInput({
   const { t } = useTranslation();
   const theme = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (value.length === 0 && typeof window !== 'undefined' && (window as any).__pendingConversionFile) {
+      const pending = (window as any).__pendingConversionFile;
+      if (pending) {
+        onChange([{ file: pending, order: 0 }]);
+        (window as any).__pendingConversionFile = undefined;
+      }
+    }
+  }, [value, onChange]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;

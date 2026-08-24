@@ -1,7 +1,7 @@
 import { defineTool } from '@tools/defineTool';
 import { lazy } from 'react';
 
-export const tool = defineTool('converters', {
+export const tool = defineTool('audio', {
   i18n: {
     name: 'converters:audioConverter.title',
     description: 'converters:audioConverter.description',

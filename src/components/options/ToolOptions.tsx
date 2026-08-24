@@ -47,7 +47,9 @@ export default function ToolOptions<T extends FormikValues>({
     >
       <Stack direction={'row'} spacing={1} alignItems={'center'}>
         <SettingsIcon />
-        <Typography fontSize={20} fontWeight={600}>{t('toolOptions.title')}</Typography>
+        <Typography fontSize={{ xs: 16, md: 20 }} fontWeight={600}>
+          {t('toolOptions.title')}
+        </Typography>
       </Stack>
       <Box mt={2} width="100%">
         <Stack direction={'column'} spacing={2} width="100%">

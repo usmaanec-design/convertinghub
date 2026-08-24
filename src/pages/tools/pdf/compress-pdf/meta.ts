@@ -3,7 +3,7 @@ import { lazy } from 'react';
 
 export const tool = defineTool('pdf', {
   path: 'compress-pdf',
-  icon: 'material-symbols:compress',
+  icon: 'flat-color-icons:file',
 
   keywords: [
     'reduce',

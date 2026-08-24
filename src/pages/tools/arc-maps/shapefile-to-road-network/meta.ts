@@ -4,8 +4,10 @@ import { lazy } from 'react';
 export const tool = defineTool('arc-maps', {
   i18n: {
     name: 'translation:categories.arc-maps.shapefileToRoadNetwork.name',
-    description: 'translation:categories.arc-maps.shapefileToRoadNetwork.description',
-    shortDescription: 'translation:categories.arc-maps.shapefileToRoadNetwork.shortDescription'
+    description:
+      'translation:categories.arc-maps.shapefileToRoadNetwork.description',
+    shortDescription:
+      'translation:categories.arc-maps.shapefileToRoadNetwork.shortDescription'
   },
   path: 'shapefile-to-road-network',
   icon: 'gis:route',

@@ -35,6 +35,16 @@ export default function BaseFileInput({
   const { showSnackBar } = useContext(CustomSnackBarContext);
 
   useEffect(() => {
+    if (!value && typeof window !== 'undefined' && (window as any).__pendingConversionFile) {
+      const pending = (window as any).__pendingConversionFile;
+      if (pending) {
+        onChange(pending);
+        (window as any).__pendingConversionFile = undefined;
+      }
+    }
+  }, [value, onChange]);
+
+  useEffect(() => {
     if (value) {
       try {
         const objectUrl = createObjectURL(value);

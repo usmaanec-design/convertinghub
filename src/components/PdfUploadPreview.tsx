@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, Button, Paper, Stack, Chip, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Stack,
+  Chip,
+  CircularProgress
+} from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -12,7 +20,10 @@ interface PdfUploadPreviewProps {
   onRemove: () => void;
 }
 
-export const PdfUploadPreview: React.FC<PdfUploadPreviewProps> = ({ file, onRemove }) => {
+export const PdfUploadPreview: React.FC<PdfUploadPreviewProps> = ({
+  file,
+  onRemove
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [pageCount, setPageCount] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -27,7 +38,7 @@ export const PdfUploadPreview: React.FC<PdfUploadPreviewProps> = ({ file, onRemo
         setRenderError(false);
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        
+
         if (isCancelled) return;
         setPageCount(pdf.numPages);
 
@@ -55,7 +66,10 @@ export const PdfUploadPreview: React.FC<PdfUploadPreviewProps> = ({ file, onRemo
           setLoading(false);
         }
       } catch (err) {
-        console.warn('[PdfUploadPreview] First page preview render warning:', err);
+        console.warn(
+          '[PdfUploadPreview] First page preview render warning:',
+          err
+        );
         if (!isCancelled) {
           setRenderError(true);
           setLoading(false);
@@ -90,7 +104,12 @@ export const PdfUploadPreview: React.FC<PdfUploadPreviewProps> = ({ file, onRemo
         my: 2
       }}
     >
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between">
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        alignItems="center"
+        justifyContent="space-between"
+      >
         {/* Left: First page preview thumbnail */}
         <Box
           sx={{
@@ -112,7 +131,9 @@ export const PdfUploadPreview: React.FC<PdfUploadPreviewProps> = ({ file, onRemo
           {renderError && (
             <Stack alignItems="center" spacing={0.5}>
               <InsertDriveFileIcon color="action" sx={{ fontSize: 40 }} />
-              <Typography variant="caption" color="text.secondary">PDF File</Typography>
+              <Typography variant="caption" color="text.secondary">
+                PDF File
+              </Typography>
             </Stack>
           )}
           <canvas
@@ -135,11 +156,17 @@ export const PdfUploadPreview: React.FC<PdfUploadPreviewProps> = ({ file, onRemo
             variant="outlined"
             sx={{ mb: 1, fontWeight: 'bold' }}
           />
-          <Typography variant="subtitle1" fontWeight="bold" noWrap sx={{ maxWidth: 350 }}>
+          <Typography
+            variant="subtitle1"
+            fontWeight="bold"
+            noWrap
+            sx={{ maxWidth: 350 }}
+          >
             {file.name}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {pageCount ? `${pageCount} pages` : 'Reading pages...'} • {formatFileSize(file.size)}
+            {pageCount ? `${pageCount} pages` : 'Reading pages...'} •{' '}
+            {formatFileSize(file.size)}
           </Typography>
         </Box>
 

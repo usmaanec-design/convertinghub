@@ -1,16 +1,33 @@
 import { useState } from 'react';
-import { Box, Button, Typography, Stack, Paper, Alert, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Stack,
+  Paper,
+  Alert,
+  CircularProgress
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { libreOfficeEngine, ConversionResult } from '@utils/libreofficeEngine';
 import { EngineResultBanner } from '../../../../components/EngineResultBanner';
+import { ConversionProgressBar } from '../../../../components/ConversionProgressBar';
+import { useAuth } from '../../../../contexts/AuthContext';
+import { executeProtectedDownload } from '../../../../utils/downloadInterceptor';
+
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AiAssistantModal from '../../../../components/AiAssistantModal';
+import { usePendingConversionFile } from '../../../../hooks';
 
 export default function WordToPdf() {
   const [file, setFile] = useState<File | null>(null);
+  usePendingConversionFile(file, setFile);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploaded = e.target.files?.[0];
@@ -28,7 +45,10 @@ export default function WordToPdf() {
       setError(null);
       const res = await libreOfficeEngine.convertDocument(file, 'pdf');
       if (!res.success || !res.blob) {
-        setError(res.error || 'Document conversion service is temporarily unavailable. Please try again.');
+        setError(
+          res.error ||
+            'Document conversion service is temporarily unavailable. Please try again.'
+        );
         setResult(null);
       } else {
         setResult(res);
@@ -41,31 +61,60 @@ export default function WordToPdf() {
     }
   };
 
+  const { isAuthenticated, signInWithGoogle } = useAuth();
+
   const handleDownload = () => {
     if (!result || !result.blob || !file) return;
-    const url = URL.createObjectURL(result.blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = result.filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    const blob = result.blob;
+    executeProtectedDownload(
+      () => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = result.filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      { isAuthenticated, signInWithGoogle }
+    );
   };
 
   return (
     <Paper sx={{ p: 4, maxWidth: 700, mx: 'auto', mt: 3, textAlign: 'center' }}>
       <Stack spacing={3} alignItems="center">
-        <Box display="flex" alignItems="center" gap={1}>
-          <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
-          <Typography variant="h5" fontWeight="bold">
-            Word to PDF Converter
-          </Typography>
+        <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+          <Box display="flex" alignItems="center" gap={1}>
+            <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
+            <Typography variant="h5" fontWeight="bold">
+              Word to PDF Converter
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<AutoAwesomeIcon sx={{ color: '#a855f7' }} />}
+            onClick={() => setIsAiModalOpen(true)}
+            sx={{
+              borderColor: '#a855f7',
+              color: '#a855f7',
+              borderRadius: 2,
+              '&:hover': { bgcolor: 'rgba(168, 85, 247, 0.08)', borderColor: '#9333ea' }
+            }}
+          >
+            AI Assistant
+          </Button>
         </Box>
 
         <Typography variant="body2" color="text.secondary">
-          Make DOC and DOCX files easy to read by converting them to PDF documents cleanly and quickly.
+          Make DOC and DOCX files easy to read by converting them to PDF
+          documents cleanly and quickly.
         </Typography>
 
-        {error && <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -79,8 +128,19 @@ export default function WordToPdf() {
           }}
           component="label"
         >
-          <input type="file" accept=".doc,.docx,.txt,.rtf" hidden onChange={handleFileUpload} />
-          <UploadFileIcon sx={{ fontSize: 48, color: file ? 'primary.main' : 'text.secondary', mb: 1 }} />
+          <input
+            type="file"
+            accept=".doc,.docx,.txt,.rtf"
+            hidden
+            onChange={handleFileUpload}
+          />
+          <UploadFileIcon
+            sx={{
+              fontSize: 48,
+              color: file ? 'primary.main' : 'text.secondary',
+              mb: 1
+            }}
+          />
           <Typography variant="subtitle1" fontWeight="bold">
             {file ? file.name : 'Click to select or drop a Word document here'}
           </Typography>
@@ -90,22 +150,32 @@ export default function WordToPdf() {
         </Box>
 
         {file && !result && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={handleConvert}
-            disabled={isProcessing}
-            startIcon={isProcessing ? <CircularProgress size={20} color="inherit" /> : null}
-            fullWidth
-          >
-            {isProcessing ? 'Converting Word to PDF...' : 'Convert to PDF'}
-          </Button>
+          <Stack spacing={2} width="100%">
+            {isProcessing && (
+              <ConversionProgressBar
+                isProcessing={true}
+                title="Converting Word to PDF..."
+              />
+            )}
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={handleConvert}
+              disabled={isProcessing}
+              fullWidth
+            >
+              {isProcessing ? 'Converting Word to PDF...' : 'Convert to PDF'}
+            </Button>
+          </Stack>
         )}
 
         {result && (
           <Stack spacing={2} width="100%">
-            <EngineResultBanner engineUsed={result.engineUsed} filename={result.filename} />
+            <EngineResultBanner
+              engineUsed={result.engineUsed}
+              filename={result.filename}
+            />
             <Button
               variant="contained"
               color="primary"
@@ -118,6 +188,11 @@ export default function WordToPdf() {
           </Stack>
         )}
       </Stack>
+
+      <AiAssistantModal
+        open={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+      />
     </Paper>
   );
 }

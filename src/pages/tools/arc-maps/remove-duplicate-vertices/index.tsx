@@ -31,7 +31,11 @@ const SAMPLE_COORDINATES = `Latitude,Longitude,LocationName
 30.0450,31.2390,Downtown
 30.0450,31.2400,Station`;
 
-function extractPointsFromText(text: string, latCol?: string, lonCol?: string): { pts: [number, number][]; headers: string[] } {
+function extractPointsFromText(
+  text: string,
+  latCol?: string,
+  lonCol?: string
+): { pts: [number, number][]; headers: string[] } {
   const points: [number, number][] = [];
   let headers: string[] = [];
 
@@ -50,7 +54,9 @@ function extractPointsFromText(text: string, latCol?: string, lonCol?: string): 
   if (lines.length === 0) return { pts: [], headers: [] };
 
   const delimiter = text.includes('\t') ? '\t' : text.includes(';') ? ';' : ',';
-  const firstLineParts = lines[0].split(delimiter).map((s) => s.trim().replace(/^["']|["']$/g, ''));
+  const firstLineParts = lines[0]
+    .split(delimiter)
+    .map((s) => s.trim().replace(/^["']|["']$/g, ''));
 
   // Check if first line is a header
   const isHeader = firstLineParts.some((p) => isNaN(Number(p)));
@@ -63,10 +69,16 @@ function extractPointsFromText(text: string, latCol?: string, lonCol?: string): 
     const lower = headers.map((h) => h.toLowerCase());
 
     if (latCol) targetLatIdx = headers.indexOf(latCol);
-    else targetLatIdx = lower.findIndex((h) => ['lat', 'latitude', 'y', 'lat_dd', 'north'].includes(h));
+    else
+      targetLatIdx = lower.findIndex((h) =>
+        ['lat', 'latitude', 'y', 'lat_dd', 'north'].includes(h)
+      );
 
     if (lonCol) targetLonIdx = headers.indexOf(lonCol);
-    else targetLonIdx = lower.findIndex((h) => ['lon', 'lng', 'longitude', 'x', 'lon_dd', 'east'].includes(h));
+    else
+      targetLonIdx = lower.findIndex((h) =>
+        ['lon', 'lng', 'longitude', 'x', 'lon_dd', 'east'].includes(h)
+      );
   }
 
   const startLine = isHeader ? 1 : 0;
@@ -148,7 +160,11 @@ export default function RemoveDuplicateVertices() {
 
   // Extract raw coordinates & headers
   const { rawPts, headers } = useMemo(() => {
-    const { pts, headers: hdrs } = extractPointsFromText(inputData, selectedLatCol, selectedLonCol);
+    const { pts, headers: hdrs } = extractPointsFromText(
+      inputData,
+      selectedLatCol,
+      selectedLonCol
+    );
     return { rawPts: pts, headers: hdrs };
   }, [inputData, selectedLatCol, selectedLonCol]);
 
@@ -162,7 +178,11 @@ export default function RemoveDuplicateVertices() {
       if (seen.has(key)) dupes++;
       else seen.add(key);
     });
-    return { total: rawPts.length, duplicates: dupes, unique: rawPts.length - dupes };
+    return {
+      total: rawPts.length,
+      duplicates: dupes,
+      unique: rawPts.length - dupes
+    };
   }, [rawPts]);
 
   // Deduplication & collinear cleaning algorithm driven by slider
@@ -221,7 +241,8 @@ export default function RemoveDuplicateVertices() {
   const originalCount = rawPts.length;
   const cleanedCount = cleanedCoords.length;
   const removedCount = originalCount - cleanedCount;
-  const reductionPct = originalCount > 0 ? Math.round((removedCount / originalCount) * 100) : 0;
+  const reductionPct =
+    originalCount > 0 ? Math.round((removedCount / originalCount) * 100) : 0;
 
   const outputFormatted = useMemo(() => {
     return JSON.stringify(cleanedCoords, null, 2);
@@ -247,12 +268,18 @@ export default function RemoveDuplicateVertices() {
 
   const handleDownloadCsv = () => {
     const csvHeader = 'Longitude,Latitude\n';
-    const csvBody = cleanedCoords.map(([lon, lat]) => `${lon},${lat}`).join('\n');
-    const blob = new Blob([csvHeader + csvBody], { type: 'text/csv;charset=utf-8;' });
+    const csvBody = cleanedCoords
+      .map(([lon, lat]) => `${lon},${lat}`)
+      .join('\n');
+    const blob = new Blob([csvHeader + csvBody], {
+      type: 'text/csv;charset=utf-8;'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cleaned_${fileName.replace(/\.[^/.]+$/, '') || 'vertices'}.csv`;
+    a.download = `cleaned_${
+      fileName.replace(/\.[^/.]+$/, '') || 'vertices'
+    }.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -267,15 +294,23 @@ export default function RemoveDuplicateVertices() {
             type: 'LineString',
             coordinates: cleanedCoords
           },
-          properties: { cleaned: true, originalVertices: originalCount, cleanedVertices: cleanedCount }
+          properties: {
+            cleaned: true,
+            originalVertices: originalCount,
+            cleanedVertices: cleanedCount
+          }
         }
       ]
     };
-    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], {
+      type: 'application/json'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cleaned_${fileName.replace(/\.[^/.]+$/, '') || 'vertices'}.geojson`;
+    a.download = `cleaned_${
+      fileName.replace(/\.[^/.]+$/, '') || 'vertices'
+    }.geojson`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -325,32 +360,62 @@ export default function RemoveDuplicateVertices() {
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Upload CSV / Excel / GeoJSON coordinate spreadsheets to automatically detect total locations, detect duplicate vertices, and dynamically clean vertices using the distance tolerance slider.
+          Upload CSV / Excel / GeoJSON coordinate spreadsheets to automatically
+          detect total locations, detect duplicate vertices, and dynamically
+          clean vertices using the distance tolerance slider.
         </Typography>
       </Stack>
 
       {/* Auto Detection Summary Banner */}
       <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'action.hover' }}>
-        <Typography variant="subtitle2" color="primary" gutterBottom fontWeight="bold">
+        <Typography
+          variant="subtitle2"
+          color="primary"
+          gutterBottom
+          fontWeight="bold"
+        >
           Sheet Auto-Detection Summary
         </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
-          <Chip label={`Total Locations: ${initialDuplicateStats.total}`} color="default" />
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Chip
+            label={`Total Locations: ${initialDuplicateStats.total}`}
+            color="default"
+          />
           <Chip
             label={`Detected Duplicate Vertices: ${initialDuplicateStats.duplicates}`}
             color={initialDuplicateStats.duplicates > 0 ? 'warning' : 'success'}
           />
-          <Chip label={`Unique Locations: ${initialDuplicateStats.unique}`} color="info" />
-          {fileName && <Chip label={`Loaded File: ${fileName}`} variant="outlined" color="primary" />}
+          <Chip
+            label={`Unique Locations: ${initialDuplicateStats.unique}`}
+            color="info"
+          />
+          {fileName && (
+            <Chip
+              label={`Loaded File: ${fileName}`}
+              variant="outlined"
+              color="primary"
+            />
+          )}
         </Stack>
       </Paper>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={6}>
           <Stack spacing={2}>
-            <Button variant="contained" component="label" startIcon={<UploadFileIcon />} fullWidth size="large">
+            <Button
+              variant="contained"
+              component="label"
+              startIcon={<UploadFileIcon />}
+              fullWidth
+              size="large"
+            >
               Upload CSV / Spreadsheet / GeoJSON File
-              <input type="file" accept=".csv,.txt,.json,.geojson,.kml" hidden onChange={handleFileUpload} />
+              <input
+                type="file"
+                accept=".csv,.txt,.json,.geojson,.kml"
+                hidden
+                onChange={handleFileUpload}
+              />
             </Button>
 
             {headers.length > 0 && (
@@ -390,7 +455,9 @@ export default function RemoveDuplicateVertices() {
               </Grid>
             )}
 
-            <Typography variant="subtitle2">Coordinates Data Input (CSV / GeoJSON / Text):</Typography>
+            <Typography variant="subtitle2">
+              Coordinates Data Input (CSV / GeoJSON / Text):
+            </Typography>
             <TextField
               multiline
               rows={9}
@@ -401,12 +468,19 @@ export default function RemoveDuplicateVertices() {
               sx={{ fontFamily: 'monospace', fontSize: 12 }}
             />
 
-            <Box mt={1} p={2} border="1px solid" borderColor="divider" borderRadius={1}>
+            <Box
+              mt={1}
+              p={2}
+              border="1px solid"
+              borderColor="divider"
+              borderRadius={1}
+            >
               <Typography variant="subtitle2" gutterBottom color="primary">
                 Interactive Drag-to-Deduplicate Slider
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Drag slider to dynamically clean duplicate vertices within distance threshold:
+                Drag slider to dynamically clean duplicate vertices within
+                distance threshold:
               </Typography>
               <Slider
                 value={distTolerance}
@@ -443,14 +517,26 @@ export default function RemoveDuplicateVertices() {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <Paper variant="outlined" sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Grid item xs={6}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             <Typography variant="subtitle2" gutterBottom>
               Path Cleaning Live Statistics
             </Typography>
 
             <Stack direction="row" spacing={1} my={1} flexWrap="wrap" gap={1}>
-              <Chip label={`Original: ${originalCount}`} color="default" variant="outlined" />
+              <Chip
+                label={`Original: ${originalCount}`}
+                color="default"
+                variant="outlined"
+              />
               <Chip label={`Cleaned: ${cleanedCount}`} color="success" />
               <Chip label={`Removed: ${removedCount}`} color="warning" />
               <Chip label={`Reduced: ${reductionPct}%`} color="primary" />
@@ -475,7 +561,9 @@ export default function RemoveDuplicateVertices() {
                 <svg
                   width="100%"
                   height="100%"
-                  viewBox={`${svgBounds.minX} ${-svgBounds.minY - svgBounds.height} ${svgBounds.width} ${svgBounds.height}`}
+                  viewBox={`${svgBounds.minX} ${
+                    -svgBounds.minY - svgBounds.height
+                  } ${svgBounds.width} ${svgBounds.height}`}
                 >
                   <polyline
                     fill="none"
@@ -483,28 +571,52 @@ export default function RemoveDuplicateVertices() {
                     strokeWidth={svgBounds.width / 150}
                     strokeDasharray="2,2"
                     points={rawPts
-                      .filter((pt): pt is [number, number] => Array.isArray(pt) && pt.length >= 2)
+                      .filter(
+                        (pt): pt is [number, number] =>
+                          Array.isArray(pt) && pt.length >= 2
+                      )
                       .map(([x, y]) => `${x},${-y}`)
                       .join(' ')}
                   />
                   {rawPts
-                    .filter((pt): pt is [number, number] => Array.isArray(pt) && pt.length >= 2)
+                    .filter(
+                      (pt): pt is [number, number] =>
+                        Array.isArray(pt) && pt.length >= 2
+                    )
                     .map(([x, y], i) => (
-                      <circle key={`orig-${i}`} cx={x} cy={-y} r={svgBounds.width / 100} fill="#888" />
+                      <circle
+                        key={`orig-${i}`}
+                        cx={x}
+                        cy={-y}
+                        r={svgBounds.width / 100}
+                        fill="#888"
+                      />
                     ))}
                   <polyline
                     fill="none"
                     stroke="#4caf50"
                     strokeWidth={svgBounds.width / 100}
                     points={cleanedCoords
-                      .filter((pt): pt is [number, number] => Array.isArray(pt) && pt.length >= 2)
+                      .filter(
+                        (pt): pt is [number, number] =>
+                          Array.isArray(pt) && pt.length >= 2
+                      )
                       .map(([x, y]) => `${x},${-y}`)
                       .join(' ')}
                   />
                   {cleanedCoords
-                    .filter((pt): pt is [number, number] => Array.isArray(pt) && pt.length >= 2)
+                    .filter(
+                      (pt): pt is [number, number] =>
+                        Array.isArray(pt) && pt.length >= 2
+                    )
                     .map(([x, y], i) => (
-                      <circle key={`clean-${i}`} cx={x} cy={-y} r={svgBounds.width / 80} fill="#4caf50" />
+                      <circle
+                        key={`clean-${i}`}
+                        cx={x}
+                        cy={-y}
+                        r={svgBounds.width / 80}
+                        fill="#4caf50"
+                      />
                     ))}
                 </svg>
               )}
@@ -519,7 +631,11 @@ export default function RemoveDuplicateVertices() {
               fullWidth
               InputProps={{ readOnly: true }}
               value={outputFormatted}
-              sx={{ fontFamily: 'monospace', fontSize: 11, bgcolor: 'action.hover' }}
+              sx={{
+                fontFamily: 'monospace',
+                fontSize: 11,
+                bgcolor: 'action.hover'
+              }}
             />
 
             <Stack direction="row" spacing={1} mt={2} flexWrap="wrap" gap={1}>

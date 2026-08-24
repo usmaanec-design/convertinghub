@@ -8,7 +8,15 @@ export const tool = defineTool('pdf', {
     shortDescription: 'translation:pdf.pdfAiSummarizer.shortDescription'
   },
   path: 'pdf-ai-summarizer',
-  icon: 'material-symbols:auto-awesome-outline',
-  keywords: ['ai', 'summarizer', 'summary', 'extract', 'key points', 'pdf', 'intelligence'],
+  icon: 'flat-color-icons:idea',
+  keywords: [
+    'ai',
+    'summarizer',
+    'summary',
+    'extract',
+    'key points',
+    'pdf',
+    'intelligence'
+  ],
   component: lazy(() => import('./index'))
 });

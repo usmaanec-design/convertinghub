@@ -29,7 +29,20 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    supportedLngs: ['en', 'ar', 'ur', 'de', 'es', 'fr', 'pt', 'ja', 'hi', 'nl', 'ru', 'zh'],
+    supportedLngs: [
+      'en',
+      'ar',
+      'ur',
+      'de',
+      'es',
+      'fr',
+      'pt',
+      'ja',
+      'hi',
+      'nl',
+      'ru',
+      'zh'
+    ],
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false
@@ -51,7 +64,8 @@ i18n.on('languageChanged', (lng) => {
 
 // Initial direction setting
 const initialLang = localStorage.getItem('lang') || 'en';
-const initialRtl = initialLang === 'ar' || initialLang === 'ur' || initialLang.startsWith('ur');
+const initialRtl =
+  initialLang === 'ar' || initialLang === 'ur' || initialLang.startsWith('ur');
 document.documentElement.dir = initialRtl ? 'rtl' : 'ltr';
 
 export default i18n;

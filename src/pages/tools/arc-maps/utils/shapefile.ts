@@ -39,7 +39,9 @@ export async function createShapefileZip(
         propertyKeys.push(fieldName);
         const isNum = typeof val === 'number';
         propertyTypes[fieldName] = isNum ? 'N' : 'C';
-        propertyLengths[fieldName] = isNum ? 18 : Math.max(String(val || '').length, 10);
+        propertyLengths[fieldName] = isNum
+          ? 18
+          : Math.max(String(val || '').length, 10);
       } else {
         if (typeof val !== 'number') propertyTypes[fieldName] = 'C';
         propertyLengths[fieldName] = Math.min(
@@ -51,8 +53,16 @@ export async function createShapefileZip(
   });
 
   // Build .shp & .shx
-  const { shpBuffer, shxBuffer } = buildShpAndShxBuffers(features, shapeTypeCode);
-  const dbfBuffer = buildDbfBuffer(features, propertyKeys, propertyTypes, propertyLengths);
+  const { shpBuffer, shxBuffer } = buildShpAndShxBuffers(
+    features,
+    shapeTypeCode
+  );
+  const dbfBuffer = buildDbfBuffer(
+    features,
+    propertyKeys,
+    propertyTypes,
+    propertyLengths
+  );
   const prjContent = `GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]`;
 
   zip.file(`${layerName}.shp`, shpBuffer);
@@ -63,7 +73,10 @@ export async function createShapefileZip(
   return await zip.generateAsync({ type: 'blob' });
 }
 
-function buildShpAndShxBuffers(features: SpatialFeature[], shapeTypeCode: number) {
+function buildShpAndShxBuffers(
+  features: SpatialFeature[],
+  shapeTypeCode: number
+) {
   // Compute global bounding box
   let minX = Infinity,
     minY = Infinity,
@@ -83,7 +96,9 @@ function buildShpAndShxBuffers(features: SpatialFeature[], shapeTypeCode: number
     } else if (f.geometryType === 'PolyLine') {
       f.coordinates.forEach(([x, y]: [number, number]) => updateBBox(x, y));
     } else if (f.geometryType === 'Polygon') {
-      const ring = Array.isArray(f.coordinates[0][0]) ? f.coordinates[0] : f.coordinates;
+      const ring = Array.isArray(f.coordinates[0][0])
+        ? f.coordinates[0]
+        : f.coordinates;
       ring.forEach(([x, y]: [number, number]) => updateBBox(x, y));
     }
   });
@@ -116,8 +131,8 @@ function buildShpAndShxBuffers(features: SpatialFeature[], shapeTypeCode: number
         shapeTypeCode === 3
           ? f.coordinates
           : Array.isArray(f.coordinates[0][0])
-          ? f.coordinates[0]
-          : f.coordinates;
+            ? f.coordinates[0]
+            : f.coordinates;
 
       let rMinX = Infinity,
         rMinY = Infinity,
@@ -321,7 +336,8 @@ export function parseShapefileBuffers(
     const contentBytes = contentLenWords * 2;
     offset += 8;
 
-    if (contentBytes <= 0 || offset + contentBytes > shpBuffer.byteLength) break;
+    if (contentBytes <= 0 || offset + contentBytes > shpBuffer.byteLength)
+      break;
 
     const shapeType = shpView.getInt32(offset, true);
 
@@ -408,7 +424,7 @@ function parseDbfBuffer(dbfBuffer: ArrayBuffer): Record<string, any>[] {
     if (view.getUint8(fOffset) === 0x0d) break;
 
     const nameBytes = new Uint8Array(dbfBuffer, fOffset, 11);
-    let name = new TextDecoder().decode(nameBytes).replace(/\0/g, '').trim();
+    const name = new TextDecoder().decode(nameBytes).replace(/\0/g, '').trim();
     const type = String.fromCharCode(view.getUint8(fOffset + 11));
     const len = view.getUint8(fOffset + 16);
 
