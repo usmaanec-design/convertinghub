@@ -34,45 +34,13 @@ export interface ConversionResult {
   tokensRemaining?: number;
 }
 
-const PRODUCTION_BACKEND_URL = 'https://convertinghub-backend.onrender.com';
+import { getBackendUrl, PRODUCTION_BACKEND_URL } from './backendConfig';
 
-const customBridgeUrl =
-  import.meta.env.VITE_BRIDGE_URL || import.meta.env.VITE_BACKEND_URL;
-
-const isLocalhost =
-  typeof window !== 'undefined' &&
-  (window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1');
-
-export const BASE_URLS = Array.from(
-  new Set(
-    [
-      ...(customBridgeUrl
-        ? [
-            customBridgeUrl.replace(/\/$/, ''),
-            customBridgeUrl.endsWith('/api/libreoffice')
-              ? customBridgeUrl
-              : `${customBridgeUrl.replace(/\/$/, '')}/api/libreoffice`,
-            customBridgeUrl.endsWith('/api')
-              ? customBridgeUrl
-              : `${customBridgeUrl.replace(/\/$/, '')}/api`
-          ]
-        : []),
-      `${PRODUCTION_BACKEND_URL}/api/libreoffice`,
-      `${PRODUCTION_BACKEND_URL}/api`,
-      PRODUCTION_BACKEND_URL,
-      ...(isLocalhost
-        ? [
-            '/api/libreoffice',
-            '/api',
-            'http://127.0.0.1:3001/api/libreoffice',
-            'http://127.0.0.1:3001/api',
-            'http://127.0.0.1:3001'
-          ]
-        : [])
-    ].filter(Boolean)
-  )
-);
+export const BASE_URLS = [
+  getBackendUrl('/api/libreoffice'),
+  getBackendUrl('/api'),
+  PRODUCTION_BACKEND_URL
+];
 
 export class LibreOfficeEngine {
   private static instance: LibreOfficeEngine;
@@ -85,33 +53,48 @@ export class LibreOfficeEngine {
   }
 
   public async getStatus(): Promise<LibreOfficeStatus> {
-    for (const baseUrl of BASE_URLS) {
-      try {
-        const targetUrl = baseUrl.endsWith('/status')
-          ? baseUrl
-          : `${baseUrl.replace(/\/$/, '')}/status`;
-        const res = await fetch(targetUrl, {
-          signal: AbortSignal.timeout(8000)
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (
-            data &&
-            (typeof data.installed === 'boolean' ||
-              typeof data.libreoffice === 'boolean')
-          ) {
-            const installed = Boolean(data.installed ?? data.libreoffice);
-            return {
-              installed,
-              version: data.version || 'Installed',
-              path: data.path || 'Server Container',
-              status: installed ? 'connected' : 'not_installed'
-            };
-          }
+    // 1. Primary Health Endpoint Check
+    try {
+      const healthUrl = getBackendUrl('/health');
+      const res = await fetch(healthUrl, {
+        signal: AbortSignal.timeout(6000)
+      });
+      if (res.ok) {
+        const data = await res.json().catch(() => null);
+        if (data && (data.status === 'ok' || data.installed === true || data.libreoffice === true)) {
+          const installed = Boolean(data.installed ?? data.libreoffice ?? true);
+          return {
+            installed,
+            version: data.version || 'LibreOffice Engine',
+            path: data.path || 'Server Container',
+            status: installed ? 'connected' : 'not_installed'
+          };
         }
-      } catch (e) {
-        // Continue checking other base URLs if ping fails
       }
+    } catch (e) {
+      // Fallback to secondary status endpoint if health ping fails
+    }
+
+    // 2. Secondary Status Endpoint Check
+    try {
+      const statusUrl = getBackendUrl('/api/libreoffice/status');
+      const res = await fetch(statusUrl, {
+        signal: AbortSignal.timeout(6000)
+      });
+      if (res.ok) {
+        const data = await res.json().catch(() => null);
+        if (data && (typeof data.installed === 'boolean' || typeof data.libreoffice === 'boolean')) {
+          const installed = Boolean(data.installed ?? data.libreoffice);
+          return {
+            installed,
+            version: data.version || 'Installed',
+            path: data.path || 'Server Container',
+            status: installed ? 'connected' : 'not_installed'
+          };
+        }
+      }
+    } catch (e) {
+      // Server down or offline
     }
 
     return {

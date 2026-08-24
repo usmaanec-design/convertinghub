@@ -3,7 +3,8 @@ import React, {
   useContext,
   useEffect,
   useState,
-  useCallback
+  useCallback,
+  useRef
 } from 'react';
 import { libreOfficeEngine, LibreOfficeStatus } from '@utils/libreofficeEngine';
 
@@ -36,9 +37,12 @@ export const LibreOfficeProvider: React.FC<{ children: React.ReactNode }> = ({
   children
 }) => {
   const [status, setStatus] = useState<LibreOfficeStatus>(defaultStatus);
-  const [isChecking, setIsChecking] = useState<boolean>(true);
+  const [isChecking, setIsChecking] = useState<boolean>(false);
+  const isCheckingRef = useRef<boolean>(false);
 
   const refreshStatus = useCallback(async () => {
+    if (isCheckingRef.current) return;
+    isCheckingRef.current = true;
     setIsChecking(true);
     try {
       const currentStatus = await libreOfficeEngine.getStatus();
@@ -52,6 +56,7 @@ export const LibreOfficeProvider: React.FC<{ children: React.ReactNode }> = ({
       });
     } finally {
       setIsChecking(false);
+      isCheckingRef.current = false;
     }
   }, []);
 
@@ -59,12 +64,10 @@ export const LibreOfficeProvider: React.FC<{ children: React.ReactNode }> = ({
     return await libreOfficeEngine.testEngine();
   }, []);
 
+  // Run status check ONCE on initial app mount - NO POLLING LOOP!
   useEffect(() => {
     refreshStatus();
-    // Poll status every 15s to keep UI updated
-    const interval = setInterval(refreshStatus, 15000);
-    return () => clearInterval(interval);
-  }, [refreshStatus]);
+  }, []);
 
   return (
     <LibreOfficeContext.Provider
