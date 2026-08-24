@@ -74,6 +74,65 @@ export const lightTheme = createTheme({
           fontWeight: 'bold'
         }
       }
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            fontSize: '14px !important',
+            minHeight: '38px !important'
+          }
+        },
+        input: {
+          '@media (max-width: 600px)': {
+            padding: '7px 10px !important',
+            fontSize: '14px !important'
+          }
+        }
+      }
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            borderRadius: '8px'
+          }
+        },
+        input: {
+          '@media (max-width: 600px)': {
+            padding: '7px 10px !important'
+          }
+        }
+      }
+    },
+    MuiSelect: {
+      styleOverrides: {
+        select: {
+          '@media (max-width: 600px)': {
+            padding: '7px 10px !important',
+            fontSize: '14px !important',
+            minHeight: '20px !important'
+          }
+        }
+      }
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            fontSize: '13px !important'
+          }
+        }
+      }
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            fontSize: '13px !important'
+          }
+        }
+      }
     }
   }
 });
@@ -108,6 +167,65 @@ export const darkTheme = createTheme({
           backgroundColor: '#f97316',
           '&:hover': {
             backgroundColor: '#ea580c'
+          }
+        }
+      }
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            fontSize: '14px !important',
+            minHeight: '38px !important'
+          }
+        },
+        input: {
+          '@media (max-width: 600px)': {
+            padding: '7px 10px !important',
+            fontSize: '14px !important'
+          }
+        }
+      }
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            borderRadius: '8px'
+          }
+        },
+        input: {
+          '@media (max-width: 600px)': {
+            padding: '7px 10px !important'
+          }
+        }
+      }
+    },
+    MuiSelect: {
+      styleOverrides: {
+        select: {
+          '@media (max-width: 600px)': {
+            padding: '7px 10px !important',
+            fontSize: '14px !important',
+            minHeight: '20px !important'
+          }
+        }
+      }
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            fontSize: '13px !important'
+          }
+        }
+      }
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            fontSize: '13px !important'
           }
         }
       }

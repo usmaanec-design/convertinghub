@@ -370,47 +370,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsSigningIn(true);
     setAuthError(null);
 
-    const standalone = isStandaloneApp();
-    const isMobileDevice = typeof window !== 'undefined' && (window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
-
-    if (standalone || isMobileDevice) {
-      console.log(
-        '[ConvertingHub Auth] Standalone/Mobile app context detected -> Executing signInWithRedirect'
-      );
-      try {
-        await signInWithRedirect(auth, googleProvider);
-      } catch (error: any) {
-        console.error(
-          '[ConvertingHub Auth] Standalone redirect auth error:',
-          error
-        );
-        setIsSigningIn(false);
-        handleAuthError(error);
-      }
-      return;
-    }
+    console.log('[ConvertingHub Auth] Initiating Google Sign-In...');
 
     try {
-      await signInWithPopup(auth, googleProvider);
+      // First attempt signInWithPopup (works seamlessly without full-page state loss on mobile Chrome/Safari)
+      const res = await signInWithPopup(auth, googleProvider);
+      console.log('[ConvertingHub Auth] Popup login successful:', res.user.email);
+      setUser(res.user);
+      setIsSigningIn(false);
     } catch (error: any) {
-      console.error('[ConvertingHub Auth] Google sign-in popup error:', error);
+      console.warn('[ConvertingHub Auth] Popup auth notice/error:', error?.code || error);
+      
+      const code = error?.code || '';
       if (
-        error?.code === 'auth/popup-blocked' ||
-        error?.code === 'auth/popup-closed-by-user' ||
-        error?.code === 'auth/operation-not-supported-in-this-environment'
+        code === 'auth/popup-blocked' ||
+        code === 'auth/operation-not-supported-in-this-environment' ||
+        code === 'auth/cancelled-popup-request' ||
+        isStandaloneApp()
       ) {
-        console.log('[ConvertingHub Auth] Retrying with signInWithRedirect fallback...');
+        console.log('[ConvertingHub Auth] Redirecting to Google OAuth via signInWithRedirect...');
         try {
           await signInWithRedirect(auth, googleProvider);
           return;
-        } catch (e2) {
+        } catch (e2: any) {
+          console.error('[ConvertingHub Auth] Redirect error:', e2);
+          setIsSigningIn(false);
           handleAuthError(e2);
         }
+      } else if (code === 'auth/popup-closed-by-user') {
+        setIsSigningIn(false);
+        setAuthError('Google sign-in was cancelled. You can try again whenever you’re ready.');
       } else {
+        setIsSigningIn(false);
         handleAuthError(error);
       }
-      setIsSigningIn(false);
-  };
+    }
   };
 
   const logout = async () => {
