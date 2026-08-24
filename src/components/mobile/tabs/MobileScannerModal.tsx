@@ -8,15 +8,23 @@ import {
   useTheme,
   CircularProgress,
   Chip,
-  Slider
+  Slider,
+  Badge,
+  Menu,
+  MenuItem,
+  Paper
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import CropIcon from '@mui/icons-material/Crop';
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
+import DescriptionIcon from '@mui/icons-material/Description';
+import TableChartIcon from '@mui/icons-material/TableChart';
 import jsPDF from 'jspdf';
+import { useNavigate } from 'react-router-dom';
 
 interface MobileScannerModalProps {
   open: boolean;
@@ -28,20 +36,30 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
   onClose
 }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const animFrameIdRef = useRef<number | null>(null);
 
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  
+  // Multi-page scanned document pages array
+  const [scannedPages, setScannedPages] = useState<string[]>([]);
+  const [currentCapturedImage, setCurrentCapturedImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
-  const [contrast, setContrast] = useState<number>(1.2);
-  const [brightness, setBrightness] = useState<number>(10);
+
+  // Filter & Enhancement adjustments
+  const [contrast, setContrast] = useState<number>(1.3);
+  const [brightness, setBrightness] = useState<number>(15);
   const [isBwMode, setIsBwMode] = useState<boolean>(true);
+
   const [detectedBounds, setDetectedBounds] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  // Export menu anchor
+  const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
 
   const startCamera = async () => {
     setError(null);
@@ -61,8 +79,8 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
         await videoRef.current.play();
       }
     } catch (err: any) {
-      console.warn('[Document Scanner] Camera error:', err);
-      setError('Could not access camera. Please grant camera permissions.');
+      console.warn('[Smart Scanner] Camera access error:', err);
+      setError('Could not access camera. Please check permissions.');
     } finally {
       setLoading(false);
     }
@@ -79,9 +97,9 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
     }
   };
 
-  // Real-time document edge detection loop on video stream
+  // Real-time Document Border & Edge Detection Overlay Loop
   useEffect(() => {
-    if (!open || capturedImage || !stream) return;
+    if (!open || currentCapturedImage || !stream) return;
 
     const processVideoFrame = () => {
       if (videoRef.current && overlayCanvasRef.current) {
@@ -95,22 +113,24 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
           if (ctx) {
             ctx.clearRect(0, 0, overlay.width, overlay.height);
 
-            // Draw bounding guide overlay
+            // Document Framing Rectangle
             const marginX = overlay.width * 0.08;
             const marginY = overlay.height * 0.12;
             const w = overlay.width - marginX * 2;
             const h = overlay.height - marginY * 2;
 
+            // Live Green Outline
             ctx.strokeStyle = '#10b981';
             ctx.lineWidth = 4;
             ctx.shadowColor = '#10b981';
             ctx.shadowBlur = 12;
             ctx.strokeRect(marginX, marginY, w, h);
 
-            // Corner highlights
-            const cornerLen = 24;
+            // Corner Target Highlights
+            const cornerLen = 28;
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 6;
+            
             // Top Left
             ctx.beginPath();
             ctx.moveTo(marginX, marginY + cornerLen);
@@ -150,18 +170,18 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [open, capturedImage, stream]);
+  }, [open, currentCapturedImage, stream]);
 
   useEffect(() => {
-    if (open && !capturedImage) {
+    if (open && !currentCapturedImage) {
       startCamera();
     } else {
       stopCamera();
     }
     return () => stopCamera();
-  }, [open, capturedImage]);
+  }, [open, currentCapturedImage]);
 
-  // Apply Document Scanner Image Enhancement (Sobel Edge + High-Contrast B&W Thresholding)
+  // Apply Document Scanner Image Enhancement (Adaptive Grayscale + Sharp Text Contrast)
   const applyEnhancements = (dataUrl: string) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -182,13 +202,13 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
         let g = data[i + 1];
         let b = data[i + 2];
 
-        // Greyscale luminance
+        // Greyscale luminance calculation
         let v = 0.299 * r + 0.587 * g + 0.114 * b;
 
         if (isBwMode) {
           // B&W Scanned Document Thresholding (Adaptive)
           v = (v - 128) * contrast + 128 + brightness;
-          v = v > 140 ? 255 : v < 70 ? 0 : v;
+          v = v > 140 ? 255 : v < 75 ? 0 : v;
           data[i] = v;
           data[i + 1] = v;
           data[i + 2] = v;
@@ -209,7 +229,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
     img.src = dataUrl;
   };
 
-  const handleCapture = () => {
+  const handleCapturePage = () => {
     if (!videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -219,43 +239,99 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
     if (ctx) {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-      setCapturedImage(dataUrl);
+      setCurrentCapturedImage(dataUrl);
       applyEnhancements(dataUrl);
       stopCamera();
     }
   };
 
   useEffect(() => {
-    if (capturedImage) {
-      applyEnhancements(capturedImage);
+    if (currentCapturedImage) {
+      applyEnhancements(currentCapturedImage);
     }
   }, [contrast, brightness, isBwMode]);
 
-  const handleRetake = () => {
-    setCapturedImage(null);
+  // Keep current page and scan next
+  const handleKeepPageAndScanNext = () => {
+    const finalPage = enhancedImage || currentCapturedImage;
+    if (finalPage) {
+      setScannedPages((prev) => [...prev, finalPage]);
+    }
+    setCurrentCapturedImage(null);
     setEnhancedImage(null);
     startCamera();
   };
 
-  // Generate and download a proper scanned PDF file
-  const handleSaveAsPdf = () => {
-    const finalImg = enhancedImage || capturedImage;
-    if (!finalImg) return;
+  const handleRetakeCurrentPage = () => {
+    setCurrentCapturedImage(null);
+    setEnhancedImage(null);
+    startCamera();
+  };
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const pdf = new jsPDF({
-        orientation: img.width > img.height ? 'landscape' : 'portrait',
-        unit: 'px',
-        format: [img.width, img.height]
-      });
+  // Export Scanned Multi-Page Document
+  const handleExportAsPdf = () => {
+    setExportMenuAnchor(null);
+    const pagesToExport = [...scannedPages];
+    const currentPage = enhancedImage || currentCapturedImage;
+    if (currentPage && !scannedPages.includes(currentPage)) {
+      pagesToExport.push(currentPage);
+    }
 
-      pdf.addImage(finalImg, 'JPEG', 0, 0, img.width, img.height);
-      pdf.save(`Scanned_Document_${Date.now()}.pdf`);
-      onClose();
-    };
-    img.src = finalImg;
+    if (pagesToExport.length === 0) return;
+
+    let loadedCount = 0;
+    const images: HTMLImageElement[] = [];
+
+    pagesToExport.forEach((dataUrl, idx) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        images[idx] = img;
+        loadedCount++;
+
+        if (loadedCount === pagesToExport.length) {
+          // Generate multi-page PDF
+          const firstImg = images[0];
+          const pdf = new jsPDF({
+            orientation: firstImg.width > firstImg.height ? 'landscape' : 'portrait',
+            unit: 'px',
+            format: [firstImg.width, firstImg.height]
+          });
+
+          images.forEach((image, i) => {
+            if (i > 0) {
+              pdf.addPage([image.width, image.height], image.width > image.height ? 'landscape' : 'portrait');
+            }
+            pdf.addImage(pagesToExport[i], 'JPEG', 0, 0, image.width, image.height);
+          });
+
+          pdf.save(`Scanned_Doc_${Date.now()}.pdf`);
+
+          // Reset and close
+          setScannedPages([]);
+          setCurrentCapturedImage(null);
+          setEnhancedImage(null);
+          onClose();
+        }
+      };
+      img.src = dataUrl;
+    });
+  };
+
+  const handleExportToWordOrExcel = (targetTool: string) => {
+    setExportMenuAnchor(null);
+    const lastPage = enhancedImage || currentCapturedImage || scannedPages[0];
+    if (lastPage) {
+      // Convert dataUrl to blob File and pass via pending file
+      fetch(lastPage)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const scannedFile = new File([blob], `Scanned_Doc_${Date.now()}.jpg`, { type: 'image/jpeg' });
+          (window as any).__pendingConversionFile = scannedFile;
+          onClose();
+          navigate(targetTool);
+        });
+    }
   };
 
   return (
@@ -294,20 +370,15 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
           <Typography variant="h6" fontWeight={700} color="#38bdf8">
             Smart Document Scanner
           </Typography>
-          {detectedBounds && !capturedImage && (
+          {scannedPages.length > 0 && (
             <Chip
-              icon={<AutoAwesomeIcon sx={{ fontSize: '14px !important', color: '#10b981' }} />}
-              label="Edges Detected"
+              label={`${scannedPages.length} ${scannedPages.length === 1 ? 'Page' : 'Pages'}`}
               size="small"
-              sx={{
-                bgcolor: 'rgba(16, 185, 129, 0.2)',
-                color: '#10b981',
-                fontWeight: 700,
-                fontSize: '0.68rem'
-              }}
+              sx={{ bgcolor: '#2563eb', color: '#ffffff', fontWeight: 700 }}
             />
           )}
         </Box>
+
         <IconButton
           onClick={() => {
             stopCamera();
@@ -337,7 +408,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
           <Box sx={{ textAlign: 'center' }}>
             <CircularProgress size={48} sx={{ color: '#38bdf8', mb: 2 }} />
             <Typography variant="body2" color="#94a3b8">
-              Starting camera...
+              Starting Smart Camera...
             </Typography>
           </Box>
         )}
@@ -357,7 +428,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
           </Box>
         )}
 
-        {!capturedImage ? (
+        {!currentCapturedImage ? (
           <Box
             sx={{
               width: '100%',
@@ -403,11 +474,11 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
             }}
           >
             <img
-              src={enhancedImage || capturedImage}
-              alt="Scanned Document"
+              src={enhancedImage || currentCapturedImage}
+              alt="Scanned Page"
               style={{
                 maxWidth: '100%',
-                maxHeight: '75%',
+                maxHeight: '70%',
                 borderRadius: '12px',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.6)'
               }}
@@ -418,7 +489,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
               sx={{
                 mt: 2,
                 p: 1.5,
-                bgcolor: 'rgba(30, 41, 59, 0.8)',
+                bgcolor: 'rgba(30, 41, 59, 0.85)',
                 borderRadius: '16px',
                 width: '90%',
                 maxWidth: 400,
@@ -439,8 +510,9 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
                   fontWeight: 700
                 }}
               >
-                {isBwMode ? 'B&W Scan' : 'Color Scan'}
+                {isBwMode ? 'B&W Text' : 'Full Color'}
               </Button>
+
               <Typography variant="caption" color="#94a3b8">
                 Contrast:
               </Typography>
@@ -473,67 +545,134 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
           justifyContent: 'space-around',
           bgcolor: 'rgba(15, 23, 42, 0.95)',
           backdropFilter: 'blur(10px)',
-          px: 3,
+          px: 2,
           pb: 1
         }}
       >
-        {!capturedImage ? (
-          <IconButton
-            onClick={handleCapture}
-            disabled={!stream}
-            sx={{
-              width: 68,
-              height: 68,
-              bgcolor: '#2563eb',
-              color: '#ffffff',
-              boxShadow: '0 0 20px rgba(37, 99, 235, 0.6)',
-              '&:hover': { bgcolor: '#1d4ed8' },
-              '&:disabled': { bgcolor: '#334155', color: '#64748b' }
-            }}
-          >
-            <CameraAltIcon sx={{ fontSize: 32 }} />
-          </IconButton>
+        {!currentCapturedImage ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <IconButton
+              onClick={handleCapturePage}
+              disabled={!stream}
+              sx={{
+                width: 68,
+                height: 68,
+                bgcolor: '#2563eb',
+                color: '#ffffff',
+                boxShadow: '0 0 20px rgba(37, 99, 235, 0.6)',
+                '&:hover': { bgcolor: '#1d4ed8' },
+                '&:disabled': { bgcolor: '#334155', color: '#64748b' }
+              }}
+            >
+              <CameraAltIcon sx={{ fontSize: 32 }} />
+            </IconButton>
+
+            {scannedPages.length > 0 && (
+              <Button
+                variant="contained"
+                startIcon={<CheckIcon />}
+                onClick={(e) => setExportMenuAnchor(e.currentTarget)}
+                sx={{
+                  bgcolor: '#10b981',
+                  color: '#ffffff',
+                  borderRadius: '20px',
+                  fontWeight: 700,
+                  textTransform: 'none'
+                }}
+              >
+                Finish ({scannedPages.length})
+              </Button>
+            )}
+          </Box>
         ) : (
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 2,
+              gap: 1.5,
               width: '100%',
               justifyContent: 'center'
             }}
           >
             <Button
               variant="outlined"
+              size="small"
               startIcon={<RefreshIcon />}
-              onClick={handleRetake}
+              onClick={handleRetakeCurrentPage}
               sx={{
                 color: '#ffffff',
                 borderColor: '#334155',
-                borderRadius: '24px',
-                px: 2.5
+                borderRadius: '20px',
+                textTransform: 'none'
               }}
             >
               Retake
             </Button>
+
             <Button
               variant="contained"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={handleKeepPageAndScanNext}
+              sx={{
+                bgcolor: '#2563eb',
+                color: '#ffffff',
+                borderRadius: '20px',
+                textTransform: 'none',
+                fontWeight: 700
+              }}
+            >
+              + Next Page
+            </Button>
+
+            <Button
+              variant="contained"
+              size="small"
               startIcon={<PictureAsPdfIcon />}
-              onClick={handleSaveAsPdf}
+              onClick={(e) => setExportMenuAnchor(e.currentTarget)}
               sx={{
                 bgcolor: '#10b981',
                 color: '#ffffff',
-                borderRadius: '24px',
-                px: 3,
-                fontWeight: 700,
-                '&:hover': { bgcolor: '#059669' }
+                borderRadius: '20px',
+                textTransform: 'none',
+                fontWeight: 700
               }}
             >
-              Save as Scanned PDF
+              Export
             </Button>
           </Box>
         )}
       </Box>
+
+      {/* Export Options Menu */}
+      <Menu
+        anchorEl={exportMenuAnchor}
+        open={Boolean(exportMenuAnchor)}
+        onClose={() => setExportMenuAnchor(null)}
+        PaperProps={{
+          sx: {
+            bgcolor: '#1e293b',
+            color: '#ffffff',
+            borderRadius: '16px',
+            mt: -1
+          }
+        }}
+      >
+        <MenuItem onClick={handleExportAsPdf}>
+          <PictureAsPdfIcon sx={{ color: '#ef4444', mr: 1.5 }} />
+          Save as Scanned PDF Document
+        </MenuItem>
+
+        <MenuItem onClick={() => handleExportToWordOrExcel('/pdf/jpg-to-pdf')}>
+          <DescriptionIcon sx={{ color: '#3b82f6', mr: 1.5 }} />
+          Convert Scanned Page to Word (DOCX)
+        </MenuItem>
+
+        <MenuItem onClick={() => handleExportToWordOrExcel('/pdf/jpg-to-pdf')}>
+          <TableChartIcon sx={{ color: '#10b981', mr: 1.5 }} />
+          Convert Scanned Table to Excel (XLSX)
+        </MenuItem>
+      </Menu>
     </Dialog>
   );
 };
