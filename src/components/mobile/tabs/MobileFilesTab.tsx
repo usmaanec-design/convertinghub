@@ -8,8 +8,6 @@ import {
   Chip,
   Grid,
   Checkbox,
-  Menu,
-  MenuItem,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -22,7 +20,7 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-  Fab
+  Alert
 } from '@mui/material';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -35,21 +33,25 @@ import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import StorageIcon from '@mui/icons-material/Storage';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ShareIcon from '@mui/icons-material/Share';
 import EditIcon from '@mui/icons-material/Edit';
 import TransformIcon from '@mui/icons-material/Transform';
 import CompressIcon from '@mui/icons-material/Compress';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
-import MergeTypeIcon from '@mui/icons-material/MergeType';
-import ContentCutIcon from '@mui/icons-material/ContentCut';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CloseIcon from '@mui/icons-material/Close';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useNavigate } from 'react-router-dom';
 
 import MobileFileViewerModal, { FileToView } from '../MobileFileViewerModal';
 import PdfGridThumbnail from '../PdfGridThumbnail';
+import {
+  saveDocumentToIDB,
+  getAllDocumentsFromIDB,
+  deleteDocumentFromIDB,
+  StoredDocument
+} from '../../../utils/fileStore';
 
 export interface SavedFileItem {
   id: string;
@@ -57,7 +59,7 @@ export interface SavedFileItem {
   size: string;
   type: 'pdf' | 'docx' | 'xlsx' | 'pptx' | 'image' | 'archive' | 'other';
   date: string;
-  fileObj?: File;
+  fileObj?: File | Blob;
   previewUrl?: string;
 }
 
@@ -70,24 +72,46 @@ export const MobileFilesTab: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<string>('All');
 
   // Files List
-  const [filesList, setFilesList] = useState<SavedFileItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('convertinghub_mobile_files');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [filesList, setFilesList] = useState<SavedFileItem[]>([]);
+  const [isLoadingDB, setIsLoadingDB] = useState<boolean>(true);
 
-  // Save metadata to localStorage
+  // Load persisted files from IndexedDB on mount
   useEffect(() => {
-    try {
-      const metadata = filesList.map(({ fileObj, previewUrl, ...rest }) => rest);
-      localStorage.setItem('convertinghub_mobile_files', JSON.stringify(metadata));
-    } catch (e) {
-      console.warn('Failed to save files metadata:', e);
+    let isMounted = true;
+    async function loadFiles() {
+      try {
+        const storedDocs = await getAllDocumentsFromIDB();
+        if (isMounted) {
+          const items: SavedFileItem[] = storedDocs.map((doc: StoredDocument) => {
+            const fileObj = new File([doc.blob], doc.name, { type: doc.blob.type });
+            let previewUrl = undefined;
+            if (doc.type === 'image') {
+              previewUrl = URL.createObjectURL(doc.blob);
+            }
+            return {
+              id: doc.id,
+              name: doc.name,
+              size: doc.size,
+              type: doc.type,
+              date: doc.date,
+              fileObj,
+              previewUrl
+            };
+          });
+          setFilesList(items);
+        }
+      } catch (err) {
+        console.warn('Failed to load documents from IndexedDB:', err);
+      } finally {
+        if (isMounted) setIsLoadingDB(false);
+      }
     }
-  }, [filesList]);
+
+    loadFiles();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Multi-select state
   const [isMultiSelect, setIsMultiSelect] = useState(false);
@@ -112,13 +136,14 @@ export const MobileFilesTab: React.FC = () => {
   // Format Selection Modal State for Convert Action
   const [convertModalOpen, setConvertModalOpen] = useState(false);
 
-  // Device File Pick Handler
-  const handleDeviceFilesPicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Device File Pick Handler (Saves to IndexedDB permanently)
+  const handleDeviceFilesPicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    const picked: SavedFileItem[] = [];
     const files = Array.from(e.target.files);
+    const newItems: SavedFileItem[] = [];
 
-    files.forEach((file, i) => {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       const ext = file.name.split('.').pop()?.toLowerCase() || '';
       let type: SavedFileItem['type'] = 'other';
       if (ext === 'pdf') type = 'pdf';
@@ -128,23 +153,41 @@ export const MobileFilesTab: React.FC = () => {
       else if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) type = 'image';
       else if (['zip', 'rar', '7z'].includes(ext)) type = 'archive';
 
+      const id = `${file.name}-${Date.now()}-${i}`;
+      const sizeStr = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+      const dateStr = new Date(file.lastModified || Date.now()).toLocaleDateString();
+
+      // Save blob to IndexedDB
+      try {
+        await saveDocumentToIDB({
+          id,
+          name: file.name,
+          size: sizeStr,
+          type,
+          date: dateStr,
+          blob: file
+        });
+      } catch (err) {
+        console.warn('Could not save to IndexedDB:', err);
+      }
+
       let previewUrl = undefined;
       if (type === 'image') {
         previewUrl = URL.createObjectURL(file);
       }
 
-      picked.push({
-        id: `${file.name}-${Date.now()}-${i}`,
+      newItems.push({
+        id,
         name: file.name,
-        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+        size: sizeStr,
         type,
-        date: new Date(file.lastModified || Date.now()).toLocaleDateString(),
+        date: dateStr,
         fileObj: file,
         previewUrl
       });
-    });
+    }
 
-    setFilesList((prev) => [...picked, ...prev]);
+    setFilesList((prev) => [...newItems, ...prev]);
   };
 
   // Filtered files view
@@ -165,10 +208,16 @@ export const MobileFilesTab: React.FC = () => {
       return;
     }
 
+    if (!item.fileObj) {
+      // Prompt user to re-select file if blob is unavailable
+      fileInputRef.current?.click();
+      return;
+    }
+
     if (item.type === 'pdf') {
       setSelectedFileForViewer({
         name: item.name,
-        fileObj: item.fileObj,
+        fileObj: item.fileObj as File,
         type: 'pdf',
         size: item.size
       });
@@ -176,20 +225,18 @@ export const MobileFilesTab: React.FC = () => {
     } else if (item.type === 'image') {
       setSelectedFileForViewer({
         name: item.name,
-        fileObj: item.fileObj,
+        fileObj: item.fileObj as File,
         url: item.previewUrl,
         type: 'image',
         size: item.size
       });
       setViewerOpen(true);
     } else {
-      // Offer conversion for Word/Excel/PPT
       setActionFile(item);
       setConvertModalOpen(true);
     }
   };
 
-  // Long press handler to open action sheet
   const handleCardLongPress = (item: SavedFileItem) => {
     if (isMultiSelect) {
       toggleSelectFile(item.id);
@@ -199,7 +246,6 @@ export const MobileFilesTab: React.FC = () => {
     setActionSheetOpen(true);
   };
 
-  // Multi select toggle
   const toggleSelectFile = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -212,7 +258,6 @@ export const MobileFilesTab: React.FC = () => {
     });
   };
 
-  // Actions
   const handleActionSelectMode = () => {
     setActionSheetOpen(false);
     setIsMultiSelect(true);
@@ -228,11 +273,25 @@ export const MobileFilesTab: React.FC = () => {
     setRenameDialogOpen(true);
   };
 
-  const saveRename = () => {
+  const saveRename = async () => {
     if (!actionFile || !renameInput.trim()) return;
+    const updatedName = renameInput.trim();
+
     setFilesList((prev) =>
-      prev.map((f) => (f.id === actionFile.id ? { ...f, name: renameInput.trim() } : f))
+      prev.map((f) => (f.id === actionFile.id ? { ...f, name: updatedName } : f))
     );
+
+    if (actionFile.fileObj) {
+      await saveDocumentToIDB({
+        id: actionFile.id,
+        name: updatedName,
+        size: actionFile.size,
+        type: actionFile.type,
+        date: actionFile.date,
+        blob: actionFile.fileObj
+      });
+    }
+
     setRenameDialogOpen(false);
     setActionFile(null);
   };
@@ -244,7 +303,7 @@ export const MobileFilesTab: React.FC = () => {
     if (navigator.share && actionFile.fileObj) {
       try {
         await navigator.share({
-          files: [actionFile.fileObj],
+          files: [actionFile.fileObj as File],
           title: actionFile.name
         });
       } catch (e) {
@@ -271,8 +330,9 @@ export const MobileFilesTab: React.FC = () => {
     }
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteTargetId) {
+      await deleteDocumentFromIDB(deleteTargetId);
       setFilesList((prev) => prev.filter((f) => f.id !== deleteTargetId));
     }
     setDeleteConfirmOpen(false);
@@ -280,8 +340,10 @@ export const MobileFilesTab: React.FC = () => {
     setActionFile(null);
   };
 
-  // Bulk actions
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
+    for (const id of Array.from(selectedIds)) {
+      await deleteDocumentFromIDB(id);
+    }
     setFilesList((prev) => prev.filter((f) => !selectedIds.has(f.id)));
     setSelectedIds(new Set());
     setIsMultiSelect(false);
@@ -332,7 +394,7 @@ export const MobileFilesTab: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          mb: 2
+          mb: 1.5
         }}
       >
         <Typography variant="h6" fontWeight={800} color="text.primary">
@@ -372,6 +434,28 @@ export const MobileFilesTab: React.FC = () => {
           )}
         </Box>
       </Box>
+
+      {/* Honest Web Security Clarification Alert */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 1.5,
+          mb: 2,
+          borderRadius: '12px',
+          bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#eff6ff',
+          border: `1px solid ${
+            theme.palette.mode === 'dark' ? '#334155' : '#bfdbfe'
+          }`,
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 1.25
+        }}
+      >
+        <InfoOutlinedIcon sx={{ color: '#2563eb', fontSize: 20, mt: 0.2 }} />
+        <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+          <strong>Privacy Notice:</strong> Select documents to add them to your app gallery. Browsers restrict apps from automatically listing phone storage without explicit user selection.
+        </Typography>
+      </Paper>
 
       {/* Filter Chips Bar */}
       <Box
@@ -431,9 +515,9 @@ export const MobileFilesTab: React.FC = () => {
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mb: 2, maxWidth: 260, mx: 'auto' }}
+            sx={{ mb: 2, maxWidth: 280, mx: 'auto' }}
           >
-            Tap "Add Files" or "Browse Storage" to load PDFs, Word, Excel, and photos from your device.
+            Tap "Add Files" or "Browse Storage" to select PDFs, Word, Excel, and photos from your device.
           </Typography>
           <Button
             variant="outlined"
@@ -512,7 +596,7 @@ export const MobileFilesTab: React.FC = () => {
                     }}
                   >
                     {item.type === 'pdf' ? (
-                      <PdfGridThumbnail fileObj={item.fileObj} />
+                      <PdfGridThumbnail fileObj={item.fileObj as File} />
                     ) : item.type === 'image' && item.previewUrl ? (
                       <img
                         src={item.previewUrl}
@@ -539,7 +623,6 @@ export const MobileFilesTab: React.FC = () => {
                       </Box>
                     )}
 
-                    {/* Three dots menu button */}
                     {!isMultiSelect && (
                       <IconButton
                         size="small"

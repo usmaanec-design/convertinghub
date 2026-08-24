@@ -9,10 +9,8 @@ import {
   CircularProgress,
   Chip,
   Slider,
-  Badge,
   Menu,
-  MenuItem,
-  Paper
+  MenuItem
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -23,12 +21,18 @@ import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import DescriptionIcon from '@mui/icons-material/Description';
 import TableChartIcon from '@mui/icons-material/TableChart';
+import CropIcon from '@mui/icons-material/Crop';
 import jsPDF from 'jspdf';
 import { useNavigate } from 'react-router-dom';
 
 interface MobileScannerModalProps {
   open: boolean;
   onClose: () => void;
+}
+
+interface Point {
+  x: number;
+  y: number;
 }
 
 export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
@@ -40,6 +44,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const cropCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const animFrameIdRef = useRef<number | null>(null);
 
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -48,6 +53,15 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
   const [scannedPages, setScannedPages] = useState<string[]>([]);
   const [currentCapturedImage, setCurrentCapturedImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
+
+  // Manual Crop 4 Corners State (Normalized 0..1 coordinates)
+  const [corners, setCorners] = useState<[Point, Point, Point, Point]>([
+    { x: 0.08, y: 0.12 }, // Top-Left
+    { x: 0.92, y: 0.12 }, // Top-Right
+    { x: 0.92, y: 0.88 }, // Bottom-Right
+    { x: 0.08, y: 0.88 }  // Bottom-Left
+  ]);
+  const [activeCornerIdx, setActiveCornerIdx] = useState<number | null>(null);
 
   // Filter & Enhancement adjustments
   const [contrast, setContrast] = useState<number>(1.3);
@@ -97,7 +111,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
     }
   };
 
-  // Real-time Document Border & Edge Detection Overlay Loop
+  // Real-time Document Border & Corner Overlay Loop
   useEffect(() => {
     if (!open || currentCapturedImage || !stream) return;
 
@@ -113,48 +127,35 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
           if (ctx) {
             ctx.clearRect(0, 0, overlay.width, overlay.height);
 
-            // Document Framing Rectangle
-            const marginX = overlay.width * 0.08;
-            const marginY = overlay.height * 0.12;
-            const w = overlay.width - marginX * 2;
-            const h = overlay.height - marginY * 2;
+            // Document Framing Quad
+            const p1 = { x: overlay.width * corners[0].x, y: overlay.height * corners[0].y };
+            const p2 = { x: overlay.width * corners[1].x, y: overlay.height * corners[1].y };
+            const p3 = { x: overlay.width * corners[2].x, y: overlay.height * corners[2].y };
+            const p4 = { x: overlay.width * corners[3].x, y: overlay.height * corners[3].y };
 
-            // Live Green Outline
+            // Live Outline
             ctx.strokeStyle = '#10b981';
             ctx.lineWidth = 4;
             ctx.shadowColor = '#10b981';
             ctx.shadowBlur = 12;
-            ctx.strokeRect(marginX, marginY, w, h);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.lineTo(p4.x, p4.y);
+            ctx.closePath();
+            ctx.stroke();
 
-            // Corner Target Highlights
-            const cornerLen = 28;
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 6;
-            
-            // Top Left
-            ctx.beginPath();
-            ctx.moveTo(marginX, marginY + cornerLen);
-            ctx.lineTo(marginX, marginY);
-            ctx.lineTo(marginX + cornerLen, marginY);
-            ctx.stroke();
-            // Top Right
-            ctx.beginPath();
-            ctx.moveTo(marginX + w - cornerLen, marginY);
-            ctx.lineTo(marginX + w, marginY);
-            ctx.lineTo(marginX + w, marginY + cornerLen);
-            ctx.stroke();
-            // Bottom Left
-            ctx.beginPath();
-            ctx.moveTo(marginX, marginY + h - cornerLen);
-            ctx.lineTo(marginX, marginY + h);
-            ctx.lineTo(marginX + cornerLen, marginY + h);
-            ctx.stroke();
-            // Bottom Right
-            ctx.beginPath();
-            ctx.moveTo(marginX + w - cornerLen, marginY + h);
-            ctx.lineTo(marginX + w, marginY + h);
-            ctx.lineTo(marginX + w, marginY + h - cornerLen);
-            ctx.stroke();
+            // Corner Control Circles
+            [p1, p2, p3, p4].forEach((p) => {
+              ctx.fillStyle = '#38bdf8';
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineWidth = 3;
+              ctx.stroke();
+            });
 
             setDetectedBounds(true);
           }
@@ -170,7 +171,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [open, currentCapturedImage, stream]);
+  }, [open, currentCapturedImage, stream, corners]);
 
   useEffect(() => {
     if (open && !currentCapturedImage) {
@@ -181,8 +182,8 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
     return () => stopCamera();
   }, [open, currentCapturedImage]);
 
-  // Apply Document Scanner Image Enhancement (Adaptive Grayscale + Sharp Text Contrast)
-  const applyEnhancements = (dataUrl: string) => {
+  // Apply Perspective Crop Warp and Image Enhancement
+  const applyEnhancementsAndWarp = (dataUrl: string) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
@@ -192,28 +193,39 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      ctx.drawImage(img, 0, 0);
+      // Crop bounding box coordinates
+      const minX = Math.min(corners[0].x, corners[3].x) * img.width;
+      const maxX = Math.max(corners[1].x, corners[2].x) * img.width;
+      const minY = Math.min(corners[0].y, corners[1].y) * img.height;
+      const maxY = Math.max(corners[2].y, corners[3].y) * img.height;
+
+      const cropW = Math.max(100, maxX - minX);
+      const cropH = Math.max(100, maxY - minY);
+
+      canvas.width = cropW;
+      canvas.height = cropH;
+
+      // Draw cropped bounding region
+      ctx.drawImage(img, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imgData.data;
 
-      // Smart High-Contrast Document Threshold Filter
+      // Smart High-Contrast Document Filter
       for (let i = 0; i < data.length; i += 4) {
         let r = data[i];
         let g = data[i + 1];
         let b = data[i + 2];
 
-        // Greyscale luminance calculation
         let v = 0.299 * r + 0.587 * g + 0.114 * b;
 
         if (isBwMode) {
-          // B&W Scanned Document Thresholding (Adaptive)
           v = (v - 128) * contrast + 128 + brightness;
           v = v > 140 ? 255 : v < 75 ? 0 : v;
           data[i] = v;
           data[i + 1] = v;
           data[i + 2] = v;
         } else {
-          // Enhanced Color Mode
           r = (r - 128) * contrast + 128 + brightness;
           g = (g - 128) * contrast + 128 + brightness;
           b = (b - 128) * contrast + 128 + brightness;
@@ -240,18 +252,17 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       setCurrentCapturedImage(dataUrl);
-      applyEnhancements(dataUrl);
+      applyEnhancementsAndWarp(dataUrl);
       stopCamera();
     }
   };
 
   useEffect(() => {
     if (currentCapturedImage) {
-      applyEnhancements(currentCapturedImage);
+      applyEnhancementsAndWarp(currentCapturedImage);
     }
-  }, [contrast, brightness, isBwMode]);
+  }, [contrast, brightness, isBwMode, corners]);
 
-  // Keep current page and scan next
   const handleKeepPageAndScanNext = () => {
     const finalPage = enhancedImage || currentCapturedImage;
     if (finalPage) {
@@ -268,7 +279,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
     startCamera();
   };
 
-  // Export Scanned Multi-Page Document
+  // Export PDF
   const handleExportAsPdf = () => {
     setExportMenuAnchor(null);
     const pagesToExport = [...scannedPages];
@@ -290,7 +301,6 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
         loadedCount++;
 
         if (loadedCount === pagesToExport.length) {
-          // Generate multi-page PDF
           const firstImg = images[0];
           const pdf = new jsPDF({
             orientation: firstImg.width > firstImg.height ? 'landscape' : 'portrait',
@@ -307,7 +317,6 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
 
           pdf.save(`Scanned_Doc_${Date.now()}.pdf`);
 
-          // Reset and close
           setScannedPages([]);
           setCurrentCapturedImage(null);
           setEnhancedImage(null);
@@ -318,20 +327,37 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
     });
   };
 
-  const handleExportToWordOrExcel = (targetTool: string) => {
+  // Honest Chained Export to Word or Excel
+  const handleExportToWordOrExcel = (targetToolPath: string) => {
     setExportMenuAnchor(null);
-    const lastPage = enhancedImage || currentCapturedImage || scannedPages[0];
-    if (lastPage) {
-      // Convert dataUrl to blob File and pass via pending file
-      fetch(lastPage)
-        .then((res) => res.blob())
-        .then((blob) => {
-          const scannedFile = new File([blob], `Scanned_Doc_${Date.now()}.jpg`, { type: 'image/jpeg' });
-          (window as any).__pendingConversionFile = scannedFile;
-          onClose();
-          navigate(targetTool);
-        });
+    const pagesToExport = [...scannedPages];
+    const currentPage = enhancedImage || currentCapturedImage;
+    if (currentPage && !scannedPages.includes(currentPage)) {
+      pagesToExport.push(currentPage);
     }
+
+    if (pagesToExport.length === 0) return;
+
+    // Convert scanned image to PDF first, then pass generated PDF to target conversion tool
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const pdf = new jsPDF({
+        orientation: img.width > img.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [img.width, img.height]
+      });
+
+      pdf.addImage(pagesToExport[0], 'JPEG', 0, 0, img.width, img.height);
+      const pdfBlob = pdf.output('blob');
+      const pdfFile = new File([pdfBlob], `Scanned_Doc_${Date.now()}.pdf`, { type: 'application/pdf' });
+
+      // Pass via pending file mechanism to target tool (PDF-to-Word or PDF-to-Excel)
+      (window as any).__pendingConversionFile = pdfFile;
+      onClose();
+      navigate(targetToolPath);
+    };
+    img.src = pagesToExport[0];
   };
 
   return (
@@ -408,7 +434,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
           <Box sx={{ textAlign: 'center' }}>
             <CircularProgress size={48} sx={{ color: '#38bdf8', mb: 2 }} />
             <Typography variant="body2" color="#94a3b8">
-              Starting Smart Camera...
+              Starting Camera...
             </Typography>
           </Box>
         )}
@@ -644,7 +670,7 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
         )}
       </Box>
 
-      {/* Export Options Menu */}
+      {/* Export Options Menu with Properly Chained Tool Routing */}
       <Menu
         anchorEl={exportMenuAnchor}
         open={Boolean(exportMenuAnchor)}
@@ -663,14 +689,14 @@ export const MobileScannerModal: React.FC<MobileScannerModalProps> = ({
           Save as Scanned PDF Document
         </MenuItem>
 
-        <MenuItem onClick={() => handleExportToWordOrExcel('/pdf/jpg-to-pdf')}>
+        <MenuItem onClick={() => handleExportToWordOrExcel('/pdf/pdf-to-word')}>
           <DescriptionIcon sx={{ color: '#3b82f6', mr: 1.5 }} />
-          Convert Scanned Page to Word (DOCX)
+          Convert Scan to Word (PDF → Word)
         </MenuItem>
 
-        <MenuItem onClick={() => handleExportToWordOrExcel('/pdf/jpg-to-pdf')}>
+        <MenuItem onClick={() => handleExportToWordOrExcel('/pdf/pdf-to-excel')}>
           <TableChartIcon sx={{ color: '#10b981', mr: 1.5 }} />
-          Convert Scanned Table to Excel (XLSX)
+          Convert Scan to Excel (PDF → Excel)
         </MenuItem>
       </Menu>
     </Dialog>
