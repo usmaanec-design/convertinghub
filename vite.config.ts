@@ -46,11 +46,17 @@ export default defineConfig({
         navigateFallbackDenylist: [
           /^\/sitemap\.xml$/,
           /^\/robots\.txt$/,
-          /^\/google.*\.html$/
+          /^\/google.*\.html$/,
+          /^\/health/,
+          /^\/api\//
         ],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/convertinghub-backend\.onrender\.com\/.*/i,
+            handler: 'NetworkOnly'
+          },
+          {
+            urlPattern: /^\/health.*/i,
             handler: 'NetworkOnly'
           },
           {

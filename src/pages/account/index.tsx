@@ -19,6 +19,7 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { getBackendUrl } from '../../utils/backendConfig';
 
 export default function AccountPage() {
   const { user, isAuthenticated, signInWithGoogle } = useAuth();
@@ -33,7 +34,7 @@ export default function AccountPage() {
 
     try {
       // Send auth token / email to backend endpoint for server-side customer ID resolution
-      const response = await fetch('/api/paddle/portal-session', {
+      const response = await fetch(getBackendUrl('/api/paddle/portal-session'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

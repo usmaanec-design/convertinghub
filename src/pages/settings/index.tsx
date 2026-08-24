@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getBackendUrl } from '../../utils/backendConfig';
 import {
   Box,
   Container,
@@ -69,7 +70,7 @@ export default function SettingsPage({ currentMode, onChangeMode }: SettingsPage
 
   useEffect(() => {
     if (isProUser) {
-      fetch('/api/admin/adobe-stats')
+      fetch(getBackendUrl('/api/admin/adobe-stats'))
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.stats) {
