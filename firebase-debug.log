@@ -1,0 +1,57 @@
+[debug] [2026-08-24T10:15:12.396Z] ----------------------------------------------------------------------
+[debug] [2026-08-24T10:15:12.399Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\usmaa\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2026-08-24T10:15:12.399Z] CLI Version:   15.25.1
+[debug] [2026-08-24T10:15:12.399Z] Platform:      win32
+[debug] [2026-08-24T10:15:12.399Z] Node Version:  v24.18.0
+[debug] [2026-08-24T10:15:12.399Z] Detected Agent: antigravity
+[debug] [2026-08-24T10:15:12.400Z] Time:          Mon Aug 24 2026 13:15:12 GMT+0300 (Arabian Standard Time)
+[debug] [2026-08-24T10:15:12.400Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-08-24T10:15:14.592Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-24T10:15:14.592Z] > authorizing via signed-in user (usmaan.ec@gmail.com)
+[debug] [2026-08-24T10:15:14.593Z] [iam] checking project convertinghub-official for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-08-24T10:15:14.608Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:14.608Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:14.610Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/convertinghub-official:testIamPermissions [none]
+[debug] [2026-08-24T10:15:14.610Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/convertinghub-official:testIamPermissions  x-goog-user-project=convertinghub-official
+[debug] [2026-08-24T10:15:14.610Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/convertinghub-official:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-08-24T10:15:15.341Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/convertinghub-official:testIamPermissions 200
+[debug] [2026-08-24T10:15:15.342Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/convertinghub-official:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-08-24T10:15:15.343Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:15.344Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:15.344Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/convertinghub-official [none]
+[debug] [2026-08-24T10:15:15.939Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/convertinghub-official 200
+[debug] [2026-08-24T10:15:15.940Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/convertinghub-official {"projectId":"convertinghub-official","projectNumber":"1054539236517","displayName":"ConvertingHub","name":"projects/convertinghub-official","resources":{"hostingSite":"convertinghub-official"},"state":"ACTIVE","labels":{"firebase":"enabled"},"etag":"1_071d44f2-ad87-4fa8-bbab-20ed93f5f0a0"}
+[info] 
+[info] === Deploying to 'convertinghub-official'...
+[info] 
+[info] i  deploying firestore, hosting 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-08-24T10:15:15.949Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:15.949Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:15.949Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/convertinghub-official/databases/(default) [none]
+[debug] [2026-08-24T10:15:17.478Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/convertinghub-official/databases/(default) 200
+[debug] [2026-08-24T10:15:17.478Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/convertinghub-official/databases/(default) {"name":"projects/convertinghub-official/databases/(default)","uid":"be28f20f-172a-42b9-a516-efd717589945","createTime":"2026-08-14T07:34:55.044978Z","updateTime":"2026-08-14T07:34:55.044978Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-08-24T09:15:16.384885Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IK3f4pmEuZYDMJa54cHqn5YD"}
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2026-08-24T10:15:17.495Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:17.495Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:17.495Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/convertinghub-official:test [none]
+[debug] [2026-08-24T10:15:17.495Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/convertinghub-official:test [omitted]
+[debug] [2026-08-24T10:15:18.606Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/convertinghub-official:test 200
+[debug] [2026-08-24T10:15:18.606Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/convertinghub-official:test {}
+[info] +  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2026-08-24T10:15:18.607Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:18.607Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:18.608Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/convertinghub-official/sites/convertinghub-official [none]
+[debug] [2026-08-24T10:15:19.875Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/convertinghub-official/sites/convertinghub-official 200
+[debug] [2026-08-24T10:15:19.875Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/convertinghub-official/sites/convertinghub-official {"name":"projects/convertinghub-official/sites/convertinghub-official","defaultUrl":"https://convertinghub-official.web.app","type":"DEFAULT_SITE"}
+[debug] [2026-08-24T10:15:19.877Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:19.877Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:19.877Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/convertinghub-official/versions [none]
+[debug] [2026-08-24T10:15:19.878Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/convertinghub-official/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-08-24T10:15:21.967Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/convertinghub-official/versions 200
+[debug] [2026-08-24T10:15:21.968Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/convertinghub-official/versions {"name":"projects/1054539236517/sites/convertinghub-official/versions/a12a34fef0136d26","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-08-24T10:15:21.969Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:21.969Z] Checked if tokens are valid: true, expires at: 1787568232398
+[debug] [2026-08-24T10:15:21.969Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/convertinghub-official/releases pageSize=10&pageToken=

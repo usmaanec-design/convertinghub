@@ -194,30 +194,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [isProUser, user]);
 
   useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+
     // Process redirect result when user returns from Google OAuth redirect flow
     getRedirectResult(auth)
       .then((result) => {
+        if (!isMounted) return;
         if (result?.user) {
           console.log(
             '[ConvertingHub Auth] Redirect login successful:',
             result.user.email
           );
+          setUser(result.user);
         }
       })
       .catch((err: any) => {
         console.warn('[ConvertingHub Auth] Redirect result check notice:', err);
-        const code = err?.code || '';
-        if (
-          code &&
-          code !== 'auth/popup-closed-by-user' &&
-          code !== 'auth/cancelled-popup-request'
-        ) {
-          handleAuthError(err);
+        if (isMounted) {
+          const code = err?.code || '';
+          if (
+            code &&
+            code !== 'auth/popup-closed-by-user' &&
+            code !== 'auth/cancelled-popup-request'
+          ) {
+            handleAuthError(err);
+          }
         }
       });
 
     // Single source of truth for Auth state
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+      if (!isMounted) return;
+      console.log(
+        '[ConvertingHub Auth] onAuthStateChanged:',
+        currentUser ? currentUser.email : 'Logged Out'
+      );
       setUser(currentUser);
       setLoading(false);
       setIsSigningIn(false);
@@ -254,7 +266,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     });
 
-    return () => unsubscribeAuth();
+    return () => {
+      isMounted = false;
+      unsubscribeAuth();
+    };
   }, []);
 
   // Real-time Firestore snapshot listener for user document plan/subscription changes

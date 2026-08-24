@@ -160,7 +160,7 @@ export const MobileHomeTab: React.FC<MobileHomeTabProps> = ({
     },
     {
       title: 'Image Converter',
-      path: '/converters/image-converter',
+      path: '/pdf/jpg-to-pdf',
       icon: <ImageAltIcon sx={{ fontSize: 28, color: '#10b981' }} />
     },
     {
