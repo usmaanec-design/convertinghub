@@ -11,6 +11,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
   TextField,
   useTheme,
@@ -20,7 +21,9 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-  InputAdornment
+  InputAdornment,
+  LinearProgress,
+  Alert
 } from '@mui/material';
 
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -50,6 +53,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import CallSplitIcon from '@mui/icons-material/CallSplit';
 import MergeIcon from '@mui/icons-material/Merge';
 import PrintIcon from '@mui/icons-material/Print';
+import SecurityIcon from '@mui/icons-material/Security';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -86,9 +90,13 @@ export const MobileFilesTab: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Files List
+  // Files List & Scanning State
   const [filesList, setFilesList] = useState<SavedFileItem[]>([]);
   const [isLoadingDB, setIsLoadingDB] = useState<boolean>(true);
+  const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [permissionModalOpen, setPermissionModalOpen] = useState<boolean>(() => {
+    return localStorage.getItem('document_permission_granted') !== 'true';
+  });
 
   // Layout View Mode (Grid vs List)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -112,9 +120,6 @@ export const MobileFilesTab: React.FC = () => {
   // Rename Dialog State
   const [renameDialogOpen, setRenameDialogOpen] = useState<boolean>(false);
   const [renameInput, setRenameInput] = useState<string>('');
-
-  // Delete Dialog State
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
 
   // 1. Load files from IndexedDB on mount
   useEffect(() => {
@@ -155,7 +160,82 @@ export const MobileFilesTab: React.FC = () => {
     };
   }, []);
 
-  // 2. Add picked files from device
+  // 2. Grant Permission & Start Automatic Asynchronous Document Scan
+  const handleGrantPermission = () => {
+    localStorage.setItem('document_permission_granted', 'true');
+    setPermissionModalOpen(false);
+    startAutomaticDeviceScan();
+  };
+
+  const startAutomaticDeviceScan = async () => {
+    setIsScanning(true);
+
+    try {
+      // 1. If File System Access API directory picker is available, attempt scanning granted folder
+      if ('showDirectoryPicker' in window) {
+        try {
+          const dirHandle = await (window as any).showDirectoryPicker({ mode: 'read' });
+          const scannedFiles: SavedFileItem[] = [];
+
+          const scanDirectory = async (handle: any) => {
+            for await (const entry of handle.values()) {
+              if (entry.kind === 'file') {
+                const file = await entry.getFile();
+                const type = detectFileType(file.name);
+                if (type !== 'other') {
+                  const id = `${file.name}-${file.lastModified}`;
+                  const sizeStr = formatSizeBytes(file.size);
+                  const dateStr = new Date(file.lastModified).toLocaleDateString();
+
+                  await saveDocumentToIDB({
+                    id,
+                    name: file.name,
+                    size: sizeStr,
+                    sizeBytes: file.size,
+                    type,
+                    date: dateStr,
+                    lastModified: file.lastModified,
+                    blob: file
+                  });
+
+                  scannedFiles.push({
+                    id,
+                    name: file.name,
+                    size: sizeStr,
+                    sizeBytes: file.size,
+                    type,
+                    date: dateStr,
+                    fileObj: file
+                  });
+                }
+              }
+            }
+          };
+
+          await scanDirectory(dirHandle);
+          if (scannedFiles.length > 0) {
+            setFilesList((prev) => {
+              const existingIds = new Set(prev.map((f) => f.id));
+              const newUnique = scannedFiles.filter((f) => !existingIds.has(f.id));
+              return [...newUnique, ...prev];
+            });
+          }
+        } catch (e) {
+          // User cancelled directory prompt, fallback gracefully
+          console.warn('Directory scan skipped:', e);
+        }
+      } else {
+        // Fallback: prompt file picker for initial scan
+        fileInputRef.current?.click();
+      }
+    } catch (err) {
+      console.warn('Automatic scan error:', err);
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  // 3. Add picked files from device
   const handleDeviceFilesPicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
@@ -204,7 +284,7 @@ export const MobileFilesTab: React.FC = () => {
     setFilesList((prev) => [...newItems, ...prev]);
   };
 
-  // 3. Filter and Search processing
+  // 4. Filter and Search processing
   const filteredFiles = useMemo(() => {
     return filesList.filter((item) => {
       // Filter tab
@@ -225,7 +305,7 @@ export const MobileFilesTab: React.FC = () => {
     });
   }, [filesList, activeFilter, searchQuery]);
 
-  // 4. Compatible Actions for current selection
+  // 5. Compatible Actions for current selection
   const currentSelectionItems = useMemo(() => {
     if (isMultiSelect) {
       return filesList.filter((f) => selectedIds.has(f.id));
@@ -418,6 +498,18 @@ export const MobileFilesTab: React.FC = () => {
         onChange={handleDeviceFilesPicked}
       />
 
+      {/* Asynchronous Document Scan Progress Bar */}
+      {isScanning && (
+        <Box sx={{ mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="caption" fontWeight={700} color="#2563eb">
+              Scanning supported documents on device...
+            </Typography>
+          </Box>
+          <LinearProgress sx={{ borderRadius: 2, height: 6 }} />
+        </Box>
+      )}
+
       {/* Header Controls */}
       <Box
         sx={{
@@ -591,14 +683,15 @@ export const MobileFilesTab: React.FC = () => {
             color="text.secondary"
             sx={{ mb: 2, maxWidth: 300, mx: 'auto' }}
           >
-            Tap "Add Files" to add PDFs, Word, Excel, PowerPoint, Text or images from your device.
+            Tap "Add Files" to scan or add PDFs, Word, Excel, PowerPoint, Text or images from your device.
           </Typography>
           <Button
-            variant="outlined"
-            onClick={() => fileInputRef.current?.click()}
-            sx={{ borderRadius: '20px', textTransform: 'none', fontWeight: 700 }}
+            variant="contained"
+            onClick={startAutomaticDeviceScan}
+            startIcon={<StorageIcon />}
+            sx={{ borderRadius: '20px', textTransform: 'none', fontWeight: 700, bgcolor: '#2563eb' }}
           >
-            Browse Device Storage
+            Scan Device Storage
           </Button>
         </Paper>
       ) : viewMode === 'grid' ? (
@@ -932,6 +1025,45 @@ export const MobileFilesTab: React.FC = () => {
           )}
         </List>
       </Drawer>
+
+      {/* First-Launch Document Permission Explanation Dialog */}
+      <Dialog
+        open={permissionModalOpen}
+        onClose={() => setPermissionModalOpen(false)}
+        PaperProps={{
+          sx: { borderRadius: '24px', p: 1, maxWidth: 420 }
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
+          <SecurityIcon sx={{ color: '#2563eb', fontSize: 28 }} />
+          <Typography variant="h6" fontWeight={800}>
+            Access Your Documents
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText color="text.secondary" sx={{ fontSize: '0.9rem', lineHeight: 1.5 }}>
+            ConvertingHub needs permission to list your supported documents (PDFs, Word, Excel, PowerPoint, Text, and photos) in your Files Library.
+            <br /><br />
+            <strong>Privacy Guarantee:</strong> Your files remain stored locally on your device unless you explicitly perform a conversion or upload operation.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button
+            variant="text"
+            onClick={() => setPermissionModalOpen(false)}
+            sx={{ textTransform: 'none', color: 'text.secondary' }}
+          >
+            Later
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleGrantPermission}
+            sx={{ borderRadius: '16px', textTransform: 'none', fontWeight: 700, bgcolor: '#2563eb' }}
+          >
+            Grant Access
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Rename File Dialog */}
       <Dialog open={renameDialogOpen} onClose={() => setRenameDialogOpen(false)}>

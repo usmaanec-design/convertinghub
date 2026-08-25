@@ -15,26 +15,19 @@
  */
 package app.web.convertinghub.official;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-
+import java.net.URLEncoder;
 
 public class LauncherActivity
         extends com.google.androidbrowserhelper.trusted.LauncherActivity {
-    
-
-    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Setting an orientation crashes the app due to the transparent background on Android 8.0
-        // Oreo and below. We only set the orientation on Oreo and above. This only affects the
-        // splash screen and Chrome will still respect the orientation.
-        // See https://github.com/GoogleChromeLabs/bubblewrap/issues/496 for details.
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         } else {
@@ -44,10 +37,36 @@ public class LauncherActivity
 
     @Override
     protected Uri getLaunchingUrl() {
-        // Get the original launch Url.
         Uri uri = super.getLaunchingUrl();
 
-        
+        Intent intent = getIntent();
+        if (intent != null) {
+            String action = intent.getAction();
+            Uri fileUri = null;
+            String mimeType = intent.getType();
+
+            if (Intent.ACTION_VIEW.equals(action) && intent.getData() != null) {
+                fileUri = intent.getData();
+            } else if (Intent.ACTION_SEND.equals(action)) {
+                fileUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            }
+
+            if (fileUri != null) {
+                try {
+                    String encodedUri = URLEncoder.encode(fileUri.toString(), "UTF-8");
+                    String encodedMime = mimeType != null ? URLEncoder.encode(mimeType, "UTF-8") : "";
+                    
+                    Uri.Builder builder = uri.buildUpon();
+                    builder.appendQueryParameter("open_file_uri", encodedUri);
+                    if (!encodedMime.isEmpty()) {
+                        builder.appendQueryParameter("intent_mime", encodedMime);
+                    }
+                    uri = builder.build();
+                } catch (Exception e) {
+                    android.util.Log.w("ConvertingHubLauncher", "Failed encoding intent URI", e);
+                }
+            }
+        }
 
         return uri;
     }
