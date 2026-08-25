@@ -197,9 +197,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     let isMounted = true;
     setLoading(true);
 
+    let redirectChecked = false;
+
     // Process redirect result when user returns from Google OAuth redirect flow
     getRedirectResult(auth)
       .then((result) => {
+        redirectChecked = true;
         if (!isMounted) return;
         if (result?.user) {
           console.log(
@@ -207,9 +210,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             result.user.email
           );
           setUser(result.user);
+          setLoading(false);
+          setIsSigningIn(false);
         }
       })
       .catch((err: any) => {
+        redirectChecked = true;
         console.warn('[ConvertingHub Auth] Redirect result check notice:', err);
         if (isMounted) {
           const code = err?.code || '';
@@ -231,8 +237,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         currentUser ? currentUser.email : 'Logged Out'
       );
       setUser(currentUser);
-      setLoading(false);
-      setIsSigningIn(false);
+      
+      // Delay turning off loading state if redirect check is in-flight
+      if (currentUser || redirectChecked) {
+        setLoading(false);
+        setIsSigningIn(false);
+      } else {
+        // Fallback safety timeout if getRedirectResult is resolving
+        setTimeout(() => {
+          if (isMounted) {
+            setLoading(false);
+            setIsSigningIn(false);
+          }
+        }, 500);
+      }
 
       if (currentUser) {
         setAuthError(null);

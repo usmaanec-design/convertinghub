@@ -7,21 +7,13 @@ import {
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-const getAuthDomain = () => {
-  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
-    const host = window.location.hostname;
-    if (host.endsWith('web.app') || host.endsWith('convertinghub.app') || host.endsWith('firebaseapp.com')) {
-      return host;
-    }
-  }
-  return import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'convertinghub-official.firebaseapp.com';
-};
-
 const firebaseConfig = {
   apiKey:
     import.meta.env.VITE_FIREBASE_API_KEY ||
     'AIzaSyDVBvzaEv3t6kY1vGzk7aa7Zp9hy6OmsbQ',
-  authDomain: getAuthDomain(),
+  authDomain:
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ||
+    'convertinghub-official.firebaseapp.com',
   projectId:
     import.meta.env.VITE_FIREBASE_PROJECT_ID || 'convertinghub-official',
   storageBucket:
@@ -37,7 +29,7 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-// Ensure local persistence across app restarts, PWAs & WebView2
+// Ensure local persistence across app restarts, PWAs & TWA
 setPersistence(auth, browserLocalPersistence).catch((err) => {
   console.warn('[ConvertingHub Auth] Persistence setup notice:', err);
 });
