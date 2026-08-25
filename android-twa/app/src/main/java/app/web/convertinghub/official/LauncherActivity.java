@@ -20,10 +20,13 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import java.net.URLEncoder;
 
 public class LauncherActivity
         extends com.google.androidbrowserhelper.trusted.LauncherActivity {
+
+    private static final String TAG = "ConvertingHubLauncher";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,13 +36,35 @@ public class LauncherActivity
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
+        handleIncomingIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIncomingIntent(intent);
+    }
+
+    private void handleIncomingIntent(Intent intent) {
+        if (intent == null) return;
+        String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action) || Intent.ACTION_SEND.equals(action)) {
+            Uri fileUri = intent.getData();
+            if (fileUri == null && Intent.ACTION_SEND.equals(action)) {
+                fileUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            }
+            if (fileUri != null) {
+                Log.d(TAG, "Received incoming intent URI: " + fileUri.toString());
+            }
+        }
     }
 
     @Override
     protected Uri getLaunchingUrl() {
         Uri uri = super.getLaunchingUrl();
-
         Intent intent = getIntent();
+
         if (intent != null) {
             String action = intent.getAction();
             Uri fileUri = null;
@@ -55,7 +80,7 @@ public class LauncherActivity
                 try {
                     String encodedUri = URLEncoder.encode(fileUri.toString(), "UTF-8");
                     String encodedMime = mimeType != null ? URLEncoder.encode(mimeType, "UTF-8") : "";
-                    
+
                     Uri.Builder builder = uri.buildUpon();
                     builder.appendQueryParameter("open_file_uri", encodedUri);
                     if (!encodedMime.isEmpty()) {
@@ -63,7 +88,7 @@ public class LauncherActivity
                     }
                     uri = builder.build();
                 } catch (Exception e) {
-                    android.util.Log.w("ConvertingHubLauncher", "Failed encoding intent URI", e);
+                    Log.w(TAG, "Failed encoding intent URI", e);
                 }
             }
         }
