@@ -22,8 +22,7 @@ import {
   ListItemText,
   Divider,
   InputAdornment,
-  LinearProgress,
-  Alert
+  LinearProgress
 } from '@mui/material';
 
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -39,13 +38,11 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import StorageIcon from '@mui/icons-material/Storage';
 import ShareIcon from '@mui/icons-material/Share';
 import EditIcon from '@mui/icons-material/Edit';
-import TransformIcon from '@mui/icons-material/Transform';
 import CompressIcon from '@mui/icons-material/Compress';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CloseIcon from '@mui/icons-material/Close';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewListIcon from '@mui/icons-material/ViewList';
@@ -53,7 +50,8 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import CallSplitIcon from '@mui/icons-material/CallSplit';
 import MergeIcon from '@mui/icons-material/Merge';
 import PrintIcon from '@mui/icons-material/Print';
-import SecurityIcon from '@mui/icons-material/Security';
+import FolderIcon from '@mui/icons-material/Folder';
+import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -63,10 +61,15 @@ import {
   saveDocumentToIDB,
   getAllDocumentsFromIDB,
   deleteDocumentFromIDB,
+  saveAuthorizedFolderToIDB,
+  getAuthorizedFoldersFromIDB,
+  removeAuthorizedFolderFromIDB,
+  scanAndReconcileAuthorizedFolders,
   detectFileType,
   formatSizeBytes,
   StoredDocument,
-  SupportedFileType
+  SupportedFileType,
+  AuthorizedFolderRecord
 } from '../../../utils/fileStore';
 import {
   getCompatibleActions,
@@ -81,6 +84,8 @@ export interface SavedFileItem {
   type: SupportedFileType;
   date: string;
   lastModified?: number;
+  folderId?: string;
+  relativePath?: string;
   fileObj?: File | Blob;
   previewUrl?: string;
 }
@@ -90,13 +95,12 @@ export const MobileFilesTab: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Files List & Scanning State
+  // Files & Authorized Folders State
   const [filesList, setFilesList] = useState<SavedFileItem[]>([]);
+  const [authorizedFolders, setAuthorizedFolders] = useState<AuthorizedFolderRecord[]>([]);
   const [isLoadingDB, setIsLoadingDB] = useState<boolean>(true);
   const [isScanning, setIsScanning] = useState<boolean>(false);
-  const [permissionModalOpen, setPermissionModalOpen] = useState<boolean>(() => {
-    return localStorage.getItem('document_permission_granted') !== 'true';
-  });
+  const [permissionModalOpen, setPermissionModalOpen] = useState<boolean>(false);
 
   // Layout View Mode (Grid vs List)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -121,121 +125,116 @@ export const MobileFilesTab: React.FC = () => {
   const [renameDialogOpen, setRenameDialogOpen] = useState<boolean>(false);
   const [renameInput, setRenameInput] = useState<string>('');
 
-  // 1. Load files from IndexedDB on mount
+  // 1. Initial Load & Startup Automatic Reconciliation
   useEffect(() => {
     let isMounted = true;
-    async function loadFiles() {
+    async function initLibrary() {
       try {
+        const folders = await getAuthorizedFoldersFromIDB();
+        if (isMounted) setAuthorizedFolders(folders);
+
+        if (folders.length === 0 && localStorage.getItem('saf_folder_setup_done') !== 'true') {
+          if (isMounted) setPermissionModalOpen(true);
+        }
+
+        // Load existing docs first
         const storedDocs = await getAllDocumentsFromIDB();
         if (isMounted) {
-          const items: SavedFileItem[] = storedDocs.map((doc: StoredDocument) => {
-            const fileObj = new File([doc.blob], doc.name, { type: doc.blob.type });
-            let previewUrl: string | undefined = undefined;
-            if (doc.type === 'image') {
-              previewUrl = URL.createObjectURL(doc.blob);
-            }
-            return {
-              id: doc.id,
-              name: doc.name,
-              size: doc.size || formatSizeBytes(doc.blob.size),
-              sizeBytes: doc.blob.size,
-              type: doc.type,
-              date: doc.date || new Date().toLocaleDateString(),
-              fileObj,
-              previewUrl
-            };
-          });
-          setFilesList(items);
+          mapStoredDocsToState(storedDocs);
+        }
+
+        // If authorized folders exist, perform automatic reconciliation scan
+        if (folders.length > 0) {
+          if (isMounted) setIsScanning(true);
+          const updatedDocs = await scanAndReconcileAuthorizedFolders(folders);
+          if (isMounted) mapStoredDocsToState(updatedDocs);
         }
       } catch (err) {
-        console.warn('Failed to load documents from IndexedDB:', err);
+        console.warn('[MobileFilesTab] Initialization error:', err);
       } finally {
-        if (isMounted) setIsLoadingDB(false);
+        if (isMounted) {
+          setIsLoadingDB(false);
+          setIsScanning(false);
+        }
       }
     }
 
-    loadFiles();
+    initLibrary();
     return () => {
       isMounted = false;
     };
   }, []);
 
-  // 2. Grant Permission & Start Automatic Asynchronous Document Scan
-  const handleGrantPermission = () => {
-    localStorage.setItem('document_permission_granted', 'true');
-    setPermissionModalOpen(false);
-    startAutomaticDeviceScan();
+  const mapStoredDocsToState = (storedDocs: StoredDocument[]) => {
+    const items: SavedFileItem[] = storedDocs.map((doc: StoredDocument) => {
+      const fileObj = doc.blob ? new File([doc.blob], doc.name, { type: doc.blob.type }) : undefined;
+      let previewUrl: string | undefined = undefined;
+      if (doc.type === 'image' && doc.blob) {
+        previewUrl = URL.createObjectURL(doc.blob);
+      }
+      return {
+        id: doc.id,
+        name: doc.name,
+        size: doc.size || (doc.blob ? formatSizeBytes(doc.blob.size) : '0 B'),
+        sizeBytes: doc.blob?.size || 0,
+        type: doc.type,
+        date: doc.date || new Date().toLocaleDateString(),
+        folderId: doc.folderId,
+        relativePath: doc.relativePath,
+        fileObj,
+        previewUrl
+      };
+    });
+    setFilesList(items);
   };
 
-  const startAutomaticDeviceScan = async () => {
+  // 2. Authorize New Document Folder via SAF / File System Access API
+  const handleAuthorizeFolder = async () => {
+    setPermissionModalOpen(false);
+    localStorage.setItem('saf_folder_setup_done', 'true');
     setIsScanning(true);
 
     try {
-      // 1. If File System Access API directory picker is available, attempt scanning granted folder
       if ('showDirectoryPicker' in window) {
-        try {
-          const dirHandle = await (window as any).showDirectoryPicker({ mode: 'read' });
-          const scannedFiles: SavedFileItem[] = [];
+        const dirHandle = await (window as any).showDirectoryPicker({ mode: 'read' });
+        const folderRecord: AuthorizedFolderRecord = {
+          id: `${dirHandle.name}-${Date.now()}`,
+          name: dirHandle.name,
+          addedAt: Date.now(),
+          handle: dirHandle
+        };
 
-          const scanDirectory = async (handle: any) => {
-            for await (const entry of handle.values()) {
-              if (entry.kind === 'file') {
-                const file = await entry.getFile();
-                const type = detectFileType(file.name);
-                if (type !== 'other') {
-                  const id = `${file.name}-${file.lastModified}`;
-                  const sizeStr = formatSizeBytes(file.size);
-                  const dateStr = new Date(file.lastModified).toLocaleDateString();
+        await saveAuthorizedFolderToIDB(folderRecord);
+        const updatedFolders = [...authorizedFolders, folderRecord];
+        setAuthorizedFolders(updatedFolders);
 
-                  await saveDocumentToIDB({
-                    id,
-                    name: file.name,
-                    size: sizeStr,
-                    sizeBytes: file.size,
-                    type,
-                    date: dateStr,
-                    lastModified: file.lastModified,
-                    blob: file
-                  });
-
-                  scannedFiles.push({
-                    id,
-                    name: file.name,
-                    size: sizeStr,
-                    sizeBytes: file.size,
-                    type,
-                    date: dateStr,
-                    fileObj: file
-                  });
-                }
-              }
-            }
-          };
-
-          await scanDirectory(dirHandle);
-          if (scannedFiles.length > 0) {
-            setFilesList((prev) => {
-              const existingIds = new Set(prev.map((f) => f.id));
-              const newUnique = scannedFiles.filter((f) => !existingIds.has(f.id));
-              return [...newUnique, ...prev];
-            });
-          }
-        } catch (e) {
-          // User cancelled directory prompt, fallback gracefully
-          console.warn('Directory scan skipped:', e);
-        }
+        // Perform recursive scan on newly authorized folder
+        const updatedDocs = await scanAndReconcileAuthorizedFolders(updatedFolders);
+        mapStoredDocsToState(updatedDocs);
       } else {
-        // Fallback: prompt file picker for initial scan
+        // Fallback: prompt file picker
         fileInputRef.current?.click();
       }
     } catch (err) {
-      console.warn('Automatic scan error:', err);
+      console.warn('[MobileFilesTab] Folder authorization skipped/failed:', err);
     } finally {
       setIsScanning(false);
     }
   };
 
-  // 3. Add picked files from device
+  // Remove Authorized Folder
+  const handleRemoveFolder = async (folderId: string) => {
+    await removeAuthorizedFolderFromIDB(folderId);
+    const updatedFolders = authorizedFolders.filter((f) => f.id !== folderId);
+    setAuthorizedFolders(updatedFolders);
+
+    setIsScanning(true);
+    const updatedDocs = await scanAndReconcileAuthorizedFolders(updatedFolders);
+    mapStoredDocsToState(updatedDocs);
+    setIsScanning(false);
+  };
+
+  // Add individual picked files from device
   const handleDeviceFilesPicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
@@ -244,7 +243,7 @@ export const MobileFilesTab: React.FC = () => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const type = detectFileType(file.name);
-      const id = `${file.name}-${Date.now()}-${i}`;
+      const id = `manual:${file.name}-${Date.now()}-${i}`;
       const sizeStr = formatSizeBytes(file.size);
       const dateStr = new Date(file.lastModified || Date.now()).toLocaleDateString();
 
@@ -284,10 +283,9 @@ export const MobileFilesTab: React.FC = () => {
     setFilesList((prev) => [...newItems, ...prev]);
   };
 
-  // 4. Filter and Search processing
+  // Filter and Search processing
   const filteredFiles = useMemo(() => {
     return filesList.filter((item) => {
-      // Filter tab
       if (activeFilter === 'PDF' && item.type !== 'pdf') return false;
       if (activeFilter === 'Word' && item.type !== 'docx') return false;
       if (activeFilter === 'Excel' && item.type !== 'xlsx') return false;
@@ -296,16 +294,19 @@ export const MobileFilesTab: React.FC = () => {
       if (activeFilter === 'Text' && item.type !== 'txt') return false;
       if (activeFilter === 'Large Files' && (item.sizeBytes || 0) < 5 * 1024 * 1024) return false;
 
-      // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        return item.name.toLowerCase().includes(q) || item.type.toLowerCase().includes(q);
+        return (
+          item.name.toLowerCase().includes(q) ||
+          item.type.toLowerCase().includes(q) ||
+          (item.relativePath && item.relativePath.toLowerCase().includes(q))
+        );
       }
       return true;
     });
   }, [filesList, activeFilter, searchQuery]);
 
-  // 5. Compatible Actions for current selection
+  // Compatible Actions for current selection
   const currentSelectionItems = useMemo(() => {
     if (isMultiSelect) {
       return filesList.filter((f) => selectedIds.has(f.id));
@@ -498,12 +499,12 @@ export const MobileFilesTab: React.FC = () => {
         onChange={handleDeviceFilesPicked}
       />
 
-      {/* Asynchronous Document Scan Progress Bar */}
+      {/* Asynchronous Scan Progress Bar */}
       {isScanning && (
         <Box sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
             <Typography variant="caption" fontWeight={700} color="#2563eb">
-              Scanning supported documents on device...
+              Indexing authorized document folders...
             </Typography>
           </Box>
           <LinearProgress sx={{ borderRadius: 2, height: 6 }} />
@@ -520,7 +521,7 @@ export const MobileFilesTab: React.FC = () => {
         }}
       >
         <Typography variant="h6" fontWeight={800} color="text.primary">
-          {isMultiSelect ? `${selectedIds.size} Selected` : `Smart Files Library (${filesList.length})`}
+          {isMultiSelect ? `${selectedIds.size} Selected` : `Files Library (${filesList.length})`}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -550,7 +551,7 @@ export const MobileFilesTab: React.FC = () => {
               variant="contained"
               size="small"
               startIcon={<AddIcon />}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleAuthorizeFolder}
               sx={{
                 borderRadius: '20px',
                 textTransform: 'none',
@@ -559,18 +560,43 @@ export const MobileFilesTab: React.FC = () => {
                 '&:hover': { bgcolor: '#1d4ed8' }
               }}
             >
-              Add Files
+              Add Folder
             </Button>
           )}
         </Box>
       </Box>
+
+      {/* Authorized Folders Bar */}
+      {authorizedFolders.length > 0 && (
+        <Box sx={{ mb: 1.5 }}>
+          <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+            AUTHORIZED DOCUMENT FOLDERS ({authorizedFolders.length})
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {authorizedFolders.map((f) => (
+              <Chip
+                key={f.id}
+                icon={<FolderIcon sx={{ color: '#2563eb' }} />}
+                label={f.name}
+                onDelete={() => handleRemoveFolder(f.id)}
+                size="small"
+                sx={{
+                  fontWeight: 700,
+                  bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#eff6ff',
+                  border: '1px solid #bfdbfe'
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
 
       {/* Fast Search Input */}
       <Box sx={{ mb: 1.5 }}>
         <TextField
           fullWidth
           size="small"
-          placeholder="Search by filename or type..."
+          placeholder="Search by filename, folder or type..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           InputProps={{
@@ -672,26 +698,26 @@ export const MobileFilesTab: React.FC = () => {
             textAlign: 'center'
           }}
         >
-          <InsertDriveFileIcon
+          <FolderSpecialIcon
             sx={{ fontSize: 48, color: '#94a3b8', mb: 1, opacity: 0.6 }}
           />
           <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-            No Documents Found
+            No Documents Authorized Yet
           </Typography>
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mb: 2, maxWidth: 300, mx: 'auto' }}
+            sx={{ mb: 2, maxWidth: 340, mx: 'auto' }}
           >
-            Tap "Add Files" to scan or add PDFs, Word, Excel, PowerPoint, Text or images from your device.
+            Tap "Choose Document Folder" to authorize a folder (e.g. Download or Documents). ConvertingHub will automatically index all supported PDFs, Word, Excel, PowerPoint, Text and images inside it.
           </Typography>
           <Button
             variant="contained"
-            onClick={startAutomaticDeviceScan}
+            onClick={handleAuthorizeFolder}
             startIcon={<StorageIcon />}
             sx={{ borderRadius: '20px', textTransform: 'none', fontWeight: 700, bgcolor: '#2563eb' }}
           >
-            Scan Device Storage
+            Choose Document Folder
           </Button>
         </Paper>
       ) : viewMode === 'grid' ? (
@@ -754,7 +780,7 @@ export const MobileFilesTab: React.FC = () => {
                       overflow: 'hidden'
                     }}
                   >
-                    {item.type === 'pdf' ? (
+                    {item.type === 'pdf' && item.fileObj ? (
                       <PdfGridThumbnail fileObj={item.fileObj as File} />
                     ) : item.type === 'image' && item.previewUrl ? (
                       <img
@@ -866,7 +892,7 @@ export const MobileFilesTab: React.FC = () => {
                     {item.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {item.size} • {item.date}
+                    {item.size} • {item.date} {item.relativePath ? `• ${item.relativePath}` : ''}
                   </Typography>
                 </Box>
                 <IconButton
@@ -933,7 +959,7 @@ export const MobileFilesTab: React.FC = () => {
         </Paper>
       )}
 
-      {/* Dynamic Compatibility Smart Action Sheet (Drawer) */}
+      {/* Dynamic Compatibility Smart Action Sheet */}
       <Drawer
         anchor="bottom"
         open={actionSheetOpen}
@@ -1026,25 +1052,27 @@ export const MobileFilesTab: React.FC = () => {
         </List>
       </Drawer>
 
-      {/* First-Launch Document Permission Explanation Dialog */}
+      {/* Persistent SAF Document Folder Setup Dialog */}
       <Dialog
         open={permissionModalOpen}
         onClose={() => setPermissionModalOpen(false)}
         PaperProps={{
-          sx: { borderRadius: '24px', p: 1, maxWidth: 420 }
+          sx: { borderRadius: '24px', p: 1, maxWidth: 440 }
         }}
       >
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
-          <SecurityIcon sx={{ color: '#2563eb', fontSize: 28 }} />
+          <FolderSpecialIcon sx={{ color: '#2563eb', fontSize: 28 }} />
           <Typography variant="h6" fontWeight={800}>
             Access Your Documents
           </Typography>
         </DialogTitle>
         <DialogContent>
           <DialogContentText color="text.secondary" sx={{ fontSize: '0.9rem', lineHeight: 1.5 }}>
-            ConvertingHub needs permission to list your supported documents (PDFs, Word, Excel, PowerPoint, Text, and photos) in your Files Library.
+            Choose a folder where your documents are stored (such as <strong>Download</strong> or <strong>Documents</strong>).
             <br /><br />
-            <strong>Privacy Guarantee:</strong> Your files remain stored locally on your device unless you explicitly perform a conversion or upload operation.
+            ConvertingHub will automatically index all supported PDFs, Word, Excel, PowerPoint, text files and images inside the folder you authorize, including subfolders.
+            <br /><br />
+            <strong>Privacy Guarantee:</strong> Your files remain stored locally on your device unless you explicitly choose a conversion or upload operation.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
@@ -1053,14 +1081,15 @@ export const MobileFilesTab: React.FC = () => {
             onClick={() => setPermissionModalOpen(false)}
             sx={{ textTransform: 'none', color: 'text.secondary' }}
           >
-            Later
+            Skip
           </Button>
           <Button
             variant="contained"
-            onClick={handleGrantPermission}
+            onClick={handleAuthorizeFolder}
+            startIcon={<FolderIcon />}
             sx={{ borderRadius: '16px', textTransform: 'none', fontWeight: 700, bgcolor: '#2563eb' }}
           >
-            Grant Access
+            Choose Document Folder
           </Button>
         </DialogActions>
       </Dialog>

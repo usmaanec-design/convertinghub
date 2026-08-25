@@ -7650,6 +7650,8 @@ androidx.viewpager.widget.ViewPager$SavedState
 androidx.viewpager.widget.ViewPager$SimpleOnPageChangeListener
 androidx.viewpager.widget.ViewPager$ViewPositionComparator
 androidx.viewpager.widget.ViewPager
+app.web.convertinghub.official.LauncherActivity:
+    private static final java.lang.String TAG
 app.web.convertinghub.official.R$bool
 app.web.convertinghub.official.R$color
 app.web.convertinghub.official.R$drawable

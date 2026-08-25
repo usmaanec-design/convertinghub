@@ -1,0 +1,459 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3    Copyright 2019 Google Inc. All Rights Reserved.
+4
+5     Licensed under the Apache License, Version 2.0 (the "License");
+6     you may not use this file except in compliance with the License.
+7     You may obtain a copy of the License at
+8
+9         http://www.apache.org/licenses/LICENSE-2.0
+10
+11     Unless required by applicable law or agreed to in writing, software
+12     distributed under the License is distributed on an "AS IS" BASIS,
+13     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+14     See the License for the specific language governing permissions and
+15     limitations under the License.
+16-->
+17<!--
+18 The "package" attribute is rewritten by the Gradle build with the value of applicationId.
+19     It is still required here, as it is used to derive paths, for instance when referring
+20     to an Activity by ".MyActivity" instead of the full name. If more Activities are added to the
+21     application, the package attribute will need to reflect the correct path in order to use
+22     the abbreviated format.
+23-->
+24<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+25    package="app.web.convertinghub.official"
+26    android:versionCode="1"
+27    android:versionName="1.0.0" >
+28
+29    <uses-sdk
+30        android:minSdkVersion="24"
+31        android:targetSdkVersion="36" />
+32
+33    <uses-permission android:name="android.permission.INTERNET" />
+33-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:25:5-67
+33-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:25:22-64
+34    <uses-permission
+34-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:26:5-107
+35        android:name="android.permission.READ_EXTERNAL_STORAGE"
+35-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:26:22-77
+36        android:maxSdkVersion="32" />
+36-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:26:78-104
+37    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+37-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:27:5-76
+37-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:27:22-73
+38
+39    <queries>
+39-->[com.google.androidbrowserhelper:androidbrowserhelper:2.6.2] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\5053e02be90783e54992393be394bb70\transformed\androidbrowserhelper-2.6.2\AndroidManifest.xml:22:5-30:15
+40        <intent>
+40-->[com.google.androidbrowserhelper:androidbrowserhelper:2.6.2] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\5053e02be90783e54992393be394bb70\transformed\androidbrowserhelper-2.6.2\AndroidManifest.xml:23:9-29:18
+41            <action android:name="android.intent.action.VIEW" />
+41-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:142:17-68
+41-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:142:25-66
+42
+43            <category android:name="android.intent.category.BROWSABLE" />
+43-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:144:17-77
+43-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:144:27-75
+44
+45            <data android:scheme="https" />
+45-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+45-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:23-45
+46        </intent>
+47    </queries>
+48
+49    <permission
+49-->[androidx.core:core:1.13.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
+50        android:name="app.web.convertinghub.official.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+50-->[androidx.core:core:1.13.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
+51        android:protectionLevel="signature" />
+51-->[androidx.core:core:1.13.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
+52
+53    <uses-permission android:name="app.web.convertinghub.official.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+53-->[androidx.core:core:1.13.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
+53-->[androidx.core:core:1.13.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
+54
+55    <application
+55-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:29:5-209:19
+56        android:name="app.web.convertinghub.official.Application"
+56-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:30:9-35
+57        android:allowBackup="true"
+57-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:31:9-35
+58        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+58-->[androidx.core:core:1.13.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
+59        android:debuggable="true"
+60        android:extractNativeLibs="false"
+61        android:icon="@mipmap/ic_launcher"
+61-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:32:9-43
+62        android:label="@string/appName"
+62-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:33:9-40
+63        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
+63-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:35:9-105
+64        android:supportsRtl="true"
+64-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:37:9-35
+65        android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+65-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:38:9-68
+66        <meta-data
+66-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:40:9-42:58
+67            android:name="asset_statements"
+67-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:41:13-44
+68            android:resource="@string/assetStatements" />
+68-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:42:13-55
+69        <meta-data
+69-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:45:13-47:58
+70            android:name="web_manifest_url"
+70-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:46:17-48
+71            android:value="@string/webManifestUrl" />
+71-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:47:17-55
+72        <meta-data
+72-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:50:9-52:52
+73            android:name="twa_generator"
+73-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:51:13-41
+74            android:value="@string/generatorApp" />
+74-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:52:13-49
+75
+76        <activity
+76-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:59:13-70:24
+77            android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
+77-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:59:23-104
+78            android:enabled="true"
+78-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:61:17-39
+79            android:excludeFromRecents="true"
+79-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:62:17-50
+80            android:exported="false" >
+80-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:60:17-41
+81            <meta-data
+81-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:63:17-65:57
+82                android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
+82-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:64:21-87
+83                android:value="@string/launchUrl" />
+83-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:65:21-54
+84
+85            <intent-filter>
+85-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:66:17-69:33
+86                <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+86-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:67:21-92
+86-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:67:29-89
+87
+88                <category android:name="android.intent.category.DEFAULT" />
+88-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:21-80
+88-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:31-77
+89            </intent-filter>
+90        </activity>
+91        <activity
+91-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:73:9-176:20
+92            android:name="app.web.convertinghub.official.LauncherActivity"
+92-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:73:19-50
+93            android:alwaysRetainTaskState="true"
+93-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:74:13-49
+94            android:exported="true"
+94-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:76:13-36
+95            android:label="@string/launcherName" >
+95-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:75:13-49
+96            <meta-data
+96-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:77:13-78:53
+97                android:name="android.support.customtabs.trusted.DEFAULT_URL"
+97-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:77:24-85
+98                android:value="@string/launchUrl" />
+98-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:78:17-50
+99            <meta-data
+99-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:80:13-82:58
+100                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
+100-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:81:17-83
+101                android:resource="@color/colorPrimary" />
+101-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:82:17-55
+102            <meta-data
+102-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:86:13-88:62
+103                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR_DARK"
+103-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:87:17-88
+104                android:resource="@color/colorPrimaryDark" />
+104-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:88:17-59
+105            <meta-data
+105-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:90:13-92:61
+106                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
+106-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:91:17-87
+107                android:resource="@color/navigationColor" />
+107-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:92:17-58
+108            <meta-data
+108-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:94:13-96:65
+109                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK"
+109-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:95:17-92
+110                android:resource="@color/navigationColorDark" />
+110-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:96:17-62
+111            <meta-data
+111-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:98:13-100:68
+112                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
+112-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:99:17-84
+113                android:resource="@color/navigationDividerColor" />
+113-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:100:17-65
+114            <meta-data
+114-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:102:13-104:72
+115                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK"
+115-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:103:17-89
+116                android:resource="@color/navigationDividerColorDark" />
+116-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:104:17-69
+117            <meta-data
+117-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:106:13-107:54
+118                android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
+118-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:106:24-95
+119                android:resource="@drawable/splash" />
+119-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:107:17-52
+120            <meta-data
+120-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:109:13-110:60
+121                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
+121-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:109:24-104
+122                android:resource="@color/backgroundColor" />
+122-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:110:17-58
+123            <meta-data
+123-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:112:13-113:71
+124                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
+124-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:112:24-105
+125                android:value="@integer/splashScreenFadeOutDuration" />
+125-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:113:17-69
+126            <meta-data
+126-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:115:13-116:60
+127                android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
+127-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:115:24-97
+128                android:value="@string/providerAuthority" />
+128-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:116:17-58
+129            <meta-data
+129-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:118:13-97
+130                android:name="android.app.shortcuts"
+130-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:118:24-60
+131                android:resource="@xml/shortcuts" />
+131-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:118:61-94
+132            <meta-data
+132-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:120:13-121:56
+133                android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
+133-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:120:24-91
+134                android:value="@string/fallbackType" />
+134-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:121:17-53
+135            <meta-data
+135-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:127:13-128:54
+136                android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION"
+136-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:127:24-92
+137                android:value="@string/orientation" />
+137-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:128:17-52
+138
+139            <intent-filter>
+139-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:136:13-139:29
+140                <action android:name="android.intent.action.MAIN" />
+140-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:137:17-69
+140-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:137:25-66
+141
+142                <category android:name="android.intent.category.LAUNCHER" />
+142-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:138:17-77
+142-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:138:27-74
+143            </intent-filter>
+144            <intent-filter android:autoVerify="true" >
+144-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:141:13-148:29
+144-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:141:28-53
+145                <action android:name="android.intent.action.VIEW" />
+145-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:142:17-68
+145-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:142:25-66
+146
+147                <category android:name="android.intent.category.DEFAULT" />
+147-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:21-80
+147-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:31-77
+148                <category android:name="android.intent.category.BROWSABLE" />
+148-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:144:17-77
+148-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:144:27-75
+149
+150                <data
+150-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+151                    android:host="@string/hostName"
+151-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:146:21-52
+152                    android:scheme="https" />
+152-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:23-45
+153            </intent-filter>
+154
+155            <!-- ConvertingHub Open With Document Intent Filters -->
+156            <intent-filter>
+156-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:151:13-167:29
+157                <action android:name="android.intent.action.VIEW" />
+157-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:142:17-68
+157-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:142:25-66
+158                <action android:name="android.intent.action.SEND" />
+158-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:153:17-69
+158-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:153:25-66
+159                <action android:name="android.intent.action.SEND_MULTIPLE" />
+159-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:154:17-78
+159-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:154:25-75
+160
+161                <category android:name="android.intent.category.DEFAULT" />
+161-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:21-80
+161-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:31-77
+162                <category android:name="android.intent.category.BROWSABLE" />
+162-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:144:17-77
+162-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:144:27-75
+163
+164                <data android:mimeType="application/pdf" />
+164-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+164-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+165                <data android:mimeType="application/msword" />
+165-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+165-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+166                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+166-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+166-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+167                <data android:mimeType="application/vnd.ms-excel" />
+167-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+167-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+168                <data android:mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+168-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+168-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+169                <data android:mimeType="text/csv" />
+169-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+169-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+170                <data android:mimeType="application/vnd.ms-powerpoint" />
+170-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+170-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+171                <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+171-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+171-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+172                <data android:mimeType="text/plain" />
+172-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+172-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+173                <data android:mimeType="image/*" />
+173-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+173-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+174            </intent-filter>
+175            <intent-filter>
+175-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:168:13-175:29
+176                <action android:name="android.intent.action.VIEW" />
+176-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:142:17-68
+176-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:142:25-66
+177
+178                <category android:name="android.intent.category.DEFAULT" />
+178-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:21-80
+178-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:31-77
+179
+180                <data android:scheme="content" />
+180-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+180-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:23-45
+181                <data android:scheme="file" />
+181-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+181-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:23-45
+182                <data android:mimeType="application/pdf" />
+182-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+182-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+183                <data android:mimeType="image/*" />
+183-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:145:17-147:19
+183-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:157:23-57
+184            </intent-filter>
+185        </activity>
+186        <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
+186-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:178:9-90
+186-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:178:19-87
+187        <activity
+187-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:180:9-181:62
+188            android:name="com.google.androidbrowserhelper.trusted.WebViewFallbackActivity"
+188-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:180:19-97
+189            android:configChanges="orientation|screenSize" />
+189-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:181:13-59
+190
+191        <provider
+191-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:183:9-191:20
+192            android:name="androidx.core.content.FileProvider"
+192-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:184:13-62
+193            android:authorities="@string/providerAuthority"
+193-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:185:13-60
+194            android:exported="false"
+194-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:187:13-37
+195            android:grantUriPermissions="true" >
+195-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:186:13-47
+196            <meta-data
+196-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:188:13-190:53
+197                android:name="android.support.FILE_PROVIDER_PATHS"
+197-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:189:17-67
+198                android:resource="@xml/filepaths" />
+198-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:190:17-50
+199        </provider>
+200
+201        <service
+201-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:193:9-204:19
+202            android:name="app.web.convertinghub.official.DelegationService"
+202-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:194:13-46
+203            android:enabled="@bool/enableNotification"
+203-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:195:13-55
+204            android:exported="@bool/enableNotification" >
+204-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:196:13-56
+205            <intent-filter>
+205-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:200:13-203:29
+206                <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE" />
+206-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:201:17-105
+206-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:201:25-103
+207
+208                <category android:name="android.intent.category.DEFAULT" />
+208-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:21-80
+208-->C:\Users\usmaa\Downloads\Convertinghub--official.web.app\Convertinghub microsoft store install app\android-twa\app\src\main\AndroidManifest.xml:68:31-77
+209            </intent-filter>
+210        </service>
+211
+212        <provider
+212-->[androidx.emoji2:emoji2:1.3.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+213            android:name="androidx.startup.InitializationProvider"
+213-->[androidx.emoji2:emoji2:1.3.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+214            android:authorities="app.web.convertinghub.official.androidx-startup"
+214-->[androidx.emoji2:emoji2:1.3.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+215            android:exported="false" >
+215-->[androidx.emoji2:emoji2:1.3.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+216            <meta-data
+216-->[androidx.emoji2:emoji2:1.3.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+217                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+217-->[androidx.emoji2:emoji2:1.3.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+218                android:value="androidx.startup" />
+218-->[androidx.emoji2:emoji2:1.3.0] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+219            <meta-data
+219-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\4bc52031417e9743197e36b704fe409f\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+220                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+220-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\4bc52031417e9743197e36b704fe409f\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+221                android:value="androidx.startup" />
+221-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\4bc52031417e9743197e36b704fe409f\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+222            <meta-data
+222-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+223                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+223-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+224                android:value="androidx.startup" />
+224-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+225        </provider>
+226
+227        <receiver
+227-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+228            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+228-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+229            android:directBootAware="false"
+229-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+230            android:enabled="true"
+230-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+231            android:exported="true"
+231-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+232            android:permission="android.permission.DUMP" >
+232-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+233            <intent-filter>
+233-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+234                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+234-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+234-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+235            </intent-filter>
+236            <intent-filter>
+236-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+237                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+237-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+237-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+238            </intent-filter>
+239            <intent-filter>
+239-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+240                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+240-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+240-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+241            </intent-filter>
+242            <intent-filter>
+242-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+243                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+243-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+243-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\usmaa\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+244            </intent-filter>
+245        </receiver>
+246    </application>
+247
+248</manifest>

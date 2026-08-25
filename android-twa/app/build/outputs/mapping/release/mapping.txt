@@ -3,8 +3,8 @@
 # min_api: 24
 # common_typos_disable
 # {"id":"com.android.tools.r8.mapping","version":"2.2"}
-# pg_map_id: 9978680
-# pg_map_hash: SHA-256 99786804616e0c95cfd99e4a7b27a95f282de692002e4f7b06b53829e521834b
+# pg_map_id: cab414a
+# pg_map_hash: SHA-256 cab414a5aa34b21a41af9fa3ef7486f18d3659c606028c821de01d7ca7b779a2
 android.app.AppComponentFactory -> android.app.AppComponentFactory:
 # {"id":"com.android.tools.r8.synthesized"}
     void <clinit>() -> <clinit>
@@ -19772,12 +19772,37 @@ app.web.convertinghub.official.DelegationService -> app.web.convertinghub.offici
     1:4:void onCreate():9:9 -> onCreate
 app.web.convertinghub.official.LauncherActivity -> app.web.convertinghub.official.LauncherActivity:
 # {"id":"sourceFile","fileName":"LauncherActivity.java"}
-    1:4:void <init>():25:25 -> <init>
-    1:5:android.net.Uri getLaunchingUrl():48:48 -> i
+    1:4:void <init>():26:26 -> <init>
+    1:6:android.net.Uri getLaunchingUrl():65:65 -> i
+    7:12:android.net.Uri getLaunchingUrl():66:66 -> i
+    13:16:android.net.Uri getLaunchingUrl():69:69 -> i
+    17:20:android.net.Uri getLaunchingUrl():71:71 -> i
+    21:34:android.net.Uri getLaunchingUrl():73:73 -> i
+    35:39:android.net.Uri getLaunchingUrl():74:74 -> i
+    40:47:android.net.Uri getLaunchingUrl():75:75 -> i
+    48:59:android.net.Uri getLaunchingUrl():76:76 -> i
+    60:69:android.net.Uri getLaunchingUrl():81:81 -> i
+    70:78:android.net.Uri getLaunchingUrl():82:82 -> i
+    79:82:android.net.Uri getLaunchingUrl():84:84 -> i
+    83:87:android.net.Uri getLaunchingUrl():85:85 -> i
+    88:93:android.net.Uri getLaunchingUrl():86:86 -> i
+    94:98:android.net.Uri getLaunchingUrl():87:87 -> i
+    99:103:android.net.Uri getLaunchingUrl():89:89 -> i
+    104:111:android.net.Uri getLaunchingUrl():91:91 -> i
     1:3:void onCreate(android.os.Bundle):33:33 -> onCreate
-    4:10:void onCreate(android.os.Bundle):38:38 -> onCreate
-    11:14:void onCreate(android.os.Bundle):39:39 -> onCreate
-    15:18:void onCreate(android.os.Bundle):41:41 -> onCreate
+    4:10:void onCreate(android.os.Bundle):34:34 -> onCreate
+    11:14:void onCreate(android.os.Bundle):35:35 -> onCreate
+    15:17:void onCreate(android.os.Bundle):37:37 -> onCreate
+    18:25:void onCreate(android.os.Bundle):39:39 -> onCreate
+    1:3:void onNewIntent(android.content.Intent):44:44 -> onNewIntent
+    4:6:void onNewIntent(android.content.Intent):45:45 -> onNewIntent
+    7:10:void onNewIntent(android.content.Intent):46:46 -> onNewIntent
+    4:7:void handleIncomingIntent(android.content.Intent):51:51 -> q
+    8:23:void handleIncomingIntent(android.content.Intent):52:52 -> q
+    24:29:void handleIncomingIntent(android.content.Intent):53:53 -> q
+    30:35:void handleIncomingIntent(android.content.Intent):54:54 -> q
+    36:46:void handleIncomingIntent(android.content.Intent):55:55 -> q
+    47:73:void handleIncomingIntent(android.content.Intent):58:58 -> q
 com.google.androidbrowserhelper.R$drawable -> J.a:
     int ic_site_settings -> a
 com.google.androidbrowserhelper.R$string -> J.b:
