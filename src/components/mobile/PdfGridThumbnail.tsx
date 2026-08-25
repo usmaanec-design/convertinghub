@@ -8,8 +8,38 @@ if (typeof window !== 'undefined' && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 }
 
-// In-Memory L1 Thumbnail Cache
-const l1ThumbnailCache = new Map<string, string>();
+// Bounded LRU Thumbnail Cache with Max Capacity 100
+class BoundedLruCache<K, V> {
+  private max: number;
+  private map = new Map<K, V>();
+
+  constructor(max = 100) {
+    this.max = max;
+  }
+
+  get(key: K): V | undefined {
+    const val = this.map.get(key);
+    if (val !== undefined) {
+      this.map.delete(key);
+      this.map.set(key, val);
+    }
+    return val;
+  }
+
+  set(key: K, val: V) {
+    if (this.map.has(key)) {
+      this.map.delete(key);
+    } else if (this.map.size >= this.max) {
+      const firstKey = this.map.keys().next().value;
+      if (firstKey !== undefined) {
+        this.map.delete(firstKey);
+      }
+    }
+    this.map.set(key, val);
+  }
+}
+
+const l1ThumbnailCache = new BoundedLruCache<string, string>(100);
 
 interface PdfGridThumbnailProps {
   docId?: string;
@@ -105,7 +135,7 @@ export const PdfGridThumbnail: React.FC<PdfGridThumbnailProps> = ({
         await renderTask.promise;
         if (isCancelled) return;
 
-        // Convert tiny canvas to data URL & store in L1 Cache
+        // Convert tiny canvas to data URL & store in Bounded L1 Cache
         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
         const key = docId || fileUrl || (fileObj ? (fileObj as File).name : null);
         if (key) {
