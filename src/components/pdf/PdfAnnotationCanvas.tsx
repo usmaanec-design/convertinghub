@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
 
 export interface Point {
@@ -21,10 +21,10 @@ export interface AnnotationStroke {
 
 interface PdfAnnotationCanvasProps {
   pageIndex: number;
-  pdfPageWidth: number;
-  pdfPageHeight: number;
-  containerWidth: number;
-  containerHeight: number;
+  pdfPageWidth?: number;
+  pdfPageHeight?: number;
+  width: number;
+  height: number;
   activeTool: PenToolType | 'select' | 'hand' | null;
   strokes: AnnotationStroke[];
   onStrokesChange: (strokes: AnnotationStroke[]) => void;
@@ -41,23 +41,23 @@ export const PEN_CONFIGS: Record<PenToolType, { color: string; width: number; op
 
 export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
   pageIndex,
-  pdfPageWidth,
-  pdfPageHeight,
-  containerWidth,
-  containerHeight,
+  pdfPageWidth = 612,
+  pdfPageHeight = 792,
+  width,
+  height,
   activeTool,
   strokes,
   onStrokesChange,
   disabled = false
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
+  const isDrawingRef = useRef<boolean>(false);
+  const currentPointsRef = useRef<Point[]>([]);
+  const animFrameRef = useRef<number | null>(null);
 
-  const scaleX = containerWidth / (pdfPageWidth || 1);
-  const scaleY = containerHeight / (pdfPageHeight || 1);
+  const scaleX = width / (pdfPageWidth || 1);
+  const scaleY = height / (pdfPageHeight || 1);
 
-  // Convert screen coordinates (canvas relative) to PDF Page Coordinates
   const toPdfCoords = useCallback(
     (canvasX: number, canvasY: number, pressure = 0.5): Point => {
       return {
@@ -69,7 +69,6 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
     [pdfPageWidth, pdfPageHeight, scaleX, scaleY]
   );
 
-  // Convert PDF Page Coordinates to screen coordinates
   const toScreenCoords = useCallback(
     (pt: Point) => {
       return {
@@ -80,7 +79,6 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
     [scaleX, scaleY]
   );
 
-  // Render all strokes onto the canvas
   const redrawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -89,7 +87,6 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw saved strokes for this page
     const renderStroke = (stroke: AnnotationStroke, strokePoints: Point[]) => {
       if (strokePoints.length === 0) return;
 
@@ -130,12 +127,13 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
       ctx.restore();
     };
 
+    // Render committed strokes
     strokes.forEach((stroke) => {
       renderStroke(stroke, stroke.points);
     });
 
-    // Draw active stroke currently being drawn
-    if (isDrawing && currentPoints.length > 0 && activeTool && PEN_CONFIGS[activeTool as PenToolType]) {
+    // Render active stroke directly from ref
+    if (isDrawingRef.current && currentPointsRef.current.length > 0 && activeTool && PEN_CONFIGS[activeTool as PenToolType]) {
       const cfg = PEN_CONFIGS[activeTool as PenToolType];
       const activeStroke: AnnotationStroke = {
         id: 'active',
@@ -143,16 +141,24 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
         color: cfg.color,
         strokeWidth: cfg.width,
         opacity: cfg.opacity,
-        points: currentPoints,
+        points: currentPointsRef.current,
         pageIndex
       };
-      renderStroke(activeStroke, currentPoints);
+      renderStroke(activeStroke, currentPointsRef.current);
     }
-  }, [strokes, isDrawing, currentPoints, activeTool, pageIndex, toScreenCoords, scaleX]);
+  }, [strokes, activeTool, pageIndex, toScreenCoords, scaleX]);
 
   useEffect(() => {
     redrawCanvas();
   }, [redrawCanvas]);
+
+  const requestRedraw = () => {
+    if (animFrameRef.current) return;
+    animFrameRef.current = requestAnimationFrame(() => {
+      redrawCanvas();
+      animFrameRef.current = null;
+    });
+  };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (disabled || !activeTool || !PEN_CONFIGS[activeTool as PenToolType]) return;
@@ -168,7 +174,6 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
     const pt = toPdfCoords(offsetX, offsetY, e.pressure || 0.5);
 
     if (activeTool === 'eraser') {
-      // Find and remove stroke near point
       const threshold = 15;
       const filtered = strokes.filter((s) => {
         return !s.points.some((p) => {
@@ -184,8 +189,9 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
       return;
     }
 
-    setIsDrawing(true);
-    setCurrentPoints([pt]);
+    isDrawingRef.current = true;
+    currentPointsRef.current = [pt];
+    requestRedraw();
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -213,19 +219,20 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
       return;
     }
 
-    if (!isDrawing) return;
+    if (!isDrawingRef.current) return;
 
     e.preventDefault();
     const pt = toPdfCoords(offsetX, offsetY, e.pressure || 0.5);
-    setCurrentPoints((prev) => [...prev, pt]);
+    currentPointsRef.current.push(pt);
+    requestRedraw();
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
+    if (!isDrawingRef.current) return;
     e.preventDefault();
-    setIsDrawing(false);
+    isDrawingRef.current = false;
 
-    if (currentPoints.length > 0 && activeTool && activeTool !== 'eraser') {
+    if (currentPointsRef.current.length > 0 && activeTool && activeTool !== 'eraser') {
       const cfg = PEN_CONFIGS[activeTool as PenToolType];
       const newStroke: AnnotationStroke = {
         id: `stroke-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
@@ -233,13 +240,14 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
         color: cfg.color,
         strokeWidth: cfg.width,
         opacity: cfg.opacity,
-        points: currentPoints,
+        points: [...currentPointsRef.current],
         pageIndex
       };
       onStrokesChange([...strokes, newStroke]);
     }
 
-    setCurrentPoints([]);
+    currentPointsRef.current = [];
+    requestRedraw();
   };
 
   const isInteractive = activeTool && Boolean(PEN_CONFIGS[activeTool as PenToolType]);
@@ -250,8 +258,8 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
         position: 'absolute',
         top: 0,
         left: 0,
-        width: containerWidth,
-        height: containerHeight,
+        width,
+        height,
         pointerEvents: isInteractive ? 'auto' : 'none',
         zIndex: 5,
         touchAction: 'none'
@@ -259,8 +267,8 @@ export const PdfAnnotationCanvas: React.FC<PdfAnnotationCanvasProps> = ({
     >
       <canvas
         ref={canvasRef}
-        width={containerWidth}
-        height={containerHeight}
+        width={width}
+        height={height}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

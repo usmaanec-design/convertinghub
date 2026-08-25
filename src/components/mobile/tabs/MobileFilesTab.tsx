@@ -125,6 +125,9 @@ export const MobileFilesTab: React.FC = () => {
   const [renameDialogOpen, setRenameDialogOpen] = useState<boolean>(false);
   const [renameInput, setRenameInput] = useState<string>('');
 
+  // Pagination / Windowing State for performance
+  const [displayLimit, setDisplayLimit] = useState<number>(36);
+
   // 1. Initial Load & Startup Automatic Reconciliation
   useEffect(() => {
     let isMounted = true;
@@ -722,140 +725,154 @@ export const MobileFilesTab: React.FC = () => {
         </Paper>
       ) : viewMode === 'grid' ? (
         /* GRID VIEW */
-        <Grid container spacing={1.5}>
-          {filteredFiles.map((item) => {
-            const isSelected = selectedIds.has(item.id);
-            return (
-              <Grid item xs={6} sm={4} key={item.id}>
-                <Paper
-                  elevation={0}
-                  onClick={() => handleOpenFile(item)}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    setTargetFile(item);
-                    setActionSheetOpen(true);
-                  }}
-                  sx={{
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#ffffff',
-                    border: `2px solid ${
-                      isSelected
-                        ? '#2563eb'
-                        : theme.palette.mode === 'dark'
-                        ? '#334155'
-                        : '#e2e8f0'
-                    }`,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    '&:active': { transform: 'scale(0.97)' }
-                  }}
-                >
-                  {isMultiSelect && (
-                    <Box sx={{ position: 'absolute', top: 6, right: 6, zIndex: 10 }}>
-                      <Checkbox
-                        checked={isSelected}
-                        onChange={() => toggleSelectFile(item.id)}
-                        sx={{
-                          color: '#ffffff',
-                          '&.Mui-checked': { color: '#2563eb' },
-                          bgcolor: 'rgba(0,0,0,0.4)',
-                          borderRadius: '50%',
-                          p: 0.5
-                        }}
-                      />
-                    </Box>
-                  )}
-
-                  <Box
+        <Box>
+          <Grid container spacing={1.5}>
+            {filteredFiles.slice(0, displayLimit).map((item) => {
+              const isSelected = selectedIds.has(item.id);
+              return (
+                <Grid item xs={6} sm={4} key={item.id}>
+                  <Paper
+                    elevation={0}
+                    onClick={() => handleOpenFile(item)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      setTargetFile(item);
+                      setActionSheetOpen(true);
+                    }}
                     sx={{
-                      height: 120,
-                      width: '100%',
-                      bgcolor: theme.palette.mode === 'dark' ? '#0f172a' : '#f8fafc',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
                       position: 'relative',
-                      overflow: 'hidden'
+                      bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#ffffff',
+                      border: `2px solid ${
+                        isSelected
+                          ? '#2563eb'
+                          : theme.palette.mode === 'dark'
+                          ? '#334155'
+                          : '#e2e8f0'
+                      }`,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      '&:active': { transform: 'scale(0.97)' }
                     }}
                   >
-                    {item.type === 'pdf' && item.fileObj ? (
-                      <PdfGridThumbnail fileObj={item.fileObj as File} />
-                    ) : item.type === 'image' && item.previewUrl ? (
-                      <img
-                        src={item.previewUrl}
-                        alt={item.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          gap: 0.5
-                        }}
-                      >
-                        {getTypeIcon(item.type)}
-                        <Typography
-                          variant="caption"
-                          fontWeight={800}
-                          sx={{ textTransform: 'uppercase', color: 'text.secondary' }}
-                        >
-                          {item.type}
-                        </Typography>
+                    {isMultiSelect && (
+                      <Box sx={{ position: 'absolute', top: 6, right: 6, zIndex: 10 }}>
+                        <Checkbox
+                          checked={isSelected}
+                          onChange={() => toggleSelectFile(item.id)}
+                          sx={{
+                            color: '#ffffff',
+                            '&.Mui-checked': { color: '#2563eb' },
+                            bgcolor: 'rgba(0,0,0,0.4)',
+                            borderRadius: '50%',
+                            p: 0.5
+                          }}
+                        />
                       </Box>
                     )}
 
-                    {!isMultiSelect && (
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setTargetFile(item);
-                          setActionSheetOpen(true);
-                        }}
-                        sx={{
-                          position: 'absolute',
-                          top: 4,
-                          right: 4,
-                          bgcolor: 'rgba(0,0,0,0.3)',
-                          color: '#ffffff',
-                          p: 0.5
-                        }}
-                      >
-                        <MoreVertIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                  </Box>
+                    <Box
+                      sx={{
+                        height: 120,
+                        width: '100%',
+                        bgcolor: theme.palette.mode === 'dark' ? '#0f172a' : '#f8fafc',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      {item.type === 'pdf' && item.fileObj ? (
+                        <PdfGridThumbnail docId={item.id} fileObj={item.fileObj as File} />
+                      ) : item.type === 'image' && item.previewUrl ? (
+                        <img
+                          src={item.previewUrl}
+                          alt={item.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 0.5
+                          }}
+                        >
+                          {getTypeIcon(item.type)}
+                          <Typography
+                            variant="caption"
+                            fontWeight={800}
+                            sx={{ textTransform: 'uppercase', color: 'text.secondary' }}
+                          >
+                            {item.type}
+                          </Typography>
+                        </Box>
+                      )}
 
-                  <Box sx={{ p: 1.25 }}>
-                    <Typography
-                      variant="body2"
-                      fontWeight={700}
-                      noWrap
-                      sx={{ fontSize: '0.825rem', color: 'text.primary' }}
-                    >
-                      {item.name}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ fontSize: '0.7rem' }}
-                    >
-                      {item.size} • {item.date}
-                    </Typography>
-                  </Box>
-                </Paper>
-              </Grid>
-            );
-          })}
-        </Grid>
+                      {!isMultiSelect && (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTargetFile(item);
+                            setActionSheetOpen(true);
+                          }}
+                          sx={{
+                            position: 'absolute',
+                            top: 4,
+                            right: 4,
+                            bgcolor: 'rgba(0,0,0,0.3)',
+                            color: '#ffffff',
+                            p: 0.5
+                          }}
+                        >
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Box>
+
+                    <Box sx={{ p: 1.25 }}>
+                      <Typography
+                        variant="body2"
+                        fontWeight={700}
+                        noWrap
+                        sx={{ fontSize: '0.825rem', color: 'text.primary' }}
+                      >
+                        {item.name}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ fontSize: '0.7rem' }}
+                      >
+                        {item.size} • {item.date}
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+              );
+            })}
+          </Grid>
+
+          {filteredFiles.length > displayLimit && (
+            <Box sx={{ textAlign: 'center', mt: 3, mb: 1 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setDisplayLimit((prev) => prev + 36)}
+                sx={{ borderRadius: '20px', textTransform: 'none', fontWeight: 700 }}
+              >
+                Load More Documents ({filteredFiles.length - displayLimit} remaining)
+              </Button>
+            </Box>
+          )}
+        </Box>
       ) : (
         /* LIST VIEW */
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {filteredFiles.map((item) => {
+          {filteredFiles.slice(0, displayLimit).map((item) => {
             const isSelected = selectedIds.has(item.id);
             return (
               <Paper
@@ -908,6 +925,18 @@ export const MobileFilesTab: React.FC = () => {
               </Paper>
             );
           })}
+
+          {filteredFiles.length > displayLimit && (
+            <Box sx={{ textAlign: 'center', mt: 2, mb: 1 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setDisplayLimit((prev) => prev + 36)}
+                sx={{ borderRadius: '20px', textTransform: 'none', fontWeight: 700 }}
+              >
+                Load More Documents ({filteredFiles.length - displayLimit} remaining)
+              </Button>
+            </Box>
+          )}
         </Box>
       )}
 
