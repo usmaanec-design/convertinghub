@@ -7651,6 +7651,9 @@ androidx.viewpager.widget.ViewPager$SimpleOnPageChangeListener
 androidx.viewpager.widget.ViewPager$ViewPositionComparator
 androidx.viewpager.widget.ViewPager
 app.web.convertinghub.official.LauncherActivity:
+    private static final java.lang.String KEY_SAF_TREE_URIS
+    private static final java.lang.String PREFS_NAME
+    private static final int REQUEST_CODE_SAF_TREE
     private static final java.lang.String TAG
 app.web.convertinghub.official.R$bool
 app.web.convertinghub.official.R$color
@@ -7661,6 +7664,9 @@ app.web.convertinghub.official.R$raw
 app.web.convertinghub.official.R$string
 app.web.convertinghub.official.R$xml
 app.web.convertinghub.official.R
+app.web.convertinghub.official.SafDocumentScanner:
+    private static final java.lang.String TAG
+    public void <init>()
 com.google.androidbrowserhelper.BuildConfig
 com.google.androidbrowserhelper.R$drawable:
     private void <init>()
