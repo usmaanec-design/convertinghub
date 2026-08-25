@@ -24,13 +24,45 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
+export type SupportedFileType =
+  | 'pdf'
+  | 'docx'
+  | 'xlsx'
+  | 'pptx'
+  | 'txt'
+  | 'image'
+  | 'archive'
+  | 'other';
+
 export interface StoredDocument {
   id: string;
   name: string;
   size: string;
-  type: 'pdf' | 'docx' | 'xlsx' | 'pptx' | 'image' | 'archive' | 'other';
+  sizeBytes?: number;
+  type: SupportedFileType;
+  extension?: string;
   date: string;
+  lastModified?: number;
   blob: Blob;
+  thumbnailUrl?: string;
+}
+
+export function detectFileType(filename: string): SupportedFileType {
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+  if (ext === 'pdf') return 'pdf';
+  if (['docx', 'doc'].includes(ext)) return 'docx';
+  if (['xlsx', 'xls', 'csv'].includes(ext)) return 'xlsx';
+  if (['pptx', 'ppt'].includes(ext)) return 'pptx';
+  if (['txt', 'log', 'md', 'json'].includes(ext)) return 'txt';
+  if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'bmp'].includes(ext)) return 'image';
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return 'archive';
+  return 'other';
+}
+
+export function formatSizeBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 export async function saveDocumentToIDB(doc: StoredDocument): Promise<void> {

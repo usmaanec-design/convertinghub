@@ -10,6 +10,9 @@ import MobileToolsTab from './tabs/MobileToolsTab';
 import MobileProfileTab from './tabs/MobileProfileTab';
 import MobileScannerModal from './tabs/MobileScannerModal';
 
+import { androidIntentService } from '../../services/androidIntentService';
+import MobileFileViewerModal, { FileToView } from './MobileFileViewerModal';
+
 interface MobileLayoutProps {
   children: React.ReactNode;
   mode: 'dark' | 'light' | 'system';
@@ -29,7 +32,28 @@ export const MobileLayout: React.FC<MobileLayoutProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
 
+  // External File Intent Viewer state
+  const [externalFileViewerOpen, setExternalFileViewerOpen] = useState<boolean>(false);
+  const [externalFileToView, setExternalFileToView] = useState<FileToView | null>(null);
+
   const isMainTabPath = location.pathname === '/';
+
+  // Initialize Android Intent Listener for external file opens (Open With / Share / PWA File Handler)
+  useEffect(() => {
+    androidIntentService.init();
+    const unsubscribe = androidIntentService.subscribe((file: File) => {
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      const type = ext === 'pdf' ? 'pdf' : ['jpg', 'jpeg', 'png', 'webp'].includes(ext) ? 'image' : 'text';
+      setExternalFileToView({
+        name: file.name,
+        fileObj: file,
+        type,
+        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+      });
+      setExternalFileViewerOpen(true);
+    });
+    return unsubscribe;
+  }, []);
 
   // Handle hardware / browser back button for mobile navigation
   useEffect(() => {
@@ -145,6 +169,13 @@ export const MobileLayout: React.FC<MobileLayoutProps> = ({
       <MobileScannerModal
         open={isScannerOpen}
         onClose={() => setIsScannerOpen(false)}
+      />
+
+      {/* External Received Document Viewer Modal */}
+      <MobileFileViewerModal
+        open={externalFileViewerOpen}
+        file={externalFileToView}
+        onClose={() => setExternalFileViewerOpen(false)}
       />
 
       {/* Fixed Bottom Navigation Bar */}

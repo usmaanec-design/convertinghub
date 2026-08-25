@@ -15,6 +15,8 @@ import {
   PdfNoteItem
 } from './pdfEditorTypes';
 
+import { AnnotationStroke } from '../../../../components/pdf/PdfAnnotationCanvas';
+
 export interface ExportPdfOptions {
   originalPdfBuffer: ArrayBuffer;
   pages: PdfPageObject[];
@@ -24,6 +26,7 @@ export interface ExportPdfOptions {
   stampItems?: Record<number, PdfStampItem[]>;
   linkItems?: Record<number, PdfLinkItem[]>;
   noteItems?: Record<number, PdfNoteItem[]>;
+  annotationStrokes?: Record<number, AnnotationStroke[]>;
   whiteoutRects: Record<number, { x: number; y: number; width: number; height: number }[]>;
 }
 
@@ -53,6 +56,7 @@ export async function exportModifiedPdf(options: ExportPdfOptions): Promise<Uint
     stampItems = {},
     linkItems = {},
     noteItems = {},
+    annotationStrokes = {},
     whiteoutRects
   } = options;
 
@@ -284,6 +288,27 @@ export async function exportModifiedPdf(options: ExportPdfOptions): Promise<Uint
         opacity: txt.opacity ?? 1,
         rotate: degrees(txt.rotation || 0)
       });
+    });
+
+    // 7. Draw Annotation Strokes (Freehand Pen & Highlighter)
+    const strokes = annotationStrokes[pageMeta.pageIndex] || [];
+    strokes.forEach((stroke) => {
+      if (!stroke.points || stroke.points.length < 2) return;
+      const strokeRgb = hexToRgb(stroke.color || '#000000');
+      const thickness = stroke.strokeWidth || 3;
+      const opacity = stroke.opacity ?? 1;
+
+      for (let p = 0; p < stroke.points.length - 1; p++) {
+        const p1 = stroke.points[p];
+        const p2 = stroke.points[p + 1];
+        pdfPage.drawLine({
+          start: { x: p1.x, y: pHeight - p1.y },
+          end: { x: p2.x, y: pHeight - p2.y },
+          thickness: thickness,
+          color: strokeRgb,
+          opacity: opacity
+        });
+      }
     });
   }
 

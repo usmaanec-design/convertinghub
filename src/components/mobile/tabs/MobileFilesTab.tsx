@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -20,8 +20,9 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-  Alert
+  InputAdornment
 } from '@mui/material';
+
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -42,6 +43,14 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CloseIcon from '@mui/icons-material/Close';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import SearchIcon from '@mui/icons-material/Search';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import CallSplitIcon from '@mui/icons-material/CallSplit';
+import MergeIcon from '@mui/icons-material/Merge';
+import PrintIcon from '@mui/icons-material/Print';
+
 import { useNavigate } from 'react-router-dom';
 
 import MobileFileViewerModal, { FileToView } from '../MobileFileViewerModal';
@@ -50,15 +59,24 @@ import {
   saveDocumentToIDB,
   getAllDocumentsFromIDB,
   deleteDocumentFromIDB,
-  StoredDocument
+  detectFileType,
+  formatSizeBytes,
+  StoredDocument,
+  SupportedFileType
 } from '../../../utils/fileStore';
+import {
+  getCompatibleActions,
+  ActionDefinition
+} from '../../../utils/compatibilityEngine';
 
 export interface SavedFileItem {
   id: string;
   name: string;
   size: string;
-  type: 'pdf' | 'docx' | 'xlsx' | 'pptx' | 'image' | 'archive' | 'other';
+  sizeBytes?: number;
+  type: SupportedFileType;
   date: string;
+  lastModified?: number;
   fileObj?: File | Blob;
   previewUrl?: string;
 }
@@ -68,14 +86,37 @@ export const MobileFilesTab: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Filter state
-  const [activeFilter, setActiveFilter] = useState<string>('All');
-
   // Files List
   const [filesList, setFilesList] = useState<SavedFileItem[]>([]);
   const [isLoadingDB, setIsLoadingDB] = useState<boolean>(true);
 
-  // Load persisted files from IndexedDB on mount
+  // Layout View Mode (Grid vs List)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeFilter, setActiveFilter] = useState<string>('All');
+
+  // Multi-select State
+  const [isMultiSelect, setIsMultiSelect] = useState<boolean>(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Action Sheet Drawer State
+  const [actionSheetOpen, setActionSheetOpen] = useState<boolean>(false);
+  const [targetFile, setTargetFile] = useState<SavedFileItem | null>(null);
+
+  // Viewer Modal State
+  const [viewerOpen, setViewerOpen] = useState<boolean>(false);
+  const [selectedFileForViewer, setSelectedFileForViewer] = useState<FileToView | null>(null);
+
+  // Rename Dialog State
+  const [renameDialogOpen, setRenameDialogOpen] = useState<boolean>(false);
+  const [renameInput, setRenameInput] = useState<string>('');
+
+  // Delete Dialog State
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
+
+  // 1. Load files from IndexedDB on mount
   useEffect(() => {
     let isMounted = true;
     async function loadFiles() {
@@ -84,16 +125,17 @@ export const MobileFilesTab: React.FC = () => {
         if (isMounted) {
           const items: SavedFileItem[] = storedDocs.map((doc: StoredDocument) => {
             const fileObj = new File([doc.blob], doc.name, { type: doc.blob.type });
-            let previewUrl = undefined;
+            let previewUrl: string | undefined = undefined;
             if (doc.type === 'image') {
               previewUrl = URL.createObjectURL(doc.blob);
             }
             return {
               id: doc.id,
               name: doc.name,
-              size: doc.size,
+              size: doc.size || formatSizeBytes(doc.blob.size),
+              sizeBytes: doc.blob.size,
               type: doc.type,
-              date: doc.date,
+              date: doc.date || new Date().toLocaleDateString(),
               fileObj,
               previewUrl
             };
@@ -113,30 +155,7 @@ export const MobileFilesTab: React.FC = () => {
     };
   }, []);
 
-  // Multi-select state
-  const [isMultiSelect, setIsMultiSelect] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-  // Action Menu Bottom Sheet State
-  const [actionFile, setActionFile] = useState<SavedFileItem | null>(null);
-  const [actionSheetOpen, setActionSheetOpen] = useState(false);
-
-  // Rename Dialog State
-  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
-  const [renameInput, setRenameInput] = useState('');
-
-  // Delete Confirm Dialog State
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-
-  // In-App Viewer Modal State
-  const [viewerOpen, setViewerOpen] = useState<boolean>(false);
-  const [selectedFileForViewer, setSelectedFileForViewer] = useState<FileToView | null>(null);
-
-  // Format Selection Modal State for Convert Action
-  const [convertModalOpen, setConvertModalOpen] = useState(false);
-
-  // Device File Pick Handler (Saves to IndexedDB permanently)
+  // 2. Add picked files from device
   const handleDeviceFilesPicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
@@ -144,34 +163,27 @@ export const MobileFilesTab: React.FC = () => {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const ext = file.name.split('.').pop()?.toLowerCase() || '';
-      let type: SavedFileItem['type'] = 'other';
-      if (ext === 'pdf') type = 'pdf';
-      else if (['docx', 'doc', 'txt'].includes(ext)) type = 'docx';
-      else if (['xlsx', 'xls', 'csv'].includes(ext)) type = 'xlsx';
-      else if (['pptx', 'ppt'].includes(ext)) type = 'pptx';
-      else if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) type = 'image';
-      else if (['zip', 'rar', '7z'].includes(ext)) type = 'archive';
-
+      const type = detectFileType(file.name);
       const id = `${file.name}-${Date.now()}-${i}`;
-      const sizeStr = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+      const sizeStr = formatSizeBytes(file.size);
       const dateStr = new Date(file.lastModified || Date.now()).toLocaleDateString();
 
-      // Save blob to IndexedDB
       try {
         await saveDocumentToIDB({
           id,
           name: file.name,
           size: sizeStr,
+          sizeBytes: file.size,
           type,
           date: dateStr,
+          lastModified: file.lastModified,
           blob: file
         });
       } catch (err) {
         console.warn('Could not save to IndexedDB:', err);
       }
 
-      let previewUrl = undefined;
+      let previewUrl: string | undefined = undefined;
       if (type === 'image') {
         previewUrl = URL.createObjectURL(file);
       }
@@ -180,8 +192,10 @@ export const MobileFilesTab: React.FC = () => {
         id,
         name: file.name,
         size: sizeStr,
+        sizeBytes: file.size,
         type,
         date: dateStr,
+        lastModified: file.lastModified,
         fileObj: file,
         previewUrl
       });
@@ -190,18 +204,42 @@ export const MobileFilesTab: React.FC = () => {
     setFilesList((prev) => [...newItems, ...prev]);
   };
 
-  // Filtered files view
-  const filteredFiles = filesList.filter((item) => {
-    if (activeFilter === 'All') return true;
-    if (activeFilter === 'PDF') return item.type === 'pdf';
-    if (activeFilter === 'Word') return item.type === 'docx';
-    if (activeFilter === 'Excel') return item.type === 'xlsx';
-    if (activeFilter === 'PPT') return item.type === 'pptx';
-    if (activeFilter === 'Images') return item.type === 'image';
-    return true;
-  });
+  // 3. Filter and Search processing
+  const filteredFiles = useMemo(() => {
+    return filesList.filter((item) => {
+      // Filter tab
+      if (activeFilter === 'PDF' && item.type !== 'pdf') return false;
+      if (activeFilter === 'Word' && item.type !== 'docx') return false;
+      if (activeFilter === 'Excel' && item.type !== 'xlsx') return false;
+      if (activeFilter === 'PPT' && item.type !== 'pptx') return false;
+      if (activeFilter === 'Images' && item.type !== 'image') return false;
+      if (activeFilter === 'Text' && item.type !== 'txt') return false;
+      if (activeFilter === 'Large Files' && (item.sizeBytes || 0) < 5 * 1024 * 1024) return false;
 
-  // Open file in viewer or convert
+      // Search query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return item.name.toLowerCase().includes(q) || item.type.toLowerCase().includes(q);
+      }
+      return true;
+    });
+  }, [filesList, activeFilter, searchQuery]);
+
+  // 4. Compatible Actions for current selection
+  const currentSelectionItems = useMemo(() => {
+    if (isMultiSelect) {
+      return filesList.filter((f) => selectedIds.has(f.id));
+    }
+    return targetFile ? [targetFile] : [];
+  }, [isMultiSelect, selectedIds, targetFile, filesList]);
+
+  const compatibleActions = useMemo(() => {
+    return getCompatibleActions(
+      currentSelectionItems.map((f) => ({ id: f.id, type: f.type, name: f.name }))
+    );
+  }, [currentSelectionItems]);
+
+  // Handlers
   const handleOpenFile = (item: SavedFileItem) => {
     if (isMultiSelect) {
       toggleSelectFile(item.id);
@@ -209,7 +247,6 @@ export const MobileFilesTab: React.FC = () => {
     }
 
     if (!item.fileObj) {
-      // Prompt user to re-select file if blob is unavailable
       fileInputRef.current?.click();
       return;
     }
@@ -232,112 +269,54 @@ export const MobileFilesTab: React.FC = () => {
       });
       setViewerOpen(true);
     } else {
-      setActionFile(item);
-      setConvertModalOpen(true);
+      setTargetFile(item);
+      setActionSheetOpen(true);
     }
-  };
-
-  const handleCardLongPress = (item: SavedFileItem) => {
-    if (isMultiSelect) {
-      toggleSelectFile(item.id);
-      return;
-    }
-    setActionFile(item);
-    setActionSheetOpen(true);
   };
 
   const toggleSelectFile = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
 
-  const handleActionSelectMode = () => {
-    setActionSheetOpen(false);
-    setIsMultiSelect(true);
-    if (actionFile) {
-      setSelectedIds(new Set([actionFile.id]));
-    }
-  };
-
-  const handleActionRename = () => {
-    if (!actionFile) return;
-    setRenameInput(actionFile.name);
-    setActionSheetOpen(false);
-    setRenameDialogOpen(true);
-  };
-
-  const saveRename = async () => {
-    if (!actionFile || !renameInput.trim()) return;
-    const updatedName = renameInput.trim();
-
-    setFilesList((prev) =>
-      prev.map((f) => (f.id === actionFile.id ? { ...f, name: updatedName } : f))
-    );
-
-    if (actionFile.fileObj) {
-      await saveDocumentToIDB({
-        id: actionFile.id,
-        name: updatedName,
-        size: actionFile.size,
-        type: actionFile.type,
-        date: actionFile.date,
-        blob: actionFile.fileObj
-      });
-    }
-
-    setRenameDialogOpen(false);
-    setActionFile(null);
-  };
-
-  const handleActionShare = async () => {
-    setActionSheetOpen(false);
-    if (!actionFile) return;
-
-    if (navigator.share && actionFile.fileObj) {
-      try {
-        await navigator.share({
-          files: [actionFile.fileObj as File],
-          title: actionFile.name
-        });
-      } catch (e) {
-        console.warn('Web Share failed:', e);
-      }
+  const handleSelectAll = () => {
+    if (selectedIds.size === filteredFiles.length) {
+      setSelectedIds(new Set());
     } else {
-      alert(`Sharing ${actionFile.name}`);
+      setSelectedIds(new Set(filteredFiles.map((f) => f.id)));
     }
   };
 
-  const handleActionQuickTool = (toolPath: string) => {
+  const handleActionExecute = (action: ActionDefinition) => {
     setActionSheetOpen(false);
-    if (actionFile?.fileObj) {
-      (window as any).__pendingConversionFile = actionFile.fileObj;
-    }
-    navigate(toolPath);
-  };
 
-  const handleActionDelete = () => {
-    setActionSheetOpen(false);
-    if (actionFile) {
-      setDeleteTargetId(actionFile.id);
-      setDeleteConfirmOpen(true);
+    if (action.handlerType === 'navigate_tool' && action.toolPath) {
+      if (currentSelectionItems.length === 1 && currentSelectionItems[0].fileObj) {
+        (window as any).__pendingConversionFile = currentSelectionItems[0].fileObj;
+      } else if (currentSelectionItems.length > 1) {
+        (window as any).__pendingConversionFiles = currentSelectionItems
+          .map((f) => f.fileObj)
+          .filter(Boolean);
+      }
+      navigate(action.toolPath);
+    } else if (action.handlerType === 'view_file' && currentSelectionItems[0]) {
+      handleOpenFile(currentSelectionItems[0]);
+    } else if (action.handlerType === 'share' && currentSelectionItems[0]?.fileObj) {
+      if (navigator.share) {
+        navigator
+          .share({
+            files: [currentSelectionItems[0].fileObj as File],
+            title: currentSelectionItems[0].name
+          })
+          .catch(() => {});
+      }
+    } else if (action.handlerType === 'print') {
+      window.print();
     }
-  };
-
-  const confirmDelete = async () => {
-    if (deleteTargetId) {
-      await deleteDocumentFromIDB(deleteTargetId);
-      setFilesList((prev) => prev.filter((f) => f.id !== deleteTargetId));
-    }
-    setDeleteConfirmOpen(false);
-    setDeleteTargetId(null);
-    setActionFile(null);
   };
 
   const handleBulkDelete = async () => {
@@ -349,7 +328,30 @@ export const MobileFilesTab: React.FC = () => {
     setIsMultiSelect(false);
   };
 
-  const getTypeIcon = (type: SavedFileItem['type']) => {
+  const saveRename = async () => {
+    if (!targetFile || !renameInput.trim()) return;
+    const updatedName = renameInput.trim();
+
+    setFilesList((prev) =>
+      prev.map((f) => (f.id === targetFile.id ? { ...f, name: updatedName } : f))
+    );
+
+    if (targetFile.fileObj) {
+      await saveDocumentToIDB({
+        id: targetFile.id,
+        name: updatedName,
+        size: targetFile.size,
+        type: targetFile.type,
+        date: targetFile.date,
+        blob: targetFile.fileObj
+      });
+    }
+
+    setRenameDialogOpen(false);
+    setTargetFile(null);
+  };
+
+  const getTypeIcon = (type: SupportedFileType) => {
     switch (type) {
       case 'pdf':
         return <PictureAsPdfIcon sx={{ color: '#ef4444', fontSize: 32 }} />;
@@ -368,6 +370,35 @@ export const MobileFilesTab: React.FC = () => {
     }
   };
 
+  const getActionIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'EditNote':
+        return <EditNoteIcon sx={{ color: '#2563eb' }} />;
+      case 'Description':
+        return <DescriptionIcon sx={{ color: '#3b82f6' }} />;
+      case 'TableChart':
+        return <TableChartIcon sx={{ color: '#10b981' }} />;
+      case 'Slideshow':
+        return <SlideshowIcon sx={{ color: '#f97316' }} />;
+      case 'Compress':
+        return <CompressIcon sx={{ color: '#8b5cf6' }} />;
+      case 'CallSplit':
+        return <CallSplitIcon sx={{ color: '#ec4899' }} />;
+      case 'RotateRight':
+        return <RotateRightIcon sx={{ color: '#f59e0b' }} />;
+      case 'Merge':
+        return <MergeIcon sx={{ color: '#2563eb' }} />;
+      case 'PictureAsPdf':
+        return <PictureAsPdfIcon sx={{ color: '#ef4444' }} />;
+      case 'Share':
+        return <ShareIcon sx={{ color: '#06b6d4' }} />;
+      case 'Print':
+        return <PrintIcon sx={{ color: '#6366f1' }} />;
+      default:
+        return <VisibilityIcon sx={{ color: '#2563eb' }} />;
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -375,11 +406,10 @@ export const MobileFilesTab: React.FC = () => {
         pt: 2,
         pb: 12,
         width: '100%',
-        maxWidth: 600,
+        maxWidth: 680,
         mx: 'auto'
       }}
     >
-      {/* Hidden Native File Picker Input */}
       <input
         type="file"
         ref={fileInputRef}
@@ -388,7 +418,7 @@ export const MobileFilesTab: React.FC = () => {
         onChange={handleDeviceFilesPicked}
       />
 
-      {/* Header Bar */}
+      {/* Header Controls */}
       <Box
         sx={{
           display: 'flex',
@@ -398,10 +428,18 @@ export const MobileFilesTab: React.FC = () => {
         }}
       >
         <Typography variant="h6" fontWeight={800} color="text.primary">
-          {isMultiSelect ? `${selectedIds.size} Selected` : `Document Gallery (${filesList.length})`}
+          {isMultiSelect ? `${selectedIds.size} Selected` : `Smart Files Library (${filesList.length})`}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
+          <IconButton
+            size="small"
+            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+            sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#f1f5f9' }}
+          >
+            {viewMode === 'grid' ? <ViewListIcon /> : <ViewModuleIcon />}
+          </IconButton>
+
           {isMultiSelect ? (
             <Button
               variant="outlined"
@@ -435,27 +473,36 @@ export const MobileFilesTab: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Honest Web Security Clarification Alert */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 1.5,
-          mb: 2,
-          borderRadius: '12px',
-          bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#eff6ff',
-          border: `1px solid ${
-            theme.palette.mode === 'dark' ? '#334155' : '#bfdbfe'
-          }`,
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 1.25
-        }}
-      >
-        <InfoOutlinedIcon sx={{ color: '#2563eb', fontSize: 20, mt: 0.2 }} />
-        <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4 }}>
-          <strong>Privacy Notice:</strong> Select documents to add them to your app gallery. Browsers restrict apps from automatically listing phone storage without explicit user selection.
-        </Typography>
-      </Paper>
+      {/* Fast Search Input */}
+      <Box sx={{ mb: 1.5 }}>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Search by filename or type..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: 'text.secondary' }} />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery ? (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setSearchQuery('')}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </InputAdornment>
+            ) : null
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '16px',
+              bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#ffffff'
+            }
+          }}
+        />
+      </Box>
 
       {/* Filter Chips Bar */}
       <Box
@@ -464,11 +511,11 @@ export const MobileFilesTab: React.FC = () => {
           gap: 1,
           overflowX: 'auto',
           pb: 1.5,
-          mb: 2,
+          mb: 1.5,
           '&::-webkit-scrollbar': { display: 'none' }
         }}
       >
-        {['All', 'PDF', 'Word', 'Excel', 'PPT', 'Images'].map((filter) => (
+        {['All', 'PDF', 'Word', 'Excel', 'PPT', 'Images', 'Text', 'Large Files'].map((filter) => (
           <Chip
             key={filter}
             label={filter}
@@ -492,6 +539,33 @@ export const MobileFilesTab: React.FC = () => {
         ))}
       </Box>
 
+      {/* Multi-Select Bar Controls */}
+      {isMultiSelect && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+            p: 1.25,
+            borderRadius: '12px',
+            bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#eff6ff'
+          }}
+        >
+          <Button
+            size="small"
+            startIcon={<SelectAllIcon />}
+            onClick={handleSelectAll}
+            sx={{ textTransform: 'none', fontWeight: 700 }}
+          >
+            {selectedIds.size === filteredFiles.length ? 'Deselect All' : 'Select All'}
+          </Button>
+          <Typography variant="caption" fontWeight={700} color="text.secondary">
+            {selectedIds.size} files selected
+          </Typography>
+        </Box>
+      )}
+
       {/* Empty State */}
       {filteredFiles.length === 0 ? (
         <Paper
@@ -510,25 +584,25 @@ export const MobileFilesTab: React.FC = () => {
             sx={{ fontSize: 48, color: '#94a3b8', mb: 1, opacity: 0.6 }}
           />
           <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-            No Documents Available
+            No Documents Found
           </Typography>
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mb: 2, maxWidth: 280, mx: 'auto' }}
+            sx={{ mb: 2, maxWidth: 300, mx: 'auto' }}
           >
-            Tap "Add Files" or "Browse Storage" to select PDFs, Word, Excel, and photos from your device.
+            Tap "Add Files" to add PDFs, Word, Excel, PowerPoint, Text or images from your device.
           </Typography>
           <Button
             variant="outlined"
             onClick={() => fileInputRef.current?.click()}
             sx={{ borderRadius: '20px', textTransform: 'none', fontWeight: 700 }}
           >
-            Browse Phone Storage
+            Browse Device Storage
           </Button>
         </Paper>
-      ) : (
-        /* Thumbnail Cards Grid View */
+      ) : viewMode === 'grid' ? (
+        /* GRID VIEW */
         <Grid container spacing={1.5}>
           {filteredFiles.map((item) => {
             const isSelected = selectedIds.has(item.id);
@@ -539,7 +613,8 @@ export const MobileFilesTab: React.FC = () => {
                   onClick={() => handleOpenFile(item)}
                   onContextMenu={(e) => {
                     e.preventDefault();
-                    handleCardLongPress(item);
+                    setTargetFile(item);
+                    setActionSheetOpen(true);
                   }}
                   sx={{
                     borderRadius: '16px',
@@ -558,16 +633,8 @@ export const MobileFilesTab: React.FC = () => {
                     '&:active': { transform: 'scale(0.97)' }
                   }}
                 >
-                  {/* Multi-select Checkbox Badge */}
                   {isMultiSelect && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 6,
-                        right: 6,
-                        zIndex: 10
-                      }}
-                    >
+                    <Box sx={{ position: 'absolute', top: 6, right: 6, zIndex: 10 }}>
                       <Checkbox
                         checked={isSelected}
                         onChange={() => toggleSelectFile(item.id)}
@@ -582,10 +649,9 @@ export const MobileFilesTab: React.FC = () => {
                     </Box>
                   )}
 
-                  {/* Thumbnail / File Card Preview */}
                   <Box
                     sx={{
-                      height: 130,
+                      height: 120,
                       width: '100%',
                       bgcolor: theme.palette.mode === 'dark' ? '#0f172a' : '#f8fafc',
                       display: 'flex',
@@ -628,7 +694,8 @@ export const MobileFilesTab: React.FC = () => {
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleCardLongPress(item);
+                          setTargetFile(item);
+                          setActionSheetOpen(true);
                         }}
                         sx={{
                           position: 'absolute',
@@ -636,8 +703,7 @@ export const MobileFilesTab: React.FC = () => {
                           right: 4,
                           bgcolor: 'rgba(0,0,0,0.3)',
                           color: '#ffffff',
-                          p: 0.5,
-                          '&:hover': { bgcolor: 'rgba(0,0,0,0.5)' }
+                          p: 0.5
                         }}
                       >
                         <MoreVertIcon fontSize="small" />
@@ -645,7 +711,6 @@ export const MobileFilesTab: React.FC = () => {
                     )}
                   </Box>
 
-                  {/* Card Title & Size Info */}
                   <Box sx={{ p: 1.25 }}>
                     <Typography
                       variant="body2"
@@ -668,9 +733,66 @@ export const MobileFilesTab: React.FC = () => {
             );
           })}
         </Grid>
+      ) : (
+        /* LIST VIEW */
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {filteredFiles.map((item) => {
+            const isSelected = selectedIds.has(item.id);
+            return (
+              <Paper
+                key={item.id}
+                elevation={0}
+                onClick={() => handleOpenFile(item)}
+                sx={{
+                  p: 1.5,
+                  borderRadius: '16px',
+                  bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#ffffff',
+                  border: `2px solid ${
+                    isSelected
+                      ? '#2563eb'
+                      : theme.palette.mode === 'dark'
+                      ? '#334155'
+                      : '#e2e8f0'
+                  }`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  cursor: 'pointer'
+                }}
+              >
+                {isMultiSelect && (
+                  <Checkbox
+                    checked={isSelected}
+                    onChange={() => toggleSelectFile(item.id)}
+                    sx={{ p: 0 }}
+                  />
+                )}
+                {getTypeIcon(item.type)}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="subtitle2" fontWeight={700} noWrap color="text.primary">
+                    {item.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {item.size} • {item.date}
+                  </Typography>
+                </Box>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTargetFile(item);
+                    setActionSheetOpen(true);
+                  }}
+                >
+                  <MoreVertIcon fontSize="small" />
+                </IconButton>
+              </Paper>
+            );
+          })}
+        </Box>
       )}
 
-      {/* Floating Multi-Select Action Toolbar */}
+      {/* Floating Multi-Select Toolbar */}
       {isMultiSelect && selectedIds.size > 0 && (
         <Paper
           elevation={8}
@@ -699,6 +821,14 @@ export const MobileFilesTab: React.FC = () => {
             <Button
               variant="contained"
               size="small"
+              onClick={() => setActionSheetOpen(true)}
+              sx={{ borderRadius: '16px', textTransform: 'none', fontWeight: 700, bgcolor: '#2563eb' }}
+            >
+              Smart Actions
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
               color="error"
               startIcon={<DeleteOutlineIcon />}
               onClick={handleBulkDelete}
@@ -710,7 +840,7 @@ export const MobileFilesTab: React.FC = () => {
         </Paper>
       )}
 
-      {/* Long-Press Action Sheet (Drawer) */}
+      {/* Dynamic Compatibility Smart Action Sheet (Drawer) */}
       <Drawer
         anchor="bottom"
         open={actionSheetOpen}
@@ -720,158 +850,106 @@ export const MobileFilesTab: React.FC = () => {
             borderTopLeftRadius: '24px',
             borderTopRightRadius: '24px',
             p: 2,
-            maxHeight: '80vh'
+            maxHeight: '80vh',
+            bgcolor: theme.palette.mode === 'dark' ? '#1e293b' : '#ffffff'
           }
         }}
       >
-        {actionFile && (
-          <Box>
-            <Box
-              sx={{
-                width: 40,
-                height: 4,
-                bgcolor: 'grey.300',
-                borderRadius: 2,
-                mx: 'auto',
-                mb: 2
+        <Box
+          sx={{
+            width: 40,
+            height: 4,
+            bgcolor: 'grey.400',
+            borderRadius: 2,
+            mx: 'auto',
+            mb: 2
+          }}
+        />
+
+        <Typography variant="subtitle1" fontWeight={800} noWrap sx={{ mb: 0.5 }}>
+          {isMultiSelect ? `${selectedIds.size} Files Selected` : targetFile?.name}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+          COMPATIBLE ACTIONS ({compatibleActions.length})
+        </Typography>
+
+        <Divider sx={{ mb: 1 }} />
+
+        <List disablePadding>
+          {compatibleActions.map((action) => (
+            <ListItem button key={action.id} onClick={() => handleActionExecute(action)}>
+              <ListItemIcon>{getActionIcon(action.iconName)}</ListItemIcon>
+              <ListItemText primary={action.label} />
+            </ListItem>
+          ))}
+
+          {!isMultiSelect && (
+            <ListItem
+              button
+              onClick={() => {
+                setActionSheetOpen(false);
+                setIsMultiSelect(true);
+                if (targetFile) setSelectedIds(new Set([targetFile.id]));
               }}
-            />
+            >
+              <ListItemIcon>
+                <SelectAllIcon sx={{ color: '#10b981' }} />
+              </ListItemIcon>
+              <ListItemText primary="Multi-Select Mode" />
+            </ListItem>
+          )}
 
-            <Typography variant="subtitle1" fontWeight={800} noWrap sx={{ mb: 0.5 }}>
-              {actionFile.name}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-              {actionFile.size} • {actionFile.type.toUpperCase()}
-            </Typography>
+          {!isMultiSelect && targetFile && (
+            <ListItem
+              button
+              onClick={() => {
+                setActionSheetOpen(false);
+                setRenameInput(targetFile.name);
+                setRenameDialogOpen(true);
+              }}
+            >
+              <ListItemIcon>
+                <EditIcon sx={{ color: '#eab308' }} />
+              </ListItemIcon>
+              <ListItemText primary="Rename File" />
+            </ListItem>
+          )}
 
-            <Divider sx={{ mb: 1 }} />
-
-            <List disablePadding>
-              <ListItem button onClick={() => handleOpenFile(actionFile)}>
-                <ListItemIcon>
-                  <VisibilityIcon sx={{ color: '#2563eb' }} />
-                </ListItemIcon>
-                <ListItemText primary="Open / View Document" />
-              </ListItem>
-
-              <ListItem button onClick={handleActionSelectMode}>
-                <ListItemIcon>
-                  <SelectAllIcon sx={{ color: '#10b981' }} />
-                </ListItemIcon>
-                <ListItemText primary="Select File (Multi-select)" />
-              </ListItem>
-
-              {actionFile.type === 'pdf' && (
-                <>
-                  <ListItem button onClick={() => handleActionQuickTool('/pdf/compress-pdf')}>
-                    <ListItemIcon>
-                      <CompressIcon sx={{ color: '#8b5cf6' }} />
-                    </ListItemIcon>
-                    <ListItemText primary="Compress PDF" />
-                  </ListItem>
-
-                  <ListItem button onClick={() => handleActionQuickTool('/pdf/pdf-to-word')}>
-                    <ListItemIcon>
-                      <TransformIcon sx={{ color: '#3b82f6' }} />
-                    </ListItemIcon>
-                    <ListItemText primary="Convert PDF to Word" />
-                  </ListItem>
-
-                  <ListItem button onClick={() => handleActionQuickTool('/pdf/organize-pdf')}>
-                    <ListItemIcon>
-                      <RotateRightIcon sx={{ color: '#f59e0b' }} />
-                    </ListItemIcon>
-                    <ListItemText primary="Organize / Rotate Pages" />
-                  </ListItem>
-                </>
-              )}
-
-              <ListItem button onClick={handleActionShare}>
-                <ListItemIcon>
-                  <ShareIcon sx={{ color: '#06b6d4' }} />
-                </ListItemIcon>
-                <ListItemText primary="Share File" />
-              </ListItem>
-
-              <ListItem button onClick={handleActionRename}>
-                <ListItemIcon>
-                  <EditIcon sx={{ color: '#eab308' }} />
-                </ListItemIcon>
-                <ListItemText primary="Rename File" />
-              </ListItem>
-
-              <ListItem button onClick={handleActionDelete}>
-                <ListItemIcon>
-                  <DeleteOutlineIcon sx={{ color: '#ef4444' }} />
-                </ListItemIcon>
-                <ListItemText primary="Delete File" primaryTypographyProps={{ color: 'error' }} />
-              </ListItem>
-            </List>
-          </Box>
-        )}
+          {!isMultiSelect && targetFile && (
+            <ListItem
+              button
+              onClick={async () => {
+                setActionSheetOpen(false);
+                await deleteDocumentFromIDB(targetFile.id);
+                setFilesList((prev) => prev.filter((f) => f.id !== targetFile.id));
+              }}
+            >
+              <ListItemIcon>
+                <DeleteOutlineIcon sx={{ color: '#ef4444' }} />
+              </ListItemIcon>
+              <ListItemText primary="Delete File" />
+            </ListItem>
+          )}
+        </List>
       </Drawer>
 
-      {/* Rename Dialog */}
+      {/* Rename File Dialog */}
       <Dialog open={renameDialogOpen} onClose={() => setRenameDialogOpen(false)}>
-        <DialogTitle fontWeight={700}>Rename File</DialogTitle>
+        <DialogTitle>Rename Document</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             fullWidth
-            size="small"
+            margin="dense"
             value={renameInput}
             onChange={(e) => setRenameInput(e.target.value)}
-            sx={{ mt: 1 }}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setRenameDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={saveRename} sx={{ fontWeight: 700 }}>
+          <Button onClick={saveRename} variant="contained">
             Save
           </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-        <DialogTitle fontWeight={700}>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2">
-            Are you sure you want to delete this document from your app gallery?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={confirmDelete} sx={{ fontWeight: 700 }}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Format Selection Modal for Non-PDF files */}
-      <Dialog open={convertModalOpen} onClose={() => setConvertModalOpen(false)}>
-        <DialogTitle fontWeight={700}>Convert Document</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Choose a format to convert <strong>{actionFile?.name}</strong>:
-          </Typography>
-          <Button
-            fullWidth
-            variant="contained"
-            startIcon={<PictureAsPdfIcon />}
-            onClick={() => {
-              setConvertModalOpen(false);
-              handleActionQuickTool(
-                actionFile?.type === 'docx' ? '/pdf/word-to-pdf' : '/pdf/jpg-to-pdf'
-              );
-            }}
-            sx={{ mb: 1, textTransform: 'none', fontWeight: 700 }}
-          >
-            Convert to PDF
-          </Button>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConvertModalOpen(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
 
@@ -879,10 +957,7 @@ export const MobileFilesTab: React.FC = () => {
       <MobileFileViewerModal
         open={viewerOpen}
         file={selectedFileForViewer}
-        onClose={() => {
-          setViewerOpen(false);
-          setSelectedFileForViewer(null);
-        }}
+        onClose={() => setViewerOpen(false)}
       />
     </Box>
   );
