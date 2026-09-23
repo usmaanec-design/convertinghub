@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   InputBase,
@@ -13,6 +13,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { AuthModal } from '../auth/AuthModal';
 
 interface MobileTopBarProps {
   searchQuery: string;
@@ -27,7 +28,8 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
 }) => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { user, isAuthenticated, signInWithGoogle, isSigningIn } = useAuth();
+  const { user, isAuthenticated, isSigningIn } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   return (
     <Box
@@ -149,7 +151,7 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
         {isAuthenticated && user ? (
           <Avatar
             src={user.photoURL || undefined}
-            alt={user.displayName || 'User Profile'}
+            alt={user.displayName || user.phoneNumber || 'User Profile'}
             onClick={onProfileClick}
             sx={{
               width: 36,
@@ -159,14 +161,18 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
               boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
             }}
           >
-            {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+            {user.displayName
+              ? user.displayName.charAt(0).toUpperCase()
+              : user.phoneNumber
+              ? '📱'
+              : 'U'}
           </Avatar>
         ) : (
           <Button
             variant="contained"
             size="small"
             disabled={isSigningIn}
-            onClick={() => signInWithGoogle()}
+            onClick={() => setAuthModalOpen(true)}
             startIcon={<GoogleIcon sx={{ fontSize: '16px !important' }} />}
             sx={{
               minWidth: '44px',
@@ -187,6 +193,13 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
           </Button>
         )}
       </Box>
+
+      {/* Auth Modal for Mobile Login (Google or Phone) */}
+      <AuthModal
+        open={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={() => setAuthModalOpen(false)}
+      />
     </Box>
   );
 };

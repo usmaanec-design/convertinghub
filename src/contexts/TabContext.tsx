@@ -65,6 +65,9 @@ export const TabProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Sync route with active tab when location changes
   useEffect(() => {
     const currentPath = location.pathname;
+    if (currentPath.startsWith('/__') || currentPath === '/404') {
+      return;
+    }
     
     // Check if current path matches any existing open tab
     const existingTab = tabs.find(

@@ -19,8 +19,8 @@
     "path": "./keystore/convertinghub-release.keystore",
     "alias": "convertinghub"
   },
-  "appVersionName": "1.0.0",
-  "appVersionCode": 1,
+  "appVersionName": "1.0.1",
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://convertinghub-official.web.app/manifest.json",
@@ -35,8 +35,10 @@
   "minSdkVersion": 24,
   "orientation": "any",
   "fingerprints": [],
-  "additionalTrustedOrigins": [],
+  "additionalTrustedOrigins": [
+    "https://convertinghub-official.firebaseapp.com"
+  ],
   "retainedBundles": [],
   "displayOverride": [],
-  "appVersion": "1.0.0"
+  "appVersion": "1.0.1"
 }

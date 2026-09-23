@@ -13,12 +13,11 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import SEOHead from 'components/SEOHead';
-import { getSiteUrl } from 'seo/seoConfig';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
 import { useTranslation } from 'react-i18next';
 
 export default function PrivacyPolicy() {
-  const siteUrl = getSiteUrl();
-  const canonicalUrl = `${siteUrl}/privacy-policy`;
+  const canonicalUrl = normalizeCanonicalUrl('/privacy-policy');
   const { t, i18n } = useTranslation();
   const theme = useTheme();
 

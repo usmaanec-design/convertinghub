@@ -6,6 +6,7 @@ const ToolsByCategory = lazy(() => import('../pages/tools-by-category'));
 const BlogIndex = lazy(() => import('../pages/blog'));
 const BlogPost = lazy(() => import('../pages/blog/BlogPost'));
 const PrivacyPolicy = lazy(() => import('../pages/privacy-policy'));
+const DeleteAccount = lazy(() => import('../pages/delete-account'));
 const TermsAndConditions = lazy(() => import('../pages/terms'));
 const RefundPolicy = lazy(() => import('../pages/refund-policy'));
 const Pricing = lazy(() => import('../pages/pricing'));
@@ -50,6 +51,10 @@ const routes: RouteObject[] = [
   {
     path: '/privacy-policy',
     element: <PrivacyPolicy />
+  },
+  {
+    path: '/delete-account',
+    element: <DeleteAccount />
   },
   {
     path: '/terms',

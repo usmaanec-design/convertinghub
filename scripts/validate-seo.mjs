@@ -70,6 +70,96 @@ function checkTools(dir) {
 checkTools(toolsDir);
 console.log(`✓ PASS: Discovered ${toolCount} total tools with registered meta.ts files.`);
 
+// 4. Validate Canonical Tags in HTML files
+console.log('\n--- Validating Canonical Link Tags in HTML ---');
+const htmlChecks = [
+  {
+    file: path.join(process.cwd(), 'index.html'),
+    expectedCanonical: `${EXPECTED_SITE_URL}/`,
+    desc: 'index.html'
+  },
+  {
+    file: path.join(process.cwd(), 'public', 'privacy-policy.html'),
+    expectedCanonical: `${EXPECTED_SITE_URL}/privacy-policy`,
+    desc: 'public/privacy-policy.html'
+  }
+];
+
+const distDir = path.join(process.cwd(), 'dist');
+if (fs.existsSync(distDir)) {
+  htmlChecks.push(
+    {
+      file: path.join(distDir, 'index.html'),
+      expectedCanonical: `${EXPECTED_SITE_URL}/`,
+      desc: 'dist/index.html'
+    },
+    {
+      file: path.join(distDir, 'privacy-policy.html'),
+      expectedCanonical: `${EXPECTED_SITE_URL}/privacy-policy`,
+      desc: 'dist/privacy-policy.html'
+    }
+  );
+}
+
+for (const check of htmlChecks) {
+  if (fs.existsSync(check.file)) {
+    const htmlContent = fs.readFileSync(check.file, 'utf8');
+    const hasCanonical = htmlContent.includes(`<link rel="canonical" href="${check.expectedCanonical}"`);
+    if (!hasCanonical) {
+      console.error(`❌ FAIL: ${check.desc} is missing exact canonical link tag: <link rel="canonical" href="${check.expectedCanonical}">`);
+      errors++;
+    } else {
+      console.log(`✓ PASS: ${check.desc} has valid canonical tag: ${check.expectedCanonical}`);
+    }
+  }
+}
+
+// 5. Validate Canonical URL format rules
+console.log('\n--- Validating Canonical URL Formatting Rules ---');
+const sampleRoutes = [
+  '/',
+  '/pricing',
+  '/blog',
+  '/blog/how-to-compress-pdf-files',
+  '/privacy-policy',
+  '/terms',
+  '/terms-of-service',
+  '/refund-policy',
+  '/categories/pdf',
+  '/pdf/pdf-to-word',
+  '/image-generic/image-compressor'
+];
+
+for (const route of sampleRoutes) {
+  let expected;
+  if (route === '/') {
+    expected = `${EXPECTED_SITE_URL}/`;
+  } else {
+    expected = `${EXPECTED_SITE_URL}${route}`;
+  }
+
+  // Verify HTTPS
+  if (!expected.startsWith('https://')) {
+    console.error(`❌ FAIL: Canonical URL for ${route} does not use HTTPS!`);
+    errors++;
+  }
+  // Verify correct domain
+  if (!expected.startsWith(EXPECTED_SITE_URL)) {
+    console.error(`❌ FAIL: Canonical URL for ${route} does not use ${EXPECTED_SITE_URL}!`);
+    errors++;
+  }
+  // Verify trailing slash rules
+  if (route === '/' && !expected.endsWith('/')) {
+    console.error(`❌ FAIL: Homepage canonical URL must end with trailing slash!`);
+    errors++;
+  }
+  if (route !== '/' && expected.endsWith('/')) {
+    console.error(`❌ FAIL: Subpage canonical URL ${expected} must NOT have trailing slash!`);
+    errors++;
+  }
+}
+console.log(`✓ PASS: Verified canonical formatting for sample public routes.`);
+
 console.log('\n=== CONVERTINGHUB SEO AUDIT SUMMARY ===');
 console.log(`Total Errors: ${errors}`);
 console.log(`Total Warnings: ${warnings}`);

@@ -55,9 +55,15 @@ export const PdfPageViewItem: React.FC<PdfPageViewItemProps> = ({
           }
         } else {
           setIsVisible(false);
+          // Release offscreen page canvas memory while preserving placeholder dimensions
+          setRendered(false);
+          if (canvasRef.current) {
+            canvasRef.current.width = 0;
+            canvasRef.current.height = 0;
+          }
         }
       },
-      { rootMargin: '250px 0px', threshold: 0.1 }
+      { rootMargin: '350px 0px', threshold: 0.05 }
     );
 
     observer.observe(el);
@@ -84,7 +90,7 @@ export const PdfPageViewItem: React.FC<PdfPageViewItemProps> = ({
         if (isCancelled || !canvasRef.current) return;
 
         const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
-        // Vector scaling formula: fitWidth / pdfPageWidth * userScale * dpr
+        // Visual Scale Formula: displayWidth / pdfPageWidth * dpr for crisp canvas
         const baseScale = displayWidth / (pdfPageWidth || 612);
         const viewportScale = baseScale * dpr;
         const viewport = page.getViewport({ scale: viewportScale });
@@ -95,6 +101,7 @@ export const PdfPageViewItem: React.FC<PdfPageViewItemProps> = ({
 
         const ctx = canvas.getContext('2d');
         if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           const renderTask = (page.render as any)({ canvasContext: ctx, viewport });
           activeRenderTaskRef.current = renderTask;
           await renderTask.promise;

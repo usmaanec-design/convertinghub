@@ -42,6 +42,7 @@ import { useTabs } from '../../contexts/TabContext';
 import { tools } from '../../tools';
 import ContactModal from '../ContactModal';
 import { TokenWallet } from '../TokenWallet';
+import { AuthModal } from '../auth/AuthModal';
 
 const languages = [
   { code: 'en', label: 'English' },
@@ -59,8 +60,9 @@ const languages = [
 ];
 
 const UserNavAuth: React.FC = () => {
-  const { user, signInWithGoogle, logout, isSigningIn } = useAuth();
+  const { user, logout, isSigningIn } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -71,39 +73,45 @@ const UserNavAuth: React.FC = () => {
 
   if (!user) {
     return (
-      <Button
-        onClick={signInWithGoogle}
-        disabled={isSigningIn}
-        variant="outlined"
-        color="primary"
-        size="small"
-        startIcon={
-          isSigningIn ? (
-            <CircularProgress size={14} color="inherit" />
-          ) : (
-            <GoogleIcon fontSize="small" />
-          )
-        }
-        sx={{
-          borderRadius: '100px',
-          fontWeight: 700,
-          textTransform: 'none',
-          px: 2,
-          borderWidth: '1.5px',
-          '&:hover': { borderWidth: '1.5px' }
-        }}
-      >
-        {isSigningIn ? 'Connecting...' : 'Continue with Google'}
-      </Button>
+      <>
+        <Button
+          onClick={() => setAuthModalOpen(true)}
+          disabled={isSigningIn}
+          variant="outlined"
+          color="primary"
+          size="small"
+          startIcon={
+            isSigningIn ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : (
+              <GoogleIcon fontSize="small" />
+            )
+          }
+          sx={{
+            borderRadius: '100px',
+            fontWeight: 700,
+            textTransform: 'none',
+            px: 2,
+            borderWidth: '1.5px',
+            '&:hover': { borderWidth: '1.5px' }
+          }}
+        >
+          {isSigningIn ? 'Connecting...' : 'Sign In'}
+        </Button>
+        <AuthModal
+          open={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+        />
+      </>
     );
   }
 
   return (
     <>
-      <Tooltip title={user.displayName || user.email || 'Account'}>
+      <Tooltip title={user.displayName || user.phoneNumber || user.email || 'Account'}>
         <IconButton onClick={handleOpenMenu} sx={{ p: 0.5 }}>
           <Avatar
-            alt={user.displayName || 'User'}
+            alt={user.displayName || user.phoneNumber || 'User'}
             src={user.photoURL || undefined}
             sx={{
               width: 36,
@@ -112,7 +120,7 @@ const UserNavAuth: React.FC = () => {
               borderColor: 'primary.main'
             }}
           >
-            {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+            {(user.displayName || user.phoneNumber || user.email || 'U').charAt(0).toUpperCase()}
           </Avatar>
         </IconButton>
       </Tooltip>
@@ -127,7 +135,7 @@ const UserNavAuth: React.FC = () => {
       >
         <Box sx={{ px: 2, py: 1.5 }}>
           <Typography variant="subtitle2" fontWeight="bold" noWrap>
-            {user.displayName || 'Google User'}
+            {user.displayName || user.phoneNumber || 'ConvertingHub User'}
           </Typography>
           <Typography
             variant="caption"
@@ -135,7 +143,7 @@ const UserNavAuth: React.FC = () => {
             noWrap
             display="block"
           >
-            {user.email}
+            {user.email || user.phoneNumber || ''}
           </Typography>
         </Box>
         <Divider sx={{ my: 0.5 }} />

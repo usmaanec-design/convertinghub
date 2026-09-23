@@ -12,6 +12,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SEOHead from 'components/SEOHead';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
 
 export default function WelcomePage() {
   useEffect(() => {
@@ -22,6 +24,8 @@ export default function WelcomePage() {
       console.warn('[WelcomePage] Failed to set Pro access in localStorage:', e);
     }
   }, []);
+
+  const canonicalUrl = normalizeCanonicalUrl('/welcome');
 
   return (
     <Box
@@ -35,6 +39,12 @@ export default function WelcomePage() {
         backgroundColor: 'background.default'
       }}
     >
+      <SEOHead
+        title="Welcome to ConvertingHub"
+        description="Welcome to ConvertingHub Pro."
+        canonicalUrl={canonicalUrl}
+        noindex={true}
+      />
       <Container maxWidth="sm">
         <Paper
           elevation={4}

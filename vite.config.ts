@@ -48,7 +48,8 @@ export default defineConfig({
           /^\/robots\.txt$/,
           /^\/google.*\.html$/,
           /^\/health/,
-          /^\/api\//
+          /^\/api\//,
+          /^\/__\//
         ],
         runtimeCaching: [
           {

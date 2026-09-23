@@ -60,5 +60,24 @@ scratch/
 *.msixbundle
 *.msix
 *.exe
+*.aab
+*.apk
+android-twa/build/
+android-twa/**/build/
+
+# Gradle & Build Caches
+.gradle/
+**/.gradle/
+.firebase/
+
+# Nested dependencies and env files
+**/node_modules/
+**/.env*
+
+# Standalone subfolder workspaces / experiments
+mobile-app/
+web-app/
+shared/
+
 
 

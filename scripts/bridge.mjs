@@ -36,8 +36,8 @@ import {
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const HOST = process.env.HOST || '0.0.0.0';
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS || process.env.CORS_ORIGINS
+  ? (process.env.ALLOWED_ORIGINS || process.env.CORS_ORIGINS).split(',').map(s => s.trim())
   : [
       'https://convertinghub.app',
       'https://www.convertinghub.app',
@@ -45,8 +45,10 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
       'https://convertinghub-official.web.app',
       'https://convertinghub.firebaseapp.com',
       'http://localhost:5173',
+      'http://localhost:5174',
       'http://localhost:3000',
       'http://127.0.0.1:5173',
+      'http://127.0.0.1:5174',
       'http://127.0.0.1:3001'
     ];
 
@@ -342,7 +344,16 @@ function setCorsHeaders(req, res) {
   let allowedOrigin = '*';
 
   if (requestOrigin) {
-    if (ALLOWED_ORIGINS.includes('*') || ALLOWED_ORIGINS.includes(requestOrigin) || requestOrigin.endsWith('.web.app') || requestOrigin.endsWith('.firebaseapp.com') || requestOrigin.endsWith('convertinghub.app')) {
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(requestOrigin);
+    const isAllowedDomain =
+      ALLOWED_ORIGINS.includes('*') ||
+      ALLOWED_ORIGINS.includes(requestOrigin) ||
+      requestOrigin.endsWith('.web.app') ||
+      requestOrigin.endsWith('.firebaseapp.com') ||
+      requestOrigin.endsWith('convertinghub.app') ||
+      requestOrigin.endsWith('.onrender.com');
+
+    if (isLocalhost || isAllowedDomain) {
       allowedOrigin = requestOrigin;
     } else if (ALLOWED_ORIGINS.length > 0) {
       allowedOrigin = ALLOWED_ORIGINS[0];
@@ -350,6 +361,7 @@ function setCorsHeaders(req, res) {
   }
 
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
 
   const reqRequestedHeaders = req.headers['access-control-request-headers'];

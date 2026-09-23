@@ -65,6 +65,7 @@ import {
   getAuthorizedFoldersFromIDB,
   removeAuthorizedFolderFromIDB,
   scanAndReconcileAuthorizedFolders,
+  loadFileFromStoredDocument,
   detectFileType,
   formatSizeBytes,
   StoredDocument,
@@ -86,6 +87,8 @@ export interface SavedFileItem {
   lastModified?: number;
   folderId?: string;
   relativePath?: string;
+  uri?: string;
+  rawDoc?: StoredDocument;
   fileObj?: File | Blob;
   previewUrl?: string;
 }
@@ -179,11 +182,13 @@ export const MobileFilesTab: React.FC = () => {
         id: doc.id,
         name: doc.name,
         size: doc.size || (doc.blob ? formatSizeBytes(doc.blob.size) : '0 B'),
-        sizeBytes: doc.blob?.size || 0,
+        sizeBytes: doc.sizeBytes || doc.blob?.size || 0,
         type: doc.type,
         date: doc.date || new Date().toLocaleDateString(),
         folderId: doc.folderId,
         relativePath: doc.relativePath,
+        uri: doc.uri,
+        rawDoc: doc,
         fileObj,
         previewUrl
       };
@@ -324,13 +329,22 @@ export const MobileFilesTab: React.FC = () => {
   }, [currentSelectionItems]);
 
   // Handlers
-  const handleOpenFile = (item: SavedFileItem) => {
+  const handleOpenFile = async (item: SavedFileItem) => {
     if (isMultiSelect) {
       toggleSelectFile(item.id);
       return;
     }
 
-    if (!item.fileObj) {
+    let activeFile = item.fileObj;
+    if (!activeFile && item.rawDoc) {
+      const loaded = await loadFileFromStoredDocument(item.rawDoc);
+      if (loaded) {
+        activeFile = loaded instanceof File ? loaded : new File([loaded], item.name);
+        item.fileObj = activeFile;
+      }
+    }
+
+    if (!activeFile) {
       fileInputRef.current?.click();
       return;
     }
@@ -338,16 +352,17 @@ export const MobileFilesTab: React.FC = () => {
     if (item.type === 'pdf') {
       setSelectedFileForViewer({
         name: item.name,
-        fileObj: item.fileObj as File,
+        fileObj: activeFile as File,
         type: 'pdf',
         size: item.size
       });
       setViewerOpen(true);
     } else if (item.type === 'image') {
+      const url = item.previewUrl || URL.createObjectURL(activeFile);
       setSelectedFileForViewer({
         name: item.name,
-        fileObj: item.fileObj as File,
-        url: item.previewUrl,
+        fileObj: activeFile as File,
+        url,
         type: 'image',
         size: item.size
       });
@@ -375,8 +390,18 @@ export const MobileFilesTab: React.FC = () => {
     }
   };
 
-  const handleActionExecute = (action: ActionDefinition) => {
+  const handleActionExecute = async (action: ActionDefinition) => {
     setActionSheetOpen(false);
+
+    // Resolve fileObj on demand for current selection if missing
+    for (const item of currentSelectionItems) {
+      if (!item.fileObj && item.rawDoc) {
+        const loaded = await loadFileFromStoredDocument(item.rawDoc);
+        if (loaded) {
+          item.fileObj = loaded instanceof File ? loaded : new File([loaded], item.name);
+        }
+      }
+    }
 
     if (action.handlerType === 'navigate_tool' && action.toolPath) {
       if (currentSelectionItems.length === 1 && currentSelectionItems[0].fileObj) {

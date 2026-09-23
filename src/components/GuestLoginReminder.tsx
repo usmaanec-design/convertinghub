@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Snackbar,
   Alert,
@@ -9,9 +9,12 @@ import {
   CircularProgress
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from './auth/AuthModal';
 
 export const GuestLoginReminder: React.FC = () => {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const {
     showLoginPrompt,
     dismissLoginPrompt,
@@ -77,14 +80,16 @@ export const GuestLoginReminder: React.FC = () => {
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.secondary">
-                Enjoying ConvertingHub? Sign in with Google to keep your
+                Enjoying ConvertingHub? Sign in with Google or Phone to keep your
                 experience connected across devices.
               </Typography>
               <Stack
                 direction="row"
-                spacing={1.5}
+                spacing={1}
                 justifyContent="flex-end"
                 pt={0.5}
+                flexWrap="wrap"
+                useFlexGap
               >
                 <Button
                   size="small"
@@ -95,6 +100,20 @@ export const GuestLoginReminder: React.FC = () => {
                   sx={{ fontWeight: 'bold' }}
                 >
                   Maybe Later
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="inherit"
+                  disabled={isSigningIn}
+                  startIcon={<PhoneIphoneIcon color="primary" />}
+                  onClick={() => {
+                    dismissLoginPrompt();
+                    setAuthModalOpen(true);
+                  }}
+                  sx={{ borderRadius: '50px', fontWeight: 'bold', px: 1.5 }}
+                >
+                  Phone
                 </Button>
                 <Button
                   size="small"
@@ -118,6 +137,13 @@ export const GuestLoginReminder: React.FC = () => {
           </Alert>
         </Snackbar>
       )}
+
+      {/* Auth Modal triggered from reminder */}
+      <AuthModal
+        open={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={() => setAuthModalOpen(false)}
+      />
     </>
   );
 };

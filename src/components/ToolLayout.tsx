@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import React, { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import ToolHeader from './ToolHeader';
 import { getToolsByCategory } from '@tools/index';
 import {
@@ -12,7 +13,7 @@ import { ToolCategory } from '@tools/defineTool';
 import { FullI18nKey } from '../i18n';
 import SEOHead from './SEOHead';
 import ToolSeoContent from './ToolSeoContent';
-import { getToolSeoData } from '../seo/seoConfig';
+import { getToolSeoData, normalizeCanonicalUrl } from '../seo/seoConfig';
 
 export default function ToolLayout({
   children,
@@ -31,6 +32,7 @@ export default function ToolLayout({
     shortDescription: FullI18nKey;
   };
 }) {
+  const location = useLocation();
   const { t } = useTranslation([
     'translation',
     getI18nNamespaceFromToolCategory(type)
@@ -40,6 +42,9 @@ export default function ToolLayout({
   const rawTitle: string = i18n?.name ? t(i18n.name) : 'Tool';
   //@ts-ignore
   const rawDescription: string = i18n?.description ? t(i18n.description) : '';
+
+  const currentPath = location?.pathname || `/${fullPath}`;
+  const canonicalUrl = normalizeCanonicalUrl(currentPath);
 
   const seoData = getToolSeoData(fullPath, rawTitle, rawDescription, type);
 
@@ -62,18 +67,13 @@ export default function ToolLayout({
   const breadcrumbs = [
     {
       name: 'Home',
-      item:
-        seoData.canonicalUrl.split('/')[0] +
-        '//' +
-        seoData.canonicalUrl.split('/')[2]
+      item: normalizeCanonicalUrl('/')
     },
     {
       name: categoryTitle,
-      item: `${seoData.canonicalUrl.split('/')[0]}//${
-        seoData.canonicalUrl.split('/')[2]
-      }/categories/${type}`
+      item: normalizeCanonicalUrl(`/categories/${type}`)
     },
-    { name: rawTitle, item: seoData.canonicalUrl }
+    { name: rawTitle, item: canonicalUrl }
   ];
 
   return (
@@ -87,7 +87,7 @@ export default function ToolLayout({
       <SEOHead
         title={seoData.title}
         description={seoData.description}
-        canonicalUrl={seoData.canonicalUrl}
+        canonicalUrl={canonicalUrl}
         keywords={seoData.keywords}
         breadcrumbs={breadcrumbs}
         faqs={seoData.faqs}

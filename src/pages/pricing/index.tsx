@@ -18,19 +18,27 @@ import {
   Paper,
   Stack,
   Divider,
-  useTheme
+  useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
 import LockIcon from '@mui/icons-material/Lock';
 import EmailIcon from '@mui/icons-material/Email';
+import GoogleIcon from '@mui/icons-material/Google';
+import SecurityIcon from '@mui/icons-material/Security';
 import { PRICING_TIERS, Tier, BUSINESS_EMAIL } from '../../config/pricing';
 import { getPaddleInstance } from '../../config/paddle';
 import { useAuth } from '../../contexts/AuthContext';
+import { auth } from '../../config/firebase';
 import { Paddle, PricePreviewResponse } from '@paddle/paddle-js';
+import { AuthModal } from '../../components/auth/AuthModal';
 
 import SEOHead from 'components/SEOHead';
-import { getSiteUrl } from 'seo/seoConfig';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
 
 interface PricePreviewState {
   [priceId: string]: {
@@ -45,14 +53,15 @@ interface PricingPageProps {
 
 export default function PricingPage({ serverCountryCode }: PricingPageProps) {
   const theme = useTheme();
-  const { user } = useAuth();
-  const siteUrl = getSiteUrl();
-  const canonicalUrl = `${siteUrl}/pricing`;
+  const { user, signInWithGoogle, isSigningIn } = useAuth();
+  const canonicalUrl = normalizeCanonicalUrl('/pricing');
 
   const [paddle, setPaddle] = useState<Paddle | undefined>(undefined);
   const [loadingPrices, setLoadingPrices] = useState<boolean>(true);
   const [priceData, setPriceData] = useState<PricePreviewState>({});
   const [error, setError] = useState<string | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState<boolean>(false);
+  const [pendingTier, setPendingTier] = useState<Tier | null>(null);
 
   const getValidCountryCode = (): string | undefined => {
     if (!serverCountryCode) return undefined;
@@ -136,7 +145,7 @@ export default function PricingPage({ serverCountryCode }: PricingPageProps) {
       });
   }, [paddle, serverCountryCode]);
 
-  const handleSubscribePro = async (tier: Tier) => {
+  const proceedWithCheckout = async (tier: Tier, currentUser?: any) => {
     const selectedPriceId = tier.priceId;
 
     if (!selectedPriceId || selectedPriceId.includes('YOUR_PADDLE_')) {
@@ -165,8 +174,9 @@ export default function PricingPage({ serverCountryCode }: PricingPageProps) {
         }
       };
 
-      if (user?.email && typeof user.email === 'string' && user.email.trim().length > 0) {
-        checkoutOptions.customer = { email: user.email.trim() };
+      const email = currentUser?.email || user?.email;
+      if (email && typeof email === 'string' && email.trim().length > 0) {
+        checkoutOptions.customer = { email: email.trim() };
       }
 
       console.log('[PricingPage] Opening Paddle Checkout with options:', checkoutOptions);
@@ -174,6 +184,34 @@ export default function PricingPage({ serverCountryCode }: PricingPageProps) {
     } catch (err: any) {
       console.error('[PricingPage] Checkout error:', err);
       setError(err?.message || 'Failed to open Paddle Checkout.');
+    }
+  };
+
+  const handleSubscribePro = async (tier: Tier) => {
+    // Mandate Google login before allowing subscription checkout
+    if (!user) {
+      setPendingTier(tier);
+      setAuthModalOpen(true);
+      return;
+    }
+
+    await proceedWithCheckout(tier, user);
+  };
+
+  const handleModalSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      setAuthModalOpen(false);
+      const activeTier = pendingTier;
+      if (activeTier) {
+        const loggedInUser = auth.currentUser;
+        if (loggedInUser) {
+          await proceedWithCheckout(activeTier, loggedInUser);
+        }
+        setPendingTier(null);
+      }
+    } catch (err) {
+      console.warn('[PricingPage] Login cancelled or notice:', err);
     }
   };
 
@@ -517,6 +555,24 @@ export default function PricingPage({ serverCountryCode }: PricingPageProps) {
             🔒 Secure checkout powered by Paddle. Encrypted payments, 256-bit SSL protection.
           </Typography>
         </Paper>
+
+        {/* Mandatory Auth Modal for Subscriptions (Google or Phone) */}
+        <AuthModal
+          open={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          title="Sign In to Upgrade to Pro"
+          subtitle="Please sign in with Google or Phone first so your Pro Plan and receipt are securely linked to your account."
+          onSuccess={() => {
+            const activeTier = pendingTier;
+            if (activeTier) {
+              const loggedInUser = auth.currentUser;
+              if (loggedInUser) {
+                proceedWithCheckout(activeTier, loggedInUser);
+              }
+              setPendingTier(null);
+            }
+          }}
+        />
       </Container>
     </Box>
   );

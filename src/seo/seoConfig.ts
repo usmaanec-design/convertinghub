@@ -6,6 +6,50 @@ export function getSiteUrl(): string {
   return rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
 }
 
+/**
+ * Ensures the canonical URL always follows SEO best practices:
+ * - Base origin: https://convertinghub-official.web.app
+ * - Enforces HTTPS
+ * - Removes unnecessary trailing slashes (except for homepage "/")
+ * - Strips query parameters and hash anchors
+ */
+export function normalizeCanonicalUrl(rawUrlOrPath?: string): string {
+  const base = DEFAULT_SITE_URL;
+  if (!rawUrlOrPath || rawUrlOrPath === '/' || rawUrlOrPath === base || rawUrlOrPath === `${base}/`) {
+    return `${base}/`;
+  }
+
+  let path = rawUrlOrPath.trim();
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    try {
+      const parsed = new URL(path);
+      path = parsed.pathname;
+    } catch {
+      path = path.replace(/^https?:\/\/[^/]+/, '');
+    }
+  }
+
+  // Strip query parameters and hashes from canonical links
+  path = path.split('?')[0].split('#')[0];
+
+  // Collapse multiple slashes and ensure leading slash
+  let cleanPath = path.replace(/\/+/g, '/');
+  if (!cleanPath.startsWith('/')) {
+    cleanPath = `/${cleanPath}`;
+  }
+
+  // Strip trailing slash except for the root '/'
+  if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
+    cleanPath = cleanPath.slice(0, -1);
+  }
+
+  if (cleanPath === '/' || cleanPath === '') {
+    return `${base}/`;
+  }
+
+  return `${base}${cleanPath}`;
+}
+
 export interface ToolSeoOverride {
   title?: string;
   description?: string;
@@ -270,7 +314,7 @@ export function getToolSeoData(
     fallbackDescription ||
     `Easily use ${fallbackTitle} online directly in your web browser with ConvertingHub.`;
 
-  const canonicalUrl = `${siteUrl}/${fullPath}`;
+  const canonicalUrl = normalizeCanonicalUrl(`/${fullPath}`);
 
   const defaultHowTo = [
     {
@@ -353,7 +397,7 @@ export function getCategorySeoData(
       categoryDescription ||
       `Explore free online ${formattedCategory} on ConvertingHub. Fast, secure, browser-based tools for productivity.`,
     h1: formattedCategory,
-    canonicalUrl: `${siteUrl}/categories/${categoryName}`,
+    canonicalUrl: normalizeCanonicalUrl(`/categories/${categoryName}`),
     ogImage: `${siteUrl}/Logos/logo-og.png`
   };
 }
@@ -364,7 +408,7 @@ export function getHomeSeoData() {
     title: 'ConvertingHub – Free Online Document, PDF & File Converters',
     description:
       'ConvertingHub offers a suite of free online tools for converting, editing, compressing, and managing PDF, Word, Excel, Images, Audio, and code files.',
-    canonicalUrl: `${siteUrl}/`,
+    canonicalUrl: normalizeCanonicalUrl('/'),
     ogImage: `${siteUrl}/Logos/logo-og.png`
   };
 }

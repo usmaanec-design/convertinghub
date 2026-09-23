@@ -11,12 +11,11 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import SEOHead from 'components/SEOHead';
-import { getSiteUrl } from 'seo/seoConfig';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
 import { useTranslation } from 'react-i18next';
 
 export default function RefundPolicy() {
-  const siteUrl = getSiteUrl();
-  const canonicalUrl = `${siteUrl}/refund-policy`;
+  const canonicalUrl = normalizeCanonicalUrl('/refund-policy');
   const { t, i18n } = useTranslation();
   const theme = useTheme();
 

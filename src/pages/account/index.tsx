@@ -17,14 +17,20 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { getBackendUrl } from '../../utils/backendConfig';
+import SEOHead from 'components/SEOHead';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
+import { AuthModal } from '../../components/auth/AuthModal';
 
 export default function AccountPage() {
   const { user, isAuthenticated, signInWithGoogle } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const canonicalUrl = normalizeCanonicalUrl('/account');
 
   const handleOpenPortal = async () => {
     if (!user || !user.email) return;
@@ -73,6 +79,12 @@ export default function AccountPage() {
           justifyContent: 'center'
         }}
       >
+        <SEOHead
+          title="My Account | ConvertingHub"
+          description="Manage your ConvertingHub account and subscription settings."
+          canonicalUrl={canonicalUrl}
+          noindex={true}
+        />
         <Container maxWidth="sm">
           <Paper
             elevation={2}
@@ -85,17 +97,35 @@ export default function AccountPage() {
             <Typography color="text.secondary" paragraph>
               Please sign in with your account to view your subscription details and manage billing.
             </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              onClick={signInWithGoogle}
-              sx={{ borderRadius: 100, px: 4, py: 1.25, fontWeight: 700 }}
-            >
-              Sign In with Google
-            </Button>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center" sx={{ mt: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={signInWithGoogle}
+                sx={{ borderRadius: 100, px: 3, py: 1.25, fontWeight: 700 }}
+              >
+                Sign In with Google
+              </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                size="large"
+                startIcon={<PhoneIphoneIcon color="primary" />}
+                onClick={() => setAuthModalOpen(true)}
+                sx={{ borderRadius: 100, px: 3, py: 1.25, fontWeight: 700 }}
+              >
+                Continue with Phone
+              </Button>
+            </Stack>
           </Paper>
         </Container>
+
+        <AuthModal
+          open={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          onSuccess={() => setAuthModalOpen(false)}
+        />
       </Box>
     );
   }
@@ -109,6 +139,12 @@ export default function AccountPage() {
         minHeight: '80vh'
       }}
     >
+      <SEOHead
+        title="My Account | ConvertingHub"
+        description="Manage your ConvertingHub account and subscription settings."
+        canonicalUrl={canonicalUrl}
+        noindex={true}
+      />
       <Container maxWidth="md">
         <Typography variant="h4" component="h1" fontWeight={800} gutterBottom>
           Account Settings & Subscription
@@ -142,7 +178,7 @@ export default function AccountPage() {
             >
               <Avatar
                 src={user.photoURL || undefined}
-                alt={user.displayName || 'User'}
+                alt={user.displayName || user.phoneNumber || 'User'}
                 sx={{
                   width: 80,
                   height: 80,
@@ -151,13 +187,13 @@ export default function AccountPage() {
                   borderColor: 'primary.main'
                 }}
               >
-                {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                {(user.displayName || user.email || user.phoneNumber || 'U').charAt(0).toUpperCase()}
               </Avatar>
               <Typography variant="h6" fontWeight={800}>
-                {user.displayName || 'Subscribed User'}
+                {user.displayName || (user.phoneNumber ? `Phone User (${user.phoneNumber})` : 'Subscribed User')}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                {user.email}
+                {user.email || user.phoneNumber || 'Verified Account'}
               </Typography>
               <Chip
                 icon={<VerifiedIcon />}

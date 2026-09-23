@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Container, Typography, Button, Paper } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import SEOHead from 'components/SEOHead';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 export default function NotFoundPage() {
@@ -10,7 +11,7 @@ export default function NotFoundPage() {
       <SEOHead
         title="404 - Page Not Found | ConvertingHub"
         description="The page you are looking for does not exist or has been moved."
-        canonicalUrl="https://convertinghub-official.web.app/404"
+        canonicalUrl={normalizeCanonicalUrl('/404')}
         noindex={true}
       />
 

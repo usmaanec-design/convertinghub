@@ -11,14 +11,16 @@ import {
   Stack
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import SecurityIcon from '@mui/icons-material/Security';
 import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from './auth/AuthModal';
 
 let activeAuthResolver: ((success: boolean) => void) | null = null;
 
 /**
- * Imperatively requests Google Login with a modal prompt when authentication is required for download.
+ * Imperatively requests Google/Phone Login with a modal prompt when authentication is required for download.
  * Resolves to true if login succeeds, or false if cancelled / closed.
  */
 export const requestGoogleLoginWithModal = (): Promise<boolean> => {
@@ -30,6 +32,7 @@ export const requestGoogleLoginWithModal = (): Promise<boolean> => {
 
 export const DownloadAuthModal: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const [phoneModalOpen, setPhoneModalOpen] = useState(false);
   const { signInWithGoogle, isSigningIn, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -64,17 +67,23 @@ export const DownloadAuthModal: React.FC = () => {
     }
   };
 
+  const handleOpenPhoneAuth = () => {
+    setOpen(false);
+    setPhoneModalOpen(true);
+  };
+
   const handleClose = () => {
     if (isSigningIn) return;
     setOpen(false);
-    if (activeAuthResolver) {
+    if (activeAuthResolver && !phoneModalOpen) {
       activeAuthResolver(false);
       activeAuthResolver = null;
     }
   };
 
   return (
-    <Dialog
+    <>
+      <Dialog
       open={open}
       onClose={handleClose}
       maxWidth="xs"
@@ -123,7 +132,7 @@ export const DownloadAuthModal: React.FC = () => {
           color="text.secondary"
           sx={{ lineHeight: 1.6, mb: 2 }}
         >
-          Please sign in with Google to continue downloading your files.
+          Please sign in to continue downloading your converted files.
         </Typography>
 
         <Stack
@@ -151,7 +160,7 @@ export const DownloadAuthModal: React.FC = () => {
         </Stack>
       </DialogContent>
 
-      <DialogActions sx={{ flexDirection: 'column', gap: 1.5, px: 1, pb: 1 }}>
+      <DialogActions sx={{ flexDirection: 'column', gap: 1.25, px: 1, pb: 1 }}>
         <Button
           fullWidth
           variant="contained"
@@ -168,7 +177,7 @@ export const DownloadAuthModal: React.FC = () => {
           }
           sx={{
             borderRadius: '100px',
-            py: 1.3,
+            py: 1.2,
             fontWeight: 700,
             fontSize: '0.95rem',
             textTransform: 'none',
@@ -183,13 +192,37 @@ export const DownloadAuthModal: React.FC = () => {
 
         <Button
           fullWidth
+          variant="outlined"
+          color="inherit"
+          size="large"
+          disabled={isSigningIn}
+          onClick={handleOpenPhoneAuth}
+          startIcon={<PhoneIphoneIcon color="primary" />}
+          sx={{
+            borderRadius: '100px',
+            py: 1.1,
+            fontWeight: 700,
+            fontSize: '0.92rem',
+            textTransform: 'none',
+            borderColor: 'divider',
+            '&:hover': {
+              borderColor: 'primary.main',
+              bgcolor: 'action.hover'
+            }
+          }}
+        >
+          Continue with Phone
+        </Button>
+
+        <Button
+          fullWidth
           variant="text"
           color="inherit"
           disabled={isSigningIn}
           onClick={handleClose}
           sx={{
             borderRadius: '100px',
-            py: 0.8,
+            py: 0.6,
             fontWeight: 600,
             fontSize: '0.875rem',
             textTransform: 'none',
@@ -200,5 +233,26 @@ export const DownloadAuthModal: React.FC = () => {
         </Button>
       </DialogActions>
     </Dialog>
+
+    <AuthModal
+      open={phoneModalOpen}
+      onClose={() => {
+        setPhoneModalOpen(false);
+        if (activeAuthResolver) {
+          activeAuthResolver(false);
+          activeAuthResolver = null;
+        }
+      }}
+      onSuccess={() => {
+        setPhoneModalOpen(false);
+        if (activeAuthResolver) {
+          activeAuthResolver(true);
+          activeAuthResolver = null;
+        }
+      }}
+      title="Sign In to Download"
+      subtitle="Verify your phone or Google account to continue downloading your files."
+    />
+    </>
   );
 };

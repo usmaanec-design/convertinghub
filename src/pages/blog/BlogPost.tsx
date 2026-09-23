@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import SEOHead from 'components/SEOHead';
 import { getBlogPost } from 'seo/blogData';
-import { getSiteUrl } from 'seo/seoConfig';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -22,12 +22,11 @@ export default function BlogPost() {
     return <Navigate to="/404" replace />;
   }
 
-  const siteUrl = getSiteUrl();
-  const canonicalUrl = `${siteUrl}/blog/${post.slug}`;
+  const canonicalUrl = normalizeCanonicalUrl(`/blog/${post.slug}`);
 
   const breadcrumbs = [
-    { name: 'Home', item: `${siteUrl}/` },
-    { name: 'Blog', item: `${siteUrl}/blog` },
+    { name: 'Home', item: normalizeCanonicalUrl('/') },
+    { name: 'Blog', item: normalizeCanonicalUrl('/blog') },
     { name: post.title, item: canonicalUrl }
   ];
 

@@ -6,6 +6,19 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "trailingSlash": false,
+    "redirects": [
+      {
+        "source": "/sitemap.xml/",
+        "destination": "/sitemap.xml",
+        "type": 301
+      },
+      {
+        "source": "/robots.txt/",
+        "destination": "/robots.txt",
+        "type": 301
+      }
+    ],
     "headers": [
       {
         "source": "/.well-known/assetlinks.json",
@@ -41,8 +54,16 @@
         "source": "/sitemap.xml",
         "headers": [
           {
+            "key": "Content-Type",
+            "value": "application/xml; charset=utf-8"
+          },
+          {
             "key": "Cache-Control",
             "value": "no-cache, no-store, must-revalidate"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "all"
           },
           {
             "key": "Access-Control-Allow-Origin",
@@ -54,8 +75,16 @@
         "source": "/robots.txt",
         "headers": [
           {
+            "key": "Content-Type",
+            "value": "text/plain; charset=utf-8"
+          },
+          {
             "key": "Cache-Control",
             "value": "no-cache, no-store, must-revalidate"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "all"
           },
           {
             "key": "Access-Control-Allow-Origin",
@@ -98,6 +127,19 @@
           {
             "key": "Cross-Origin-Opener-Policy",
             "value": "same-origin-allow-popups"
+          }
+        ]
+      },
+      {
+        "source": "/__/**",
+        "headers": [
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "unsafe-none"
+          },
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
           }
         ]
       }

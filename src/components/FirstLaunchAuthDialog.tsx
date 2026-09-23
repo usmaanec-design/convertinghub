@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,11 +8,14 @@ import {
   Typography,
   Stack,
   Box,
-  CircularProgress
+  CircularProgress,
+  Divider
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import SecurityIcon from '@mui/icons-material/Security';
 import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from './auth/AuthModal';
 
 export const FirstLaunchAuthDialog: React.FC = () => {
   const {
@@ -21,6 +24,7 @@ export const FirstLaunchAuthDialog: React.FC = () => {
     signInWithGoogle,
     isSigningIn
   } = useAuth();
+  const [phoneAuthOpen, setPhoneAuthOpen] = useState(false);
 
   if (!showFirstLaunchDialog) return null;
 
@@ -117,15 +121,40 @@ export const FirstLaunchAuthDialog: React.FC = () => {
           {isSigningIn ? 'Connecting...' : 'Continue with Google'}
         </Button>
 
+        <Button
+          fullWidth
+          variant="outlined"
+          color="inherit"
+          size="large"
+          disabled={isSigningIn}
+          onClick={() => {
+            dismissFirstLaunchDialog('not_now');
+            setPhoneAuthOpen(true);
+          }}
+          startIcon={<PhoneIphoneIcon />}
+          sx={{
+            borderRadius: '100px',
+            py: 1.1,
+            fontWeight: 700,
+            fontSize: '0.92rem',
+            textTransform: 'none',
+            borderWidth: '1.5px',
+            '&:hover': { borderWidth: '1.5px' }
+          }}
+        >
+          Continue with Phone
+        </Button>
+
         <Stack
           direction="row"
           spacing={1}
           width="100%"
           justifyContent="space-between"
+          sx={{ mt: 0.5 }}
         >
           <Button
             fullWidth
-            variant="outlined"
+            variant="text"
             color="inherit"
             disabled={isSigningIn}
             onClick={() => dismissFirstLaunchDialog('guest')}
@@ -156,6 +185,11 @@ export const FirstLaunchAuthDialog: React.FC = () => {
           </Button>
         </Stack>
       </DialogActions>
+
+      <AuthModal
+        open={phoneAuthOpen}
+        onClose={() => setPhoneAuthOpen(false)}
+      />
     </Dialog>
   );
 };

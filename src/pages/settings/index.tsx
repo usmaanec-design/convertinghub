@@ -41,6 +41,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { usePreferences } from '../../contexts/PreferencesContext';
 import { tools } from '../../tools';
 import { Mode } from '../../components/App';
+import SEOHead from 'components/SEOHead';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
 
 interface SettingsPageProps {
   currentMode?: Mode;
@@ -125,6 +127,12 @@ export default function SettingsPage({ currentMode, onChangeMode }: SettingsPage
         minHeight: '85vh'
       }}
     >
+      <SEOHead
+        title="Settings & Preferences | ConvertingHub"
+        description="Customize application theme, manage favorite tools, configure download preferences, and check account status."
+        canonicalUrl={normalizeCanonicalUrl('/settings')}
+        noindex={true}
+      />
       <Container maxWidth="md">
         <Typography variant="h4" component="h1" fontWeight={900} gutterBottom color="text.primary">
           Settings & Preferences

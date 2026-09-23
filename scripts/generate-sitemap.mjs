@@ -150,7 +150,7 @@ function generateSitemapXml() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${xmlEntries}
-</urlset>`;
+</urlset>\n`;
 
   // Write to public/sitemap.xml
   const publicPath = path.join(process.cwd(), 'public', 'sitemap.xml');

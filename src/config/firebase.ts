@@ -36,4 +36,4 @@ setPersistence(auth, browserLocalPersistence).catch((err) => {
 
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({ prompt: 'select_account' });
+// Avoid forcing select_account on every click so login is fluent and instant

@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { getSiteUrl } from '../seo/seoConfig';
+import { getSiteUrl, normalizeCanonicalUrl } from '../seo/seoConfig';
 
 export interface SEOHeadProps {
   title: string;
   description: string;
-  canonicalUrl: string;
+  canonicalUrl?: string;
   ogImage?: string;
   ogType?: string;
   noindex?: boolean;
@@ -28,6 +28,18 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   schemaType = 'WebApplication'
 }) => {
   const siteUrl = getSiteUrl();
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const finalCanonicalUrl = normalizeCanonicalUrl(canonicalUrl || currentPath);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const staticCanonicals = document.querySelectorAll(
+        'link[rel="canonical"]:not([data-react-helmet])'
+      );
+      staticCanonicals.forEach((el) => el.remove());
+    }
+  }, [finalCanonicalUrl]);
+
   const defaultImage = `${siteUrl}/Logos/logo-og.png`;
   const imageToUse = ogImage || defaultImage;
 
@@ -46,7 +58,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     '@type': schemaType,
     name: title.split('–')[0].trim(),
     description: description,
-    url: canonicalUrl,
+    url: finalCanonicalUrl,
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'All',
     browserRequirements: 'Requires JavaScript. Requires HTML5.',
@@ -97,7 +109,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       {keywords && keywords.length > 0 && (
         <meta name="keywords" content={keywords.join(', ')} />
       )}
-      <link rel="canonical" href={canonicalUrl} />
+      <link rel="canonical" href={finalCanonicalUrl} />
       <meta
         name="robots"
         content={noindex ? 'noindex, nofollow' : 'index, follow'}
@@ -108,7 +120,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       <meta property="og:type" content={ogType} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:url" content={finalCanonicalUrl} />
       <meta property="og:image" content={imageToUse} />
 
       {/* Twitter */}

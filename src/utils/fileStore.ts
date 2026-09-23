@@ -56,7 +56,9 @@ export interface StoredDocument {
   lastModified?: number;
   folderId?: string;
   relativePath?: string;
-  blob: Blob;
+  uri?: string;
+  blob?: Blob;
+  handle?: any;
   thumbnailUrl?: string;
 }
 
@@ -78,13 +80,52 @@ export function formatSizeBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-// Documents IDB operations
+// On-demand document file loader
+export async function loadFileFromStoredDocument(doc: StoredDocument): Promise<File | Blob | null> {
+  if (doc.blob) return doc.blob;
+  if (doc.handle && typeof doc.handle.getFile === 'function') {
+    try {
+      return await doc.handle.getFile();
+    } catch (e) {
+      console.warn('[FileStore] Failed reading handle:', e);
+    }
+  }
+  if (doc.uri) {
+    try {
+      const res = await fetch(doc.uri);
+      return await res.blob();
+    } catch (e) {
+      console.warn('[FileStore] Failed fetching content URI:', e);
+    }
+  }
+  return null;
+}
+
+// Documents IDB operations (Metadata indexing only)
 export async function saveDocumentToIDB(doc: StoredDocument): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-    const req = store.put(doc);
+
+    // Ensure we do NOT serialize heavy binary blobs into metadata IndexedDB records
+    const metadataOnly: StoredDocument = {
+      id: doc.id,
+      name: doc.name,
+      size: doc.size,
+      sizeBytes: doc.sizeBytes,
+      type: doc.type,
+      extension: doc.extension,
+      date: doc.date,
+      lastModified: doc.lastModified,
+      folderId: doc.folderId,
+      relativePath: doc.relativePath,
+      uri: doc.uri,
+      thumbnailUrl: doc.thumbnailUrl
+      // handle is kept in-memory or persisted via SAF directory handle
+    };
+
+    const req = store.put(metadataOnly);
     req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });
@@ -167,7 +208,7 @@ export async function removeAuthorizedFolderFromIDB(id: string): Promise<void> {
   });
 }
 
-// Recursive Metadata Scanner & Reconciler for Authorized SAF Folders
+// Recursive Metadata Scanner & Reconciler for Authorized SAF Folders (Metadata Only)
 export async function scanAndReconcileAuthorizedFolders(
   folders: AuthorizedFolderRecord[]
 ): Promise<StoredDocument[]> {
@@ -189,38 +230,44 @@ export async function scanAndReconcileAuthorizedFolders(
         }
       }
 
-      // Recursive scan function
+      // Fast Metadata-only scan (No reading full file contents into memory)
       const traverseDirectory = async (dirHandle: any, currentPath: string) => {
         for await (const entry of dirHandle.values()) {
           if (entry.kind === 'file') {
             try {
-              const file = await entry.getFile();
-              const type = detectFileType(file.name);
+              const type = detectFileType(entry.name);
               if (type !== 'other') {
-                const id = `${folderRecord.id}:${currentPath}/${file.name}`;
+                const id = `${folderRecord.id}:${currentPath}/${entry.name}`;
                 scannedDocIds.add(id);
 
-                const sizeStr = formatSizeBytes(file.size);
-                const dateStr = new Date(file.lastModified).toLocaleDateString();
+                let sizeBytes = 0;
+                let lastModified = Date.now();
+                
+                // Read metadata header only
+                if (typeof entry.getFile === 'function') {
+                  const meta = await entry.getFile();
+                  sizeBytes = meta.size;
+                  lastModified = meta.lastModified;
+                }
 
                 const docRecord: StoredDocument = {
                   id,
-                  name: file.name,
-                  size: sizeStr,
-                  sizeBytes: file.size,
+                  name: entry.name,
+                  size: formatSizeBytes(sizeBytes),
+                  sizeBytes,
                   type,
-                  date: dateStr,
-                  lastModified: file.lastModified,
+                  date: new Date(lastModified).toLocaleDateString(),
+                  lastModified,
                   folderId: folderRecord.id,
-                  relativePath: `${currentPath}/${file.name}`,
-                  blob: file
+                  relativePath: `${currentPath}/${entry.name}`,
+                  handle: entry
                 };
 
                 docMap.set(id, docRecord);
                 await saveDocumentToIDB(docRecord);
               }
             } catch (err) {
-              console.warn('[FileStore] Failed reading file handle:', err);
+              console.warn('[FileStore] Failed reading entry metadata:', err);
             }
           } else if (entry.kind === 'directory') {
             await traverseDirectory(entry, `${currentPath}/${entry.name}`);

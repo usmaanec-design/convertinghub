@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -24,8 +24,10 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import ContactSupportIcon from '@mui/icons-material/ContactSupport';
 import StarIcon from '@mui/icons-material/Star';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { AuthModal } from '../../auth/AuthModal';
 
 interface MobileProfileTabProps {
   currentMode: 'dark' | 'light' | 'system';
@@ -40,6 +42,7 @@ export const MobileProfileTab: React.FC<MobileProfileTabProps> = ({
   const navigate = useNavigate();
   const { user, isAuthenticated, signInWithGoogle, logout, isSigningIn, isProUser } =
     useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const isDarkMode = theme.palette.mode === 'dark';
 
@@ -79,7 +82,7 @@ export const MobileProfileTab: React.FC<MobileProfileTabProps> = ({
           <>
             <Avatar
               src={user.photoURL || undefined}
-              alt={user.displayName || 'User'}
+              alt={user.displayName || user.phoneNumber || 'User'}
               sx={{
                 width: 72,
                 height: 72,
@@ -90,13 +93,15 @@ export const MobileProfileTab: React.FC<MobileProfileTabProps> = ({
             >
               {user.displayName
                 ? user.displayName.charAt(0).toUpperCase()
+                : user.phoneNumber
+                ? '📱'
                 : 'U'}
             </Avatar>
             <Typography variant="h6" fontWeight={700}>
-              {user.displayName || 'ConvertingHub User'}
+              {user.displayName || (user.phoneNumber ? `User (${user.phoneNumber})` : 'ConvertingHub User')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-              {user.email}
+              {user.email || user.phoneNumber || 'Signed in'}
             </Typography>
 
             <Chip
@@ -156,29 +161,53 @@ export const MobileProfileTab: React.FC<MobileProfileTabProps> = ({
               color="text.secondary"
               sx={{ mb: 2, maxWidth: 280 }}
             >
-              Sign in with your Google account to sync conversions, unlock priority cloud processing, and manage your plan.
+              Sign in with your Google or Phone account to sync conversions, unlock priority cloud processing, and manage your plan.
             </Typography>
 
-            <Button
-              variant="contained"
-              disabled={isSigningIn}
-              startIcon={<GoogleIcon />}
-              onClick={() => signInWithGoogle()}
-              sx={{
-                borderRadius: '24px',
-                px: 4,
-                py: 1,
-                fontWeight: 700,
-                textTransform: 'none',
-                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)'
-              }}
-            >
-              Sign In with Google
-            </Button>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25, width: '100%', maxWidth: 280 }}>
+              <Button
+                variant="contained"
+                disabled={isSigningIn}
+                startIcon={<GoogleIcon />}
+                onClick={() => signInWithGoogle()}
+                sx={{
+                  borderRadius: '24px',
+                  py: 1,
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                  boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)'
+                }}
+              >
+                Sign In with Google
+              </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                disabled={isSigningIn}
+                startIcon={<PhoneIphoneIcon color="primary" />}
+                onClick={() => setAuthModalOpen(true)}
+                sx={{
+                  borderRadius: '24px',
+                  py: 0.9,
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  borderColor: theme.palette.mode === 'dark' ? '#334155' : '#cbd5e1'
+                }}
+              >
+                Continue with Phone
+              </Button>
+            </Box>
           </>
         )}
       </Paper>
+
+      {/* Auth Modal for Mobile Profile */}
+      <AuthModal
+        open={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={() => setAuthModalOpen(false)}
+      />
 
       {/* Embedded Mobile Settings & Legal Links */}
       <Typography

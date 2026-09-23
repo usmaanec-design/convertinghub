@@ -3,9 +3,12 @@ import {
   User,
   onAuthStateChanged,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  signOut
+  signOut,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult,
+  PhoneAuthProvider,
+  linkWithCredential
 } from 'firebase/auth';
 import { doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../config/firebase';
@@ -20,7 +23,6 @@ export const isStandaloneApp = (): boolean => {
     '(display-mode: window-controls-overlay)'
   ).matches;
   const isMinimalUI = window.matchMedia('(display-mode: minimal-ui)').matches;
-  const isFullscreen = window.matchMedia('(display-mode: fullscreen)').matches;
   const isNavStandalone = (window.navigator as any).standalone === true;
   const isWebView = /\b(WebView|PWABuilder)\b/i.test(navigator.userAgent);
 
@@ -28,7 +30,6 @@ export const isStandaloneApp = (): boolean => {
     isStandalone ||
     isWCO ||
     isMinimalUI ||
-    isFullscreen ||
     isNavStandalone ||
     isWebView
   );
@@ -51,6 +52,14 @@ interface AuthContextType {
   loading: boolean;
   isSigningIn: boolean;
   signInWithGoogle: () => Promise<void>;
+  sendPhoneOtp: (
+    phoneNumber: string,
+    recaptchaVerifier: RecaptchaVerifier
+  ) => Promise<ConfirmationResult>;
+  verifyPhoneOtp: (
+    confirmationResult: ConfirmationResult,
+    otp: string
+  ) => Promise<User>;
   logout: () => Promise<void>;
   guestToolUsageCount: number;
   incrementGuestUsage: () => void;
@@ -73,6 +82,12 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isSigningIn: false,
   signInWithGoogle: async () => {},
+  sendPhoneOtp: async () => {
+    throw new Error('sendPhoneOtp not initialized');
+  },
+  verifyPhoneOtp: async () => {
+    throw new Error('verifyPhoneOtp not initialized');
+  },
   logout: async () => {},
   guestToolUsageCount: 0,
   incrementGuestUsage: () => {},
@@ -197,38 +212,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     let isMounted = true;
     setLoading(true);
 
-    let redirectChecked = false;
-
-    // Process redirect result when user returns from Google OAuth redirect flow
-    getRedirectResult(auth)
-      .then((result) => {
-        redirectChecked = true;
-        if (!isMounted) return;
-        if (result?.user) {
-          console.log(
-            '[ConvertingHub Auth] Redirect login successful:',
-            result.user.email
-          );
-          setUser(result.user);
-          setLoading(false);
-          setIsSigningIn(false);
-        }
-      })
-      .catch((err: any) => {
-        redirectChecked = true;
-        console.warn('[ConvertingHub Auth] Redirect result check notice:', err);
-        if (isMounted) {
-          const code = err?.code || '';
-          if (
-            code &&
-            code !== 'auth/popup-closed-by-user' &&
-            code !== 'auth/cancelled-popup-request'
-          ) {
-            handleAuthError(err);
-          }
-        }
-      });
-
     // Single source of truth for Auth state
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (!isMounted) return;
@@ -237,20 +220,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         currentUser ? currentUser.email : 'Logged Out'
       );
       setUser(currentUser);
-      
-      // Delay turning off loading state if redirect check is in-flight
-      if (currentUser || redirectChecked) {
-        setLoading(false);
-        setIsSigningIn(false);
-      } else {
-        // Fallback safety timeout if getRedirectResult is resolving
-        setTimeout(() => {
-          if (isMounted) {
-            setLoading(false);
-            setIsSigningIn(false);
-          }
-        }, 500);
-      }
+      setLoading(false);
+      setIsSigningIn(false);
 
       if (currentUser) {
         setAuthError(null);
@@ -265,8 +236,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           await setDoc(
             userRef,
             {
-              displayName: currentUser.displayName || '',
+              displayName:
+                currentUser.displayName || currentUser.phoneNumber || '',
               email: currentUser.email || '',
+              phoneNumber: currentUser.phoneNumber || '',
               photoURL: currentUser.photoURL || '',
               hasRated: ratingState.hasRated,
               downloadCount: downloadState.downloadCount,
@@ -353,17 +326,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const handleAuthError = (error: any) => {
     console.warn('[ConvertingHub Auth] Auth error detail:', error);
     const code = error?.code || '';
-    let userMsg = "We couldn't complete Google sign-in. Please try again.";
+    let userMsg = "We couldn't complete sign-in. Please try again.";
 
     if (
       code === 'auth/popup-closed-by-user' ||
       code === 'auth/cancelled-popup-request'
     ) {
-      userMsg = 'Google sign-in was cancelled. You can try again whenever you’re ready.';
+      userMsg = 'Sign-in was cancelled. You can try again whenever you’re ready.';
     } else if (code === 'auth/popup-blocked') {
       userMsg = 'Popup blocked by browser. Please enable popups or try again.';
     } else if (code === 'auth/network-request-failed') {
       userMsg = 'Network error. Please check your internet connection and try again.';
+    } else if (code === 'auth/invalid-phone-number') {
+      userMsg = 'Invalid phone number format. Please include country code (e.g. +1 or +92).';
+    } else if (code === 'auth/missing-phone-number') {
+      userMsg = 'Please enter a valid phone number.';
+    } else if (code === 'auth/invalid-verification-code') {
+      userMsg = 'Incorrect 6-digit verification code. Please check and try again.';
+    } else if (code === 'auth/code-expired') {
+      userMsg = 'Verification code has expired. Please request a new code.';
+    } else if (code === 'auth/too-many-requests') {
+      userMsg = 'Too many attempts. Please wait a few moments before trying again.';
+    } else if (code === 'auth/captcha-check-failed') {
+      userMsg = 'reCAPTCHA verification failed. Please try again.';
+    } else if (code === 'auth/operation-not-allowed') {
+      userMsg = 'Phone sign-in is currently disabled in your Firebase Console. Please enable "Phone" provider in Firebase Console > Authentication > Sign-in method.';
     }
 
     setAuthError(userMsg);
@@ -388,40 +375,104 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsSigningIn(true);
     setAuthError(null);
 
-    console.log('[ConvertingHub Auth] Initiating Google Sign-In...');
+    console.log('[ConvertingHub Auth] Initiating Google Sign-In via popup...');
 
     try {
-      // First attempt signInWithPopup (works seamlessly without full-page state loss on mobile Chrome/Safari)
       const res = await signInWithPopup(auth, googleProvider);
       console.log('[ConvertingHub Auth] Popup login successful:', res.user.email);
       setUser(res.user);
-      setIsSigningIn(false);
     } catch (error: any) {
       console.warn('[ConvertingHub Auth] Popup auth notice/error:', error?.code || error);
-      
+
       const code = error?.code || '';
+
       if (
-        code === 'auth/popup-blocked' ||
-        code === 'auth/operation-not-supported-in-this-environment' ||
-        code === 'auth/cancelled-popup-request' ||
-        isStandaloneApp()
+        code === 'auth/popup-closed-by-user' ||
+        code === 'auth/cancelled-popup-request'
       ) {
-        console.log('[ConvertingHub Auth] Redirecting to Google OAuth via signInWithRedirect...');
-        try {
-          await signInWithRedirect(auth, googleProvider);
-          return;
-        } catch (e2: any) {
-          console.error('[ConvertingHub Auth] Redirect error:', e2);
-          setIsSigningIn(false);
-          handleAuthError(e2);
-        }
-      } else if (code === 'auth/popup-closed-by-user') {
-        setIsSigningIn(false);
-        setAuthError('Google sign-in was cancelled. You can try again whenever you’re ready.');
+        console.log('[ConvertingHub Auth] Popup closed or cancelled by user.');
+        return;
+      }
+
+      if (code === 'auth/popup-blocked') {
+        setAuthError('Popup was blocked by your browser. Please allow popups for this site to sign in with Google.');
       } else {
-        setIsSigningIn(false);
         handleAuthError(error);
       }
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const sendPhoneOtp = async (
+    phoneNumber: string,
+    recaptchaVerifier: RecaptchaVerifier
+  ): Promise<ConfirmationResult> => {
+    setIsSigningIn(true);
+    setAuthError(null);
+    try {
+      console.log('[ConvertingHub Auth] Sending SMS OTP to:', phoneNumber);
+      const confirmationResult = await signInWithPhoneNumber(
+        auth,
+        phoneNumber,
+        recaptchaVerifier
+      );
+      console.log('[ConvertingHub Auth] SMS OTP sent successfully');
+      return confirmationResult;
+    } catch (err: any) {
+      console.error('[ConvertingHub Auth] sendPhoneOtp error:', err);
+      handleAuthError(err);
+      throw err;
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const verifyPhoneOtp = async (
+    confirmationResult: ConfirmationResult,
+    otp: string
+  ): Promise<User> => {
+    setIsSigningIn(true);
+    setAuthError(null);
+    try {
+      console.log('[ConvertingHub Auth] Verifying SMS OTP...');
+      // Provider linking: if user is already logged in with Google, link phone credential
+      if (auth.currentUser && !auth.currentUser.isAnonymous) {
+        try {
+          const credential = PhoneAuthProvider.credential(
+            confirmationResult.verificationId,
+            otp
+          );
+          const linkResult = await linkWithCredential(
+            auth.currentUser,
+            credential
+          );
+          console.log(
+            '[ConvertingHub Auth] Successfully linked phone to existing user:',
+            linkResult.user.phoneNumber
+          );
+          setUser(linkResult.user);
+          return linkResult.user;
+        } catch (linkError: any) {
+          if (linkError?.code !== 'auth/credential-already-in-use') {
+            throw linkError;
+          }
+        }
+      }
+
+      const res = await confirmationResult.confirm(otp);
+      console.log(
+        '[ConvertingHub Auth] Phone verification successful:',
+        res.user.phoneNumber
+      );
+      setUser(res.user);
+      return res.user;
+    } catch (err: any) {
+      console.error('[ConvertingHub Auth] verifyPhoneOtp error:', err);
+      handleAuthError(err);
+      throw err;
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
@@ -474,6 +525,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         loading,
         isSigningIn,
         signInWithGoogle,
+        sendPhoneOtp,
+        verifyPhoneOtp,
         logout,
         guestToolUsageCount,
         incrementGuestUsage,

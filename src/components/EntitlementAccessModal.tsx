@@ -14,10 +14,12 @@ import {
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import GoogleIcon from '@mui/icons-material/Google';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { useAuth } from '../contexts/AuthContext';
 import { EntitlementStatus } from '../utils/entitlementManager';
 import { useNavigate } from 'react-router-dom';
+import { AuthModal } from './auth/AuthModal';
 
 interface EntitlementAccessModalProps {
   open: boolean;
@@ -35,6 +37,7 @@ export const EntitlementAccessModal: React.FC<EntitlementAccessModalProps> = ({
   const { signInWithGoogle } = useAuth();
   const theme = useTheme();
   const navigate = useNavigate();
+  const [authModalOpen, setAuthModalOpen] = React.useState(false);
 
   if (!entitlement || entitlement.allowed) {
     return null;
@@ -60,7 +63,8 @@ export const EntitlementAccessModal: React.FC<EntitlementAccessModalProps> = ({
   };
 
   return (
-    <Dialog
+    <>
+      <Dialog
       open={open}
       onClose={onClose}
       maxWidth="xs"
@@ -134,7 +138,7 @@ export const EntitlementAccessModal: React.FC<EntitlementAccessModalProps> = ({
                 }}
               >
                 <Typography variant="subtitle2" fontWeight={800} color="primary.main">
-                  Sign in with Google to unlock 1 additional free conversion.
+                  Sign in with Google or Phone to unlock 1 additional free conversion.
                 </Typography>
               </Paper>
             </>
@@ -177,19 +181,35 @@ export const EntitlementAccessModal: React.FC<EntitlementAccessModalProps> = ({
         </Stack>
       </DialogContent>
 
-      <DialogActions sx={{ flexDirection: 'column', gap: 1.5, px: 3, pb: 2 }}>
+      <DialogActions sx={{ flexDirection: 'column', gap: 1.25, px: 3, pb: 2 }}>
         {isLoginRequired && (
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            fullWidth
-            startIcon={<GoogleIcon />}
-            onClick={handleGoogleLogin}
-            sx={{ py: 1.25, fontWeight: 800, borderRadius: 2.5, textTransform: 'none' }}
-          >
-            Continue with Google
-          </Button>
+          <>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              fullWidth
+              startIcon={<GoogleIcon />}
+              onClick={handleGoogleLogin}
+              sx={{ py: 1.25, fontWeight: 800, borderRadius: 2.5, textTransform: 'none' }}
+            >
+              Continue with Google
+            </Button>
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="large"
+              fullWidth
+              startIcon={<PhoneIphoneIcon color="primary" />}
+              onClick={() => {
+                onClose();
+                setAuthModalOpen(true);
+              }}
+              sx={{ py: 1.1, fontWeight: 700, borderRadius: 2.5, textTransform: 'none' }}
+            >
+              Continue with Phone
+            </Button>
+          </>
         )}
 
         {isProRequired && (
@@ -216,5 +236,14 @@ export const EntitlementAccessModal: React.FC<EntitlementAccessModalProps> = ({
         </Button>
       </DialogActions>
     </Dialog>
+
+    <AuthModal
+      open={authModalOpen}
+      onClose={() => setAuthModalOpen(false)}
+      onSuccess={() => setAuthModalOpen(false)}
+      title="Unlock Free Conversion"
+      subtitle="Sign in with your phone or Google account to unlock your additional free conversion."
+    />
+    </>
   );
 };

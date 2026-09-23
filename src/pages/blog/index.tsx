@@ -13,11 +13,10 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import SEOHead from 'components/SEOHead';
 import { BLOG_POSTS } from 'seo/blogData';
-import { getSiteUrl } from 'seo/seoConfig';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
 
 export default function BlogIndex() {
-  const siteUrl = getSiteUrl();
-  const canonicalUrl = `${siteUrl}/blog`;
+  const canonicalUrl = normalizeCanonicalUrl('/blog');
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>

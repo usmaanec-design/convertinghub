@@ -93,8 +93,43 @@ export const MobileFileViewerModal: React.FC<MobileFileViewerModalProps> = ({
   const [thumbDrawerOpen, setThumbDrawerOpen] = useState<boolean>(false);
   const [thumbnails, setThumbnails] = useState<string[]>([]);
 
-  // Double tap to zoom reference
+  // Touch Zoom (Double tap toggle & Pinch zoom)
   const lastTapRef = useRef<number>(0);
+  const pinchDistRef = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      pinchDistRef.current = dist;
+    } else if (e.touches.length === 1) {
+      const now = Date.now();
+      if (now - lastTapRef.current < 300) {
+        setScale((s) => (s > 1.2 ? 1.0 : 1.6));
+      }
+      lastTapRef.current = now;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 2 && pinchDistRef.current !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = dist / pinchDistRef.current;
+      if (Math.abs(factor - 1) > 0.05) {
+        setScale((prev) => Math.min(2.5, Math.max(0.6, prev * (factor > 1 ? 1.08 : 0.92))));
+        pinchDistRef.current = dist;
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    pinchDistRef.current = null;
+  };
 
   // Measure fit-to-width container space
   const updateFitWidth = useCallback(() => {
@@ -234,14 +269,7 @@ export const MobileFileViewerModal: React.FC<MobileFileViewerModalProps> = ({
     if (activePageNum < totalPages) scrollToPage(activePageNum + 1);
   };
 
-  // Double Tap to Zoom Toggle
-  const handleTouchStart = () => {
-    const now = Date.now();
-    if (now - lastTapRef.current < 300) {
-      setScale((s) => (s > 1.2 ? 1.0 : 1.75));
-    }
-    lastTapRef.current = now;
-  };
+
 
   // Stroke change handler per page
   const handlePageStrokesChange = (pIdx: number, newStrokes: AnnotationStroke[]) => {
@@ -557,6 +585,8 @@ export const MobileFileViewerModal: React.FC<MobileFileViewerModalProps> = ({
       <Box
         ref={scrollContainerRef}
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         sx={{
           flex: 1,
           overflowY: 'auto',

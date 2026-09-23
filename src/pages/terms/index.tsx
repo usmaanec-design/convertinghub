@@ -9,14 +9,14 @@ import {
   Stack,
   useTheme
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import SEOHead from 'components/SEOHead';
-import { getSiteUrl } from 'seo/seoConfig';
+import { normalizeCanonicalUrl } from 'seo/seoConfig';
 import { useTranslation } from 'react-i18next';
 
 export default function TermsAndConditions() {
-  const siteUrl = getSiteUrl();
-  const canonicalUrl = `${siteUrl}/terms-of-service`;
+  const location = useLocation();
+  const canonicalUrl = normalizeCanonicalUrl(location.pathname || '/terms-of-service');
   const { t, i18n } = useTranslation();
   const theme = useTheme();
 

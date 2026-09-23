@@ -255,6 +255,16 @@ export const Footer: React.FC = () => {
                 Refund Policy
               </MuiLink>
               <MuiLink
+                component={RouterLink}
+                to="/delete-account"
+                color="text.secondary"
+                underline="hover"
+                variant="body2"
+                fontWeight={600}
+              >
+                Delete Account
+              </MuiLink>
+              <MuiLink
                 href="mailto:it.expert.usmaan@gmail.com"
                 color="text.secondary"
                 underline="hover"
