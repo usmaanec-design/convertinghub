@@ -1,16 +1,13 @@
 {
-  "name": "omni-tools",
-  "description": "This project offers a variety of online tools to help with everyday tasks, \nall available for free and open for community contributions",
-  "version": "0.7.0",
+  "name": "convertinghub",
+  "description": "ConvertingHub - Modern, secure, and privacy-first all-in-one document, image, media, and digital utility platform.",
+  "version": "1.0.1",
   "private": true,
+  "license": "UNLICENSED",
+  "homepage": "https://convertinghub-official.web.app",
   "author": {
-    "name": "Ibrahima Gaye Coulibaly",
-    "email": "ibracool99@gmail.com",
-    "url": "https://github.com/iib0011"
-  },
-  "bugs": {
-    "url": "https://github.com/iib0011/omni-tools/issues",
-    "email": "ibracool99@gmail.com"
+    "name": "ConvertingHub",
+    "url": "https://convertinghub-official.web.app"
   },
   "scripts": {
     "dev": "vite",
